@@ -16,7 +16,7 @@
 ### 1. General Requirements
 - This app will feature a clean and modern UI/UX.
 - The design should utilize the branding colors for a consistent theme.
-- Responsive layout for desktop and mobile devices.
+- Responsive layout for desktop and mobile devices(This Can Be Done Using Media Queries-But Not Required  Right Now).
 
 ### 2. Core Features
 
