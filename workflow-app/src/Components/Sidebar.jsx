@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaHome, FaInbox, FaClock, FaBook, FaList } from "react-icons/fa";
 import { AiFillStar } from "react-icons/ai";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
