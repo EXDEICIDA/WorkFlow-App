@@ -1,0 +1,96 @@
+# AI Agent Workflow App Prompt File
+
+## Branding Colors
+- **Primary Light Color**: `#f8f8f8`
+- **Primary Dark Color**: `#212529`
+- **Accent Color**: `#5f3dc4`
+
+## Tech Stack
+- **Frontend**: React.js
+- **Backend**: Flask (Python)
+- **Database**: SQLite
+- **Authentication**: Auth0
+
+## Development Plan
+
+### 1. General Requirements
+- This app will feature a clean and modern UI/UX.
+- The design should utilize the branding colors for a consistent theme.
+- Responsive layout for desktop and mobile devices.
+
+### 2. Core Features
+
+#### Settings
+- User preferences and configurations.
+- Options for toggling themes and adjusting notifications.
+
+#### Profile
+- View and edit user profile details.
+- Upload profile pictures.
+- Manage connected accounts through Auth0.
+
+#### Projects
+- Create, update, and delete projects.
+- View a list of active and archived projects.
+- Each project will have a detailed page for managing tasks.
+
+#### Canvas
+- Interactive workspace for planning and organizing project tasks.
+- Drag-and-drop functionality for cards or elements.
+- Options for adding annotations, markers, or quick notes.
+
+#### Dashboard
+- Overview of user activities and statistics.
+- Key metrics like number of active projects, pending tasks, and upcoming deadlines.
+- Widgets for quick access to important app features.
+
+#### Pages
+- Custom pages for static content (e.g., About Us, FAQ, Privacy Policy).
+
+#### Sidebar
+- Well-designed navigation panel that adapts to screen size.
+- Highlights active sections.
+- Includes icons and labels for easy navigation.
+
+### 3. Design Requirements
+- Use **#f8f8f8** as the main background color.
+- Utilize **#212529** for text and secondary elements.
+- Highlight interactive elements like buttons, links, and active sidebar items with **#5f3dc4**.
+- Follow modern UI/UX principles for accessibility and clarity.
+- Prioritize intuitive and simple navigation.
+
+### 4. Development Tasks
+
+#### Frontend (React.js)
+- Implement reusable components for Sidebar, Dashboard Widgets, Project Cards, and Canvas Tools.
+- Use state management (e.g., Redux or Context API) to handle app-wide states.
+- Ensure API calls for fetching and updating data are optimized.
+- Integrate Auth0 for seamless authentication.
+
+#### Backend (Flask)
+- Develop RESTful APIs for user management, project operations, and task handling.
+- Ensure secure communication with the frontend using Auth0 tokens.
+- Set up SQLite database with models for users, projects, tasks, and settings.
+- Implement query optimization for large datasets.
+
+#### Authentication (Auth0)
+- Set up login and signup flows with Auth0.
+- Ensure roles and permissions are handled correctly for different user levels.
+- Implement session management and logout features.
+
+#### Database (SQLite)
+- Schema:
+  - Users: `id`, `name`, `email`, `profile_picture`, `preferences`
+  - Projects: `id`, `user_id`, `title`, `description`, `status`, `created_at`
+  - Tasks: `id`, `project_id`, `title`, `details`, `status`, `priority`, `due_date`
+  - Settings: `user_id`, `theme`, `notifications`
+
+### 5. Future Enhancements
+- Add real-time collaboration features.
+- Integrate analytics for project performance.
+- Support exporting projects and tasks to PDF or CSV.
+- Provide customizable themes for users.
+
+---
+This document serves as a comprehensive guide for developing the AI Agent Workflow App with a focus on functionality, design, and scalability.
+
