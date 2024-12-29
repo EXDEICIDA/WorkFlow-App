@@ -42,13 +42,29 @@
   background-color: #ffffff1a;
 }
 
+.search-bar {
+  position: relative;
+  width: 100%;
+}
+
 .search-bar input {
   width: 100%;
-  padding: 8px;
+  padding: 8px 8px 8px 36px;
   border-radius: 4px;
   background-color: #2a2a2a;
   border: none;
   color: #fff;
+}
+
+.search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #888;
+  pointer-events: none;
 }
 
 .section {

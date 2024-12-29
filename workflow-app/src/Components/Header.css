@@ -22,8 +22,8 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 12px;
+  gap: 16px;
+  margin-left: 0;
 }
 
 .header-icon {
@@ -46,15 +46,35 @@
   gap: 16px;
 }
 
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-button:hover {
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .header-title {
     font-size: 1.1rem;
   }
-  
+
   .header-content {
     padding: 0 16px;
   }
-  
+
   .header-icon {
     width: 40px;
     height: 40px;
