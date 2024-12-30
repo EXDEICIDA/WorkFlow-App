@@ -14,7 +14,7 @@ const Sidebar = () => {
       {/* Header */}
       <div className="sidebar-header">
         <div className="workspace-title">
-          <span>{!isCollapsed && "Workspace"}</span>
+          <span>{!isCollapsed && "Workflow"}</span>
           <button className="collapse-btn" onClick={toggleSidebar}>
             {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
           </button>
