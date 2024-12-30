@@ -81,6 +81,7 @@
 }
 
 .nav-item {
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -92,6 +93,7 @@
 }
 
 .nav-item:hover {
+  color: inherit;
   background-color: #2a2a2a;
 }
 
