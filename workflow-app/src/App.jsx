@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import DashboardPage from "./Pages/DashboardPage";
+import ProjectsPage from "./Pages/ProjectsPage";
 import "./App.css";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
           </Routes>
         </main>
       </div>
