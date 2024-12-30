@@ -149,7 +149,7 @@ const Sidebar = () => {
 
           {!isCollapsed && <span>Projects</span>}
         </Link>
-        <div className="nav-item">
+        <Link to="/canvas" className="nav-item">
           <svg
             width="24"
             height="24"
@@ -167,8 +167,8 @@ const Sidebar = () => {
             />
           </svg>
           {!isCollapsed && <span>Canvas</span>}
-        </div>
-        <div className="nav-item">
+        </Link>
+        <Link to="/scripts" className="nav-item">
           <svg
             width="24"
             height="24"
@@ -186,7 +186,7 @@ const Sidebar = () => {
             />
           </svg>
           {!isCollapsed && <span>Scripts</span>}
-        </div>
+        </Link>
         <Link to="/settings" className="nav-item">
           <svg
             width="24"

@@ -5,6 +5,8 @@ import ProjectsPage from "./Pages/ProjectsPage";
 import TasksPage from "./Pages/TasksPage";
 import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
+import CanvasPage from "./Pages/CanvasPage";
+import ScriptsPage from "./Pages/ScriptsPage";
 import "./App.css";
 
 function App() {
@@ -16,6 +18,8 @@ function App() {
           <Routes>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/canvas" element={<CanvasPage />} />
+            <Route path="/scripts" element={<ScriptsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
