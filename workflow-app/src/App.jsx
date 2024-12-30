@@ -1,5 +1,5 @@
 import Sidebar from "./Components/Sidebar";
-import Header from "./Components/Header";
+import Header from "./components/Header";
 import "./App.css";
 
 function App() {
@@ -8,7 +8,9 @@ function App() {
       <Header />
       <div className="content-wrapper">
         <Sidebar />
-        <main className="main-content">{/* Your main content goes here */}</main>
+        <main className="main-content">
+          {/* Your main content goes here */}
+        </main>
       </div>
     </div>
   );
