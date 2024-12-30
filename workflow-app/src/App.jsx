@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import DashboardPage from "./Pages/DashboardPage";
 import ProjectsPage from "./Pages/ProjectsPage";
+import TasksPage from "./Pages/TasksPage";
 import "./App.css";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
           <Routes>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
           </Routes>
         </main>
       </div>

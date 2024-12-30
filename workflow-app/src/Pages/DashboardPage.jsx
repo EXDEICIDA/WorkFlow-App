@@ -7,7 +7,10 @@ const DashboardPage = () => {
         <h1>Dashboard</h1>
       </div>
       <div className="dashboard-content">
-        <p>Welcome to your dashboard! This is where you will see all your important information.</p>
+        <p>
+          Welcome to your dashboard! This is where you will see all your
+          important information.
+        </p>
       </div>
     </div>
   );
