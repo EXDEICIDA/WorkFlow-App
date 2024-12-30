@@ -3,6 +3,8 @@ import Sidebar from "./Components/Sidebar";
 import DashboardPage from "./Pages/DashboardPage";
 import ProjectsPage from "./Pages/ProjectsPage";
 import TasksPage from "./Pages/TasksPage";
+import SettingsPage from "./Pages/SettingsPage";
+import ProfilePage from "./Pages/ProfilePage";
 import "./App.css";
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </main>
       </div>
