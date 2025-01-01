@@ -9,7 +9,7 @@
   right: 0;
   top: 0;
   bottom: 0;
-  padding: 2rem;
+  padding: 2rem 2rem 2rem 1rem;
   overflow-y: auto;
   box-shadow: -2px 0 0 #1a1a1a;
 }
@@ -176,6 +176,17 @@ input:checked + .toggle-slider:before {
 }
 
 .notification-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.update-icon {
+  display: flex;
+  align-items: center;
+  color: #888;
+}
+
+.update-icon svg {
   width: 24px;
   height: 24px;
 }
