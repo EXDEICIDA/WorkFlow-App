@@ -9,6 +9,7 @@ const Sidebar = () => {
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
+    document.body.dataset.sidebar = isCollapsed ? "" : "collapsed";
   };
 
   return (

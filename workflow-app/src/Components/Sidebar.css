@@ -8,6 +8,10 @@
   flex-direction: column;
   gap: 24px;
   transition: width 0.3s ease;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
@@ -109,4 +113,14 @@
 
 .collapsed .nav-item svg {
   margin: 0;
+}
+
+.main-content {
+  margin-left: 250px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 70px;
 }

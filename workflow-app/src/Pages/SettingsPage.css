@@ -1,23 +1,181 @@
 .settings-container {
+  margin-left: 250px;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  width: calc(100% - 250px);
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
   padding: 2rem;
-  width: 100%;
-  height: 100%;
   overflow-y: auto;
+  box-shadow: -2px 0 0 #1a1a1a;
 }
 
-.settings-header {
-  margin-bottom: 2rem;
+body[data-sidebar="collapsed"] .settings-container {
+  margin-left: 70px;
+  width: calc(100% - 70px);
 }
 
-.settings-header h1 {
+.settings-container h1 {
   font-size: 2rem;
-  font-weight: 600;
-  color: #333;
+  margin-bottom: 2rem;
+  font-weight: normal;
 }
 
-.settings-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.settings-section {
+  padding: 1rem 0;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.settings-section-content {
+  flex: 1;
+  padding-right: 2rem;
+}
+
+.settings-section h2 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-bottom: 0.5rem;
+}
+
+.settings-section h3 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 0.25rem;
+}
+
+.settings-section p {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.settings-section-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Buttons */
+.settings-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primary-button {
+  background-color: #8b6d3c;
+  color: white;
+  border: none;
+}
+
+.primary-button:hover {
+  background-color: #9d7b44;
+}
+
+.secondary-button {
+  background-color: #2a2a2a;
+  color: white;
+  border: none;
+}
+
+.secondary-button:hover {
+  background-color: #333;
+}
+
+.danger-button {
+  background-color: #2a2a2a;
+  color: #ff4444;
+  border: none;
+}
+
+.danger-button:hover {
+  background-color: #333;
+}
+
+/* Select dropdowns */
+.settings-select {
+  background-color: #2a2a2a;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: none;
+  min-width: 150px;
+  font-size: 0.9rem;
+}
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #8b6d3c;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  color: #888;
+}
+
+.theme-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.notification-icon {
+  display: flex;
+  align-items: center;
+  color: #888;
+}
+
+.notification-icon svg {
+  width: 24px;
+  height: 24px;
 }

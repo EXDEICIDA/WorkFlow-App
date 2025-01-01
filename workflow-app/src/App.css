@@ -9,17 +9,29 @@ body {
   color: #212529;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .app {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  width: 100%;
 }
 
 .main-content {
   flex: 1;
-  padding: 20px;
   background-color: #f8f8f8;
+  min-height: 100vh;
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s ease;
+  overflow-x: hidden;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 70px;
+  width: calc(100% - 70px);
 }
 
 .page-container {
