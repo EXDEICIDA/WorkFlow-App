@@ -207,3 +207,8 @@ body[data-sidebar="collapsed"] .tasks-container {
   position: relative;
   z-index: 2;
 }
+
+.view-icon {
+  width: 20px;
+  height: 20px;
+}

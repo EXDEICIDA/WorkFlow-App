@@ -29,15 +29,38 @@ const TasksPage = () => {
           <button
             className={`view-btn ${viewType === "board" ? "active" : ""}`}
           >
-            <span className="view-icon">📋</span> Board View
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="view-icon"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z"
+              />
+            </svg>
+            Board View
           </button>
           <button className={`view-btn ${viewType === "list" ? "active" : ""}`}>
-            <span className="view-icon">📝</span> List
-          </button>
-          <button
-            className={`view-btn ${viewType === "gallery" ? "active" : ""}`}
-          >
-            <span className="view-icon">🖼️</span> Gallery
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="view-icon"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+              />
+            </svg>
+            List
           </button>
           <button className="new-task-btn">+</button>
         </div>
