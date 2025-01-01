@@ -91,6 +91,33 @@
 - Support exporting projects and tasks to PDF or CSV.
 - Provide customizable themes for users.
 
+project/
+│
+├── backend/                # Flask application
+│   ├── app/
+│   │   ├── __init__.py     # App initialization
+│   │   ├── auth/
+│   │   │   ├── __init__.py # Auth blueprint
+│   │   │   ├── routes.py   # Auth routes (e.g., login, signup)
+│   │   │   ├── utils.py    # JWT-related utilities
+│   │   ├── models.py       # Database models
+│   │   ├── config.py       # Configuration (e.g., secret keys)
+│   │   ├── routes.py       # Other app routes
+│   │   └── ...
+│   └── run.py              # Entry point to start the Flask app
+│
+├── frontend/               # React application
+│   ├── public/
+│   ├── src/
+│   │   ├── components/     # Reusable React components
+│   │   ├── pages/          # App pages (e.g., LoginPage, Dashboard)
+│   │   ├── api/            # Axios or Fetch API services
+│   │   ├── utils/          # Utilities (e.g., token storage helpers)
+│   │   └── App.js          # Main React app
+│   └── ...
+│
+└── README.md
+
 ---
 This document serves as a comprehensive guide for developing the AI Agent Workflow App with a focus on functionality, design, and scalability.
 
