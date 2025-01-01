@@ -43,6 +43,10 @@ const TasksPage = () => {
         </div>
       </div>
 
+      <div className="view-divider">
+        <span className="view-label">Board View</span>
+      </div>
+
       <div className="tasks-board">
         <div className="task-column">
           <div className="column-header">
