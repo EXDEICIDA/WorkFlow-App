@@ -1,0 +1,154 @@
+.task-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.task-form-container {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.task-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.task-form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.close-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.9rem;
+  resize: none;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.priority-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.priority-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background-color: #333;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Priority-specific colors */
+.priority-btn[data-priority="low"].active {
+  background-color: #4caf50; /* Green */
+}
+
+.priority-btn[data-priority="medium"].active {
+  background-color: #8b6d3c; /* Original brown */
+}
+
+.priority-btn[data-priority="high"].active {
+  background-color: #dc3545; /* Red */
+}
+
+/* Hover states for each priority */
+.priority-btn[data-priority="low"]:hover:not(.active) {
+  background-color: rgba(76, 175, 80, 0.2); /* Transparent green */
+}
+
+.priority-btn[data-priority="medium"]:hover:not(.active) {
+  background-color: rgba(139, 109, 60, 0.2); /* Transparent brown */
+}
+
+.priority-btn[data-priority="high"]:hover:not(.active) {
+  background-color: rgba(220, 53, 69, 0.2); /* Transparent red */
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background-color: #333;
+}
+
+.submit-btn {
+  background-color: #8b6d3c;
+  border: none;
+  color: #fff;
+}
+
+.submit-btn:hover {
+  background-color: #9d7b44;
+}

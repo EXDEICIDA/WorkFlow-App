@@ -1,8 +1,16 @@
 import { useState } from "react";
 import "./TasksPage.css";
+import TaskForm from "../Components/TaskForm";
 
 const TasksPage = () => {
   const [viewType, setViewType] = useState("board"); // board, list, gallery
+  const [showTaskForm, setShowTaskForm] = useState(false);
+
+  const handleTaskSubmit = (taskData) => {
+    // Handle the new task data here
+    console.log("New task:", taskData);
+    // Add your task creation logic
+  };
 
   return (
     <div className="tasks-container">
@@ -62,7 +70,12 @@ const TasksPage = () => {
             </svg>
             List
           </button>
-          <button className="new-task-btn">+</button>
+          <button
+            className="new-task-btn"
+            onClick={() => setShowTaskForm(true)}
+          >
+            +
+          </button>
         </div>
       </div>
 
@@ -106,6 +119,13 @@ const TasksPage = () => {
           </div>
         </div>
       </div>
+
+      {showTaskForm && (
+        <TaskForm
+          onClose={() => setShowTaskForm(false)}
+          onSubmit={handleTaskSubmit}
+        />
+      )}
     </div>
   );
 };
