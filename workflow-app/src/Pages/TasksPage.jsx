@@ -141,7 +141,23 @@ const TasksPage = () => {
       <div className="tasks-board">
         <div className="task-column">
           <div className="column-header">
-            <h3>To Do</h3>
+            <div className="header-content">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="status-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+              </svg>
+              <h3>To Do</h3>
+            </div>
             <span className="task-count">{tasks.pending.length}</span>
           </div>
           <div className="task-list">
@@ -153,7 +169,23 @@ const TasksPage = () => {
 
         <div className="task-column">
           <div className="column-header">
-            <h3>Doing</h3>
+            <div className="header-content">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="status-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"
+                />
+              </svg>
+              <h3>Doing</h3>
+            </div>
             <span className="task-count">{tasks.inProgress.length}</span>
           </div>
           <div className="task-list">
@@ -165,7 +197,23 @@ const TasksPage = () => {
 
         <div className="task-column">
           <div className="column-header">
-            <h3>Done 🎉</h3>
+            <div className="header-content">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="status-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+              </svg>
+              <h3>Done</h3>
+            </div>
             <span className="task-count">{tasks.completed.length}</span>
           </div>
           <div className="task-list">

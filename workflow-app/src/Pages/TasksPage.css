@@ -216,3 +216,22 @@ body[data-sidebar="collapsed"] .tasks-container {
 .task-list::-webkit-scrollbar-thumb:hover {
   background: #4a4a4a;
 }
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: currentColor;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
