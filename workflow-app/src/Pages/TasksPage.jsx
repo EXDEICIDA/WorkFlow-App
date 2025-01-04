@@ -1,15 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./TasksPage.css";
 import TaskForm from "../Components/TaskForm";
+import TaskItem from "../Components/TaskItem";
 
 const TasksPage = () => {
-  const [viewType, setViewType] = useState("board"); // board, list, gallery
+  const [viewType, setViewType] = useState("board");
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [tasks, setTasks] = useState({
+    pending: [],
+    inProgress: [],
+    completed: [],
+  });
 
-  const handleTaskSubmit = (taskData) => {
-    // Handle the new task data here
-    console.log("New task:", taskData);
-    // Add your task creation logic
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+
+      const data = await response.json();
+
+      // Group tasks by status
+      const groupedTasks = {
+        pending: data.filter((task) => task.status === "Pending"),
+        inProgress: data.filter((task) => task.status === "In Progress"),
+        completed: data.filter((task) => task.status === "Completed"),
+      };
+
+      setTasks(groupedTasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleTaskSubmit = async (taskData) => {
+    try {
+      console.log("Sending task data:", taskData); // Debug log
+
+      const response = await fetch("http://localhost:8080/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Server error:", errorData); // Debug log
+        throw new Error(errorData.error || "Failed to create task");
+      }
+
+      const newTask = await response.json();
+      console.log("Task created:", newTask); // Debug log
+
+      // Refresh tasks after creating new one
+      fetchTasks();
+      setShowTaskForm(false);
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
   };
 
   return (
@@ -87,35 +142,36 @@ const TasksPage = () => {
         <div className="task-column">
           <div className="column-header">
             <h3>To Do</h3>
-            <span className="task-count">3</span>
+            <span className="task-count">{tasks.pending.length}</span>
           </div>
           <div className="task-list">
-            <div className="task-card">Go</div>
-            <div className="task-card">EAT</div>
-            <div className="task-card">Read A book</div>
-            <button className="add-task-btn">+ New page</button>
+            {tasks.pending.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
           </div>
         </div>
 
         <div className="task-column">
           <div className="column-header">
             <h3>Doing</h3>
-            <span className="task-count">1</span>
+            <span className="task-count">{tasks.inProgress.length}</span>
           </div>
           <div className="task-list">
-            <div className="task-card">Go tot he mars</div>
-            <button className="add-task-btn">+ New page</button>
+            {tasks.inProgress.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
           </div>
         </div>
 
         <div className="task-column">
           <div className="column-header">
             <h3>Done 🎉</h3>
-            <span className="task-count">1</span>
+            <span className="task-count">{tasks.completed.length}</span>
           </div>
           <div className="task-list">
-            <div className="task-card">Study</div>
-            <button className="add-task-btn">+ New page</button>
+            {tasks.completed.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
           </div>
         </div>
       </div>

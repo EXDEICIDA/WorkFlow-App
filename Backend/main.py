@@ -5,7 +5,6 @@ from Classes.Tasks import TaskManager
 app = Flask(__name__)
 CORS(app)
 
-# Initialize TaskManager once
 task_manager = TaskManager()
 
 @app.route('/api/tasks', methods=['POST'])
@@ -24,6 +23,14 @@ def add_task():
         )
         return jsonify(task), 201
         
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/tasks', methods=['GET'])
+def get_tasks():
+    try:
+        tasks = task_manager.fetch_tasks()
+        return jsonify(tasks), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -1,23 +1,11 @@
+import React from "react";
+import "./TaskItem.css";
+
 const TaskItem = ({ task }) => {
   return (
     <div className="task-item">
-      <div className="task-content">
-        <h3 className="task-title">{task.title}</h3>
-        <p className="task-description">{task.description}</p>
-        <div className="task-meta">
-          <span
-            className={`task-priority priority-${task.priority.toLowerCase()}`}
-          >
-            {task.priority}
-          </span>
-          <span className="task-status">{task.status}</span>
-        </div>
-      </div>
-
-      <button
-        className="delete-btn"
-        onClick={() => console.log("Delete:", task.id)}
-      >
+      <h3 className="task-title">{task.title}</h3>
+      <button className="delete-btn">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -36,3 +24,5 @@ const TaskItem = ({ task }) => {
     </div>
   );
 };
+
+export default TaskItem;

@@ -38,3 +38,11 @@ class TaskManager:
             
         except Exception as e:
             raise Exception(f"Failed to create task: {str(e)}")
+
+    def fetch_tasks(self):
+        """Fetch all tasks from the database."""
+        try:
+            response = self._client.table('tasks').select('*').execute()
+            return response.data if response.data else []
+        except Exception as e:
+            raise Exception(f"Failed to fetch tasks: {str(e)}")

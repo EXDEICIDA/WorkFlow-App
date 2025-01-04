@@ -11,28 +11,18 @@ const TaskForm = ({ onClose, onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!taskData.title.trim()) {
+      alert("Title is required!");
+      return;
+    }
+
     try {
       console.log("Sending data:", taskData);
-
-      const response = await fetch("http://localhost:8080/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData),
-      });
-
-      const data = await response.json();
-      console.log("Server response:", data);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Server error");
-      }
-
-      onSubmit(data);
+      await onSubmit(taskData);
       onClose();
     } catch (error) {
-      console.error("Full error:", error);
+      console.error("Error submitting task:", error);
       alert(error.message || "Failed to create task");
     }
   };
