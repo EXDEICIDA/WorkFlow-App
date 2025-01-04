@@ -5,13 +5,44 @@ const TaskForm = ({ onClose, onSubmit }) => {
   const [taskData, setTaskData] = useState({
     title: "",
     description: "",
-    priority: "medium",
+    priority: "Medium",
+    status: "Pending",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(taskData);
-    onClose();
+    try {
+      console.log("Sending data:", taskData);
+
+      const response = await fetch("http://localhost:8080/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(taskData),
+      });
+
+      const data = await response.json();
+      console.log("Server response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Server error");
+      }
+
+      onSubmit(data);
+      onClose();
+    } catch (error) {
+      console.error("Full error:", error);
+      alert(error.message || "Failed to create task");
+    }
+  };
+
+  const handlePriorityClick = (priority) => {
+    setTaskData({
+      ...taskData,
+      priority:
+        priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase(),
+    });
   };
 
   return (
@@ -72,9 +103,9 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 type="button"
                 data-priority="low"
                 className={`priority-btn ${
-                  taskData.priority === "low" ? "active" : ""
+                  taskData.priority === "Low" ? "active" : ""
                 }`}
-                onClick={() => setTaskData({ ...taskData, priority: "low" })}
+                onClick={() => handlePriorityClick("low")}
               >
                 Low
               </button>
@@ -82,9 +113,9 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 type="button"
                 data-priority="medium"
                 className={`priority-btn ${
-                  taskData.priority === "medium" ? "active" : ""
+                  taskData.priority === "Medium" ? "active" : ""
                 }`}
-                onClick={() => setTaskData({ ...taskData, priority: "medium" })}
+                onClick={() => handlePriorityClick("medium")}
               >
                 Medium
               </button>
@@ -92,9 +123,9 @@ const TaskForm = ({ onClose, onSubmit }) => {
                 type="button"
                 data-priority="high"
                 className={`priority-btn ${
-                  taskData.priority === "high" ? "active" : ""
+                  taskData.priority === "High" ? "active" : ""
                 }`}
-                onClick={() => setTaskData({ ...taskData, priority: "high" })}
+                onClick={() => handlePriorityClick("high")}
               >
                 High
               </button>

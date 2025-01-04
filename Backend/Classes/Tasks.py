@@ -1,62 +1,40 @@
-import utility_functions 
+from supabase import create_client
+from dotenv import load_dotenv
+import os
 
-while True:
-    user_action = input("Type add, show, edit, complete or exit: ")
-    user_action = user_action.strip()
+# Load environment variables once at module level
+load_dotenv()
 
-    if user_action.startswith("add"):
-        todo = user_action[4:]
-
-        todos = utility_functions.get_todos()
-
-        todos.append(todo + '\n')
-
-        utility_functions.write_todos(todos)
-    elif user_action.startswith("show"):
-
-        todos = utility_functions.get_todos()
-
-        for index, item in enumerate(todos):
-            item = item.strip('\n')
-            row = f"{index + 1} - {item}"
-            print(row)
-
-    elif user_action.startswith("edit"):
+class TaskManager:
+    def __init__(self):
+        self._client = self._init_supabase()
+        
+    def _init_supabase(self):
+        """Initialize Supabase client securely."""
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_KEY")
+        
+        if not url or not key:
+            raise Exception("Database configuration missing")
+            
+        return create_client(url, key)
+    
+    def create_task(self, title, description, priority, status):
+        """Create a new task in the database."""
         try:
-            number = int(user_action[5:])
-            print(number)
-            number = number - 1
-
-            todos = utility_functions.get_todos()
-
-            new_todo = input("Enter a new todo: ")
-            todos[number] = new_todo + '\n'
-
-            utility_functions.write_todos("tasks.txt", todos)
-        except ValueError:
-            print("Invalid input")
-            continue
-
-    elif user_action.startswith("complete"):
-        try:
-            number = int(user_action[9:])
-
-            todos = utility_functions.get_todos()
-            index = number - 1
-            todo_to_remove = todos[index].strip('\n')
-            todos.pop(index)
-
-            utility_functions.write_todos("tasks.txt", todos)
-
-            message = f"Task number {number - 1}, {todo_to_remove}, has been completed."
-            print(message)
-        except IndexError:
-            print("There is no task with that number to remove")
-
-    elif user_action.startswith('exit'):
-        break
-
-    else:
-        print("This command is not valid!")
-
-print("Bye")
+            task_data = {
+                "title": title,
+                "description": description,
+                "priority": priority,
+                "status": status
+            }
+            
+            response = self._client.table('tasks').insert(task_data).execute()
+            
+            if not response.data:
+                raise Exception("Task creation failed")
+                
+            return response.data[0]
+            
+        except Exception as e:
+            raise Exception(f"Failed to create task: {str(e)}")
