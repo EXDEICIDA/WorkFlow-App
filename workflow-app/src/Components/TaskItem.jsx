@@ -1,11 +1,30 @@
 import React from "react";
 import "./TaskItem.css";
 
-const TaskItem = ({ task }) => {
+const TaskItem = ({ task, onDelete }) => {
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/tasks/${task.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+
+      onDelete(task.id);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+
   return (
     <div className="task-item">
       <h3 className="task-title">{task.title}</h3>
-      <button className="delete-btn">
+      <button className="delete-btn" onClick={handleDelete}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

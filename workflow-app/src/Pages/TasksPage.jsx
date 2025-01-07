@@ -67,6 +67,14 @@ const TasksPage = () => {
     }
   };
 
+  const handleDeleteTask = (taskId) => {
+    setTasks((prevTasks) => ({
+      pending: prevTasks.pending.filter((task) => task.id !== taskId),
+      inProgress: prevTasks.inProgress.filter((task) => task.id !== taskId),
+      completed: prevTasks.completed.filter((task) => task.id !== taskId),
+    }));
+  };
+
   return (
     <div className="tasks-container">
       <div className="tasks-header">
@@ -162,7 +170,7 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.pending.map((task) => (
-              <TaskItem key={task.id} task={task} />
+              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
             ))}
           </div>
         </div>
@@ -190,7 +198,7 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.inProgress.map((task) => (
-              <TaskItem key={task.id} task={task} />
+              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
             ))}
           </div>
         </div>
@@ -218,7 +226,7 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.completed.map((task) => (
-              <TaskItem key={task.id} task={task} />
+              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
             ))}
           </div>
         </div>

@@ -46,3 +46,18 @@ class TaskManager:
             return response.data if response.data else []
         except Exception as e:
             raise Exception(f"Failed to fetch tasks: {str(e)}")
+
+    def delete_task(self, task_id):
+        """Delete a task from the database."""
+        try:
+            response = self._client.table('tasks').delete().eq('id', task_id).execute()
+            
+            if not response.data:
+                raise Exception("Task deletion failed")
+            
+            return response.data[0]
+        except Exception as e:
+            raise Exception(f"Failed to delete task: {str(e)}")
+
+
+   

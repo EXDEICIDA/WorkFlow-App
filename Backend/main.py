@@ -34,5 +34,13 @@ def get_tasks():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    try:
+        task = task_manager.delete_task(task_id)
+        return jsonify(task), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
