@@ -1,23 +1,134 @@
+.canvas-page {
+  margin-left: 250px;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  width: calc(100% - 250px);
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
+  box-shadow: -2px 0 0 #1a1a1a;
+}
+
+body[data-sidebar="collapsed"] .canvas-page {
+  margin-left: 70px;
+  width: calc(100% - 70px);
+}
+
+.canvas-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+  height: 48px;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-btn {
+  background: none;
+  border: none;
+  color: #666;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-btn:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.toolbar-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.canvas-title {
+  color: #888;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
 .canvas-container {
-  padding: 2rem;
+  flex: 1;
+  position: relative;
+  background-color: #121212;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-.canvas-header {
-  margin-bottom: 2rem;
+.drawing-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  display: block;
 }
 
-.canvas-header h1 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #333;
+.canvas-help {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  pointer-events: none;
 }
 
-.canvas-content {
-  background: white;
-  padding: 2rem;
+.canvas-help p {
+  margin: 0.25rem 0;
+}
+
+.canvas-footer {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #1a1a1a;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #2a2a2a;
+}
+
+.footer-btn {
+  background: none;
+  border: none;
+  color: #666;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-btn:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.footer-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
