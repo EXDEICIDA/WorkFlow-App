@@ -75,6 +75,20 @@ const TasksPage = () => {
     }));
   };
 
+  const handleUpdateTask = (updatedTask) => {
+    setTasks((prevTasks) => ({
+      pending: prevTasks.pending.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      ),
+      inProgress: prevTasks.inProgress.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      ),
+      completed: prevTasks.completed.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      ),
+    }));
+  };
+
   return (
     <div className="tasks-container">
       <div className="tasks-header">
@@ -170,7 +184,12 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.pending.map((task) => (
-              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
+              <TaskItem
+                key={task.id}
+                task={task}
+                onDelete={handleDeleteTask}
+                onUpdate={handleUpdateTask}
+              />
             ))}
           </div>
         </div>
@@ -198,7 +217,12 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.inProgress.map((task) => (
-              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
+              <TaskItem
+                key={task.id}
+                task={task}
+                onDelete={handleDeleteTask}
+                onUpdate={handleUpdateTask}
+              />
             ))}
           </div>
         </div>
@@ -226,7 +250,12 @@ const TasksPage = () => {
           </div>
           <div className="task-list">
             {tasks.completed.map((task) => (
-              <TaskItem key={task.id} task={task} onDelete={handleDeleteTask} />
+              <TaskItem
+                key={task.id}
+                task={task}
+                onDelete={handleDeleteTask}
+                onUpdate={handleUpdateTask}
+              />
             ))}
           </div>
         </div>

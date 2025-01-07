@@ -42,5 +42,17 @@ def delete_task(task_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    try:
+        data = request.get_json()
+        if not data or 'title' not in data:
+            return jsonify({"error": "Title is required"}), 400
+            
+        task = task_manager.update_task(task_id, data['title'])
+        return jsonify(task), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
