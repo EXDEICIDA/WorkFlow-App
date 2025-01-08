@@ -2,11 +2,69 @@ import { useEffect, useRef, useState } from "react";
 import "./CanvasPage.css";
 
 const CanvasPage = () => {
-  const canvasRef = useRef(null);
+  const [tabs, setTabs] = useState([]);
+  const [activeTabIndex, setActiveTabIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
+  // Function to add new tab with canvas
+  const addNewTab = () => {
+    const newTab = {
+      id: tabs.length + 1,
+      name: "",
+      active: false,
+      isEditing: true,
+      canvasRef: { current: null },
+    };
+    setTabs([...tabs, newTab]);
+    setActiveTabIndex(tabs.length);
+  };
+
+  // Function to handle tab name editing
+  const handleTabNameChange = (index, newName) => {
+    if (!newName.trim()) {
+      newName = `Untitled ${index + 1}`;
+    }
+    setTabs(
+      tabs.map((tab, i) =>
+        i === index ? { ...tab, name: newName, isEditing: false } : tab
+      )
+    );
+  };
+
+  // Function to handle input key press
+  const handleKeyPress = (e, index, currentValue) => {
+    if (e.key === "Enter") {
+      handleTabNameChange(index, currentValue);
+    }
+  };
+
+  // Function to handle input blur
+  const handleBlur = (index, currentValue) => {
+    handleTabNameChange(index, currentValue);
+  };
+
+  // Navigate between tabs
+  const navigateTab = (direction) => {
+    if (direction === "left" && activeTabIndex > 0) {
+      setActiveTabIndex(activeTabIndex - 1);
+    } else if (direction === "right" && activeTabIndex < tabs.length - 1) {
+      setActiveTabIndex(activeTabIndex + 1);
+    }
+  };
+
+  // Initialize canvas when tab changes or new tab is created
   useEffect(() => {
+    if (activeTabIndex !== null) {
+      const currentTab = tabs[activeTabIndex];
+      if (currentTab?.canvasRef?.current) {
+        initializeCanvas(currentTab.canvasRef);
+      }
+    }
+  }, [activeTabIndex, tabs.length]);
+
+  // Function to initialize canvas
+  const initializeCanvas = (canvasRef) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -14,10 +72,8 @@ const CanvasPage = () => {
       const container = canvas.parentElement;
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
+      drawGrid();
     };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
 
     const drawGrid = () => {
       ctx.fillStyle = "#2a2a2a";
@@ -33,16 +89,21 @@ const CanvasPage = () => {
       }
     };
 
-    drawGrid();
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     return () => window.removeEventListener("resize", resizeCanvas);
-  }, []);
+  };
 
   return (
     <div className="canvas-page">
       <div className="canvas-toolbar">
         <div className="toolbar-left">
-          <button className="toolbar-btn">
+          <button
+            className="toolbar-btn"
+            onClick={() => navigateTab("left")}
+            disabled={activeTabIndex === 0 || activeTabIndex === null}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -57,7 +118,13 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <button className="toolbar-btn">
+          <button
+            className="toolbar-btn"
+            onClick={() => navigateTab("right")}
+            disabled={
+              activeTabIndex === tabs.length - 1 || activeTabIndex === null
+            }
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -72,14 +139,82 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <span className="canvas-title">Untitled 1</span>
+
+          <div className="canvas-tabs">
+            {tabs.map((tab, index) => (
+              <div
+                key={tab.id}
+                className={`canvas-tab ${
+                  index === activeTabIndex ? "active" : ""
+                }`}
+                onClick={() => !tab.isEditing && setActiveTabIndex(index)}
+                onDoubleClick={() =>
+                  setTabs(
+                    tabs.map((t, i) =>
+                      i === index ? { ...t, isEditing: true } : t
+                    )
+                  )
+                }
+              >
+                {tab.isEditing ? (
+                  <input
+                    type="text"
+                    value={tab.name}
+                    placeholder={`Untitled ${index + 1}`}
+                    onChange={(e) =>
+                      setTabs(
+                        tabs.map((t, i) =>
+                          i === index ? { ...t, name: e.target.value } : t
+                        )
+                      )
+                    }
+                    onBlur={(e) => handleTabNameChange(index, e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e, index, e.target.value)}
+                    autoFocus
+                    className="tab-name-input"
+                  />
+                ) : (
+                  tab.name || `Untitled ${index + 1}`
+                )}
+              </div>
+            ))}
+            <button className="new-tab-btn" onClick={addNewTab}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4.5v15m7.5-7.5h-15"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="canvas-container">
-        <canvas ref={canvasRef} className="drawing-canvas" />
+        {tabs.map((tab, index) => (
+          <canvas
+            key={tab.id}
+            ref={tab.canvasRef}
+            className="drawing-canvas"
+            style={{ display: index === activeTabIndex ? "block" : "none" }}
+          />
+        ))}
 
-        {/* Tools Panel */}
+        {!isDragging && (
+          <div className="canvas-help">
+            <p>Drag from below or double click</p>
+            <p>Space + Drag to pan</p>
+            <p>Ctrl + scroll to zoom</p>
+          </div>
+        )}
+
         <div className="tools-panel">
           <button className="tool-btn">
             <svg
@@ -108,6 +243,22 @@ const CanvasPage = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          </button>
+          <button className="tool-btn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5 12h14"
               />
             </svg>
           </button>
@@ -162,14 +313,6 @@ const CanvasPage = () => {
             </svg>
           </button>
         </div>
-
-        {!isDragging && (
-          <div className="canvas-help">
-            <p>Drag from below or double click</p>
-            <p>Space + Drag to pan</p>
-            <p>Ctrl + scroll to zoom</p>
-          </div>
-        )}
 
         <div className="canvas-footer">
           <button className="footer-btn">
