@@ -178,7 +178,9 @@ const TasksPage = () => {
       </div>
 
       <div className="view-divider">
-        <span className="view-label">Board View</span>
+        <span className="view-label">
+          {viewType === "board" ? "Board View" : "List View"}
+        </span>
       </div>
 
       {viewType === "board" ? (
