@@ -314,8 +314,8 @@ const CanvasPage = () => {
           </button>
         </div>
 
-        <div className="canvas-footer">
-          <button className="footer-btn">
+        <div className="bottom-tools">
+          <button className="tool-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -330,7 +330,7 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <button className="footer-btn">
+          <button className="tool-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -345,7 +345,7 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <button className="footer-btn">
+          <button className="tool-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

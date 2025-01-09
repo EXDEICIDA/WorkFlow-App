@@ -239,3 +239,40 @@ body[data-sidebar="collapsed"] .canvas-page {
   outline: none;
   background-color: #333;
 }
+
+.bottom-tools {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  z-index: 100;
+}
+
+.bottom-tools .tool-btn {
+  background: none;
+  border: none;
+  color: #666;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bottom-tools .tool-btn:hover {
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.bottom-tools .tool-btn svg {
+  width: 20px;
+  height: 20px;
+}
