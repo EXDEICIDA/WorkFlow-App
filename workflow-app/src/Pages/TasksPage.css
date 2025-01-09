@@ -235,3 +235,82 @@ body[data-sidebar="collapsed"] .tasks-container {
   align-items: center;
   margin-bottom: 1rem;
 }
+
+.tasks-list-view {
+  padding: 1rem;
+}
+
+.list-task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.list-task-item:hover {
+  border-color: #3a3a3a;
+  transform: translateX(4px);
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-header h3 {
+  font-size: 1rem;
+  color: #fff;
+  margin: 0;
+}
+
+.task-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.task-status.pending {
+  background-color: #2d2d2d;
+  color: #888;
+}
+
+.task-status.in-progress {
+  background-color: #2d3748;
+  color: #63b3ed;
+}
+
+.task-status.completed {
+  background-color: #2d3c2e;
+  color: #68d391;
+}
+
+.task-description {
+  color: #888;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.list-task-item:hover .task-actions {
+  opacity: 1;
+}
+
+/* Keep existing button styles for edit-btn and delete-btn */
