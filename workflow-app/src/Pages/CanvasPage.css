@@ -98,12 +98,12 @@ body[data-sidebar="collapsed"] .canvas-page {
   transform: translate(-50%, -50%);
   text-align: center;
   color: #666;
-  font-size: 0.9rem;
   pointer-events: none;
 }
 
 .canvas-help p {
-  margin: 0.25rem 0;
+  margin: 8px 0;
+  font-size: 14px;
 }
 
 .canvas-footer {

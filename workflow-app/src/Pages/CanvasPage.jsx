@@ -5,7 +5,50 @@ const CanvasPage = () => {
   const [tabs, setTabs] = useState([]);
   const [activeTabIndex, setActiveTabIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const activeCanvasRef = tabs[activeTabIndex]?.canvasRef || null;
+
+  // Add zoom constants
+  const MIN_ZOOM = 0.25; // Maximum zoom out (25%)
+  const MAX_ZOOM = 2; // Maximum zoom in (200%)
+  const ZOOM_FACTOR = 1.1; // Zoom step (10% per click)
+
+  // Add constants for safe areas
+  const HEADER_HEIGHT = 60; // Height of the top toolbar
+  const TOOLBAR_WIDTH = 50; // Width of the right toolbar
+  const SAFE_MARGIN = 20; // Additional safety margin
+
+  // Helper to check if any tabs exist
+  const hasNoTabs = tabs.length === 0;
+
+  // Handle keyboard events for space key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === "Space") {
+        e.preventDefault(); // Prevent page scroll
+        setIsSpacePressed(true);
+        document.body.style.cursor = "grab";
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.code === "Space") {
+        setIsSpacePressed(false);
+        document.body.style.cursor = "default";
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
 
   // Function to add new tab with canvas
   const addNewTab = () => {
@@ -76,6 +119,187 @@ const CanvasPage = () => {
     };
 
     const drawGrid = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+
+      // Apply transformations
+      ctx.translate(pan.x, pan.y);
+      ctx.scale(zoom, zoom);
+
+      // Draw dots
+      ctx.fillStyle = "#2a2a2a";
+      const dotSize = 1;
+      const spacing = 20;
+
+      // Calculate visible area
+      const startX = Math.floor(-pan.x / zoom / spacing) * spacing - spacing;
+      const startY = Math.floor(-pan.y / zoom / spacing) * spacing - spacing;
+      const endX =
+        Math.ceil((canvas.width - pan.x) / zoom / spacing) * spacing + spacing;
+      const endY =
+        Math.ceil((canvas.height - pan.y) / zoom / spacing) * spacing + spacing;
+
+      for (let x = startX; x < endX; x += spacing) {
+        for (let y = startY; y < endY; y += spacing) {
+          ctx.beginPath();
+          ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.restore();
+    };
+
+    // Mouse event handlers
+    const handleMouseDown = (e) => {
+      if (isSpacePressed) {
+        setIsDragging(true);
+        setStartPos({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+        document.body.style.cursor = "grabbing";
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      if (isDragging && isSpacePressed) {
+        const newPan = {
+          x: e.clientX - startPos.x,
+          y: e.clientY - startPos.y,
+        };
+        setPan(newPan);
+        drawGrid();
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.body.style.cursor = isSpacePressed ? "grab" : "default";
+    };
+
+    // Zoom handler
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const zoomFactor = e.deltaY > 0 ? 1 / ZOOM_FACTOR : ZOOM_FACTOR;
+
+        setZoom((prevZoom) => {
+          const newZoom = Math.min(
+            Math.max(prevZoom * zoomFactor, MIN_ZOOM),
+            MAX_ZOOM
+          );
+          return newZoom;
+        });
+      }
+    };
+
+    // Add event listeners
+    canvas.addEventListener("mousedown", handleMouseDown);
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseup", handleMouseUp);
+    canvas.addEventListener("mouseleave", handleMouseUp);
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+
+    return () => {
+      canvas.removeEventListener("mousedown", handleMouseDown);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("mouseleave", handleMouseUp);
+      canvas.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  };
+
+  // Update handleZoom with limits
+  const handleZoom = (zoomIn) => {
+    if (activeTabIndex === null) return;
+
+    const canvas = tabs[activeTabIndex]?.canvasRef?.current;
+    if (!canvas) return;
+
+    const zoomFactor = zoomIn ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
+    const ctx = canvas.getContext("2d");
+
+    // Get center of canvas for zoom point
+    const rect = canvas.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    setZoom((prevZoom) => {
+      // Apply zoom limits
+      const newZoom = Math.min(
+        Math.max(prevZoom * zoomFactor, MIN_ZOOM),
+        MAX_ZOOM
+      );
+
+      // Only update if within limits
+      if (newZoom === prevZoom) return prevZoom;
+
+      setPan((prevPan) => ({
+        x: centerX - (centerX - prevPan.x) * zoomFactor,
+        y: centerY - (centerY - prevPan.y) * zoomFactor,
+      }));
+
+      // Redraw grid immediately after state update
+      requestAnimationFrame(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(pan.x, pan.y);
+        ctx.scale(newZoom, newZoom);
+
+        // Draw dots
+        ctx.fillStyle = "#2a2a2a";
+        const dotSize = 1;
+        const spacing = 20;
+
+        const startX =
+          Math.floor(-pan.x / newZoom / spacing) * spacing - spacing;
+        const startY =
+          Math.floor(-pan.y / newZoom / spacing) * spacing - spacing;
+        const endX =
+          Math.ceil((canvas.width - pan.x) / newZoom / spacing) * spacing +
+          spacing;
+        const endY =
+          Math.ceil((canvas.height - pan.y) / newZoom / spacing) * spacing +
+          spacing;
+
+        for (let x = startX; x < endX; x += spacing) {
+          for (let y = startY; y < endY; y += spacing) {
+            ctx.beginPath();
+            ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        ctx.restore();
+      });
+
+      return newZoom;
+    });
+  };
+
+  // Add reset zoom function
+  const handleResetZoom = () => {
+    if (activeTabIndex === null) return;
+
+    const canvas = tabs[activeTabIndex]?.canvasRef?.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    // Reset zoom and pan to initial values
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+
+    // Redraw grid with reset values
+    requestAnimationFrame(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(0, 0);
+      ctx.scale(1, 1);
+
+      // Draw dots
       ctx.fillStyle = "#2a2a2a";
       const dotSize = 1;
       const spacing = 20;
@@ -87,12 +311,56 @@ const CanvasPage = () => {
           ctx.fill();
         }
       }
-    };
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+      ctx.restore();
+    });
+  };
 
-    return () => window.removeEventListener("resize", resizeCanvas);
+  // Function to draw grid with boundary checks
+  const drawGrid = (ctx, canvas, newZoom = zoom, newPan = pan) => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+
+    ctx.translate(newPan.x, newPan.y);
+    ctx.scale(newZoom, newZoom);
+
+    ctx.fillStyle = "#2a2a2a";
+    const dotSize = 1;
+    const spacing = 20;
+
+    // Calculate visible area
+    const startX = Math.floor(-newPan.x / newZoom / spacing) * spacing;
+    const startY = Math.floor(-newPan.y / newZoom / spacing) * spacing;
+    const endX =
+      Math.ceil((canvas.width - newPan.x) / newZoom / spacing) * spacing;
+    const endY =
+      Math.ceil((canvas.height - newPan.y) / newZoom / spacing) * spacing;
+
+    // Draw dots with safe area checks
+    for (let x = startX; x < endX; x += spacing) {
+      for (let y = startY; y < endY; y += spacing) {
+        // Convert to screen coordinates
+        const screenX = x * newZoom + newPan.x;
+        const screenY = y * newZoom + newPan.y;
+
+        // Check if dot is within safe area (away from edges and UI elements)
+        const isSafeX =
+          screenX >= SAFE_MARGIN &&
+          screenX <= canvas.width - TOOLBAR_WIDTH - SAFE_MARGIN;
+
+        const isSafeY =
+          screenY >= HEADER_HEIGHT + SAFE_MARGIN &&
+          screenY <= canvas.height - SAFE_MARGIN;
+
+        if (isSafeX && isSafeY) {
+          ctx.beginPath();
+          ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    ctx.restore();
   };
 
   return (
@@ -207,7 +475,15 @@ const CanvasPage = () => {
           />
         ))}
 
-        {!isDragging && (
+        {/* Show help text only when no tabs exist */}
+        {hasNoTabs && (
+          <div className="canvas-help">
+            <p>Click the + button above to create a new canvas</p>
+          </div>
+        )}
+
+        {/* Show drag help only when a tab exists but not dragging */}
+        {!hasNoTabs && !isDragging && (
           <div className="canvas-help">
             <p>Drag from below or double click</p>
             <p>Space + Drag to pan</p>
@@ -231,7 +507,11 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <button className="tool-btn">
+          <button
+            className="tool-btn"
+            onClick={() => handleZoom(true)}
+            title="Zoom In"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -246,23 +526,30 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
-          <button className="tool-btn">
+          <button
+            className="tool-btn"
+            onClick={() => handleZoom(false)}
+            title="Zoom Out"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke-width="1.5"
+              strokeWidth={1.5}
               stroke="currentColor"
-              class="size-6"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M5 12h14"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.5 12h-15"
               />
             </svg>
           </button>
-          <button className="tool-btn">
+          <button
+            className="tool-btn"
+            onClick={handleResetZoom}
+            title="Reset Zoom"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -277,6 +564,7 @@ const CanvasPage = () => {
               />
             </svg>
           </button>
+
           <button className="tool-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
