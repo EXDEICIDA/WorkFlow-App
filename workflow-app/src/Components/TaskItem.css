@@ -30,23 +30,33 @@
   text-overflow: ellipsis;
 }
 
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+.edit-btn,
 .delete-btn {
   background: none;
   border: none;
   padding: 0.25rem;
   cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s ease;
   color: #666;
   border-radius: 3px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  margin-left: 0.25rem;
 }
 
-.task-item:hover .delete-btn {
-  opacity: 1;
+.edit-btn:hover {
+  background-color: #363636;
+  color: #4a9eff;
 }
 
 .delete-btn:hover {
@@ -54,7 +64,8 @@
   color: #dc3545;
 }
 
-.delete-icon {
+.delete-icon,
+.edit-icon {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
@@ -81,7 +92,6 @@
   gap: 0.25rem;
 }
 
-.edit-btn,
 .save-btn,
 .cancel-btn {
   background: none;
@@ -89,59 +99,18 @@
   padding: 0.25rem;
   cursor: pointer;
   color: #888;
-}
-
-.edit-btn:hover,
-.save-btn:hover {
-  color: #fff;
-}
-
-.cancel-btn:hover {
-  color: #ff4444;
-}
-
-.edit-btn {
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.2s ease;
-  color: #666;
   border-radius: 3px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  margin-left: 0.25rem;
 }
 
-.task-item:hover .edit-btn {
-  opacity: 1;
+.save-btn:hover {
   background-color: #363636;
+  color: #4ade80;
 }
 
-.edit-btn:hover {
+.cancel-btn:hover {
   background-color: #363636;
-  color: #4a9eff;
-}
-
-.edit-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
-}
-
-.task-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.task-item .edit-btn {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.task-item:hover .edit-btn {
-  opacity: 1;
-  background-color: #363636;
+  color: #ff4444;
 }
