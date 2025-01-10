@@ -20,6 +20,19 @@ const TasksPage = () => {
     inProgress: [],
     completed: [],
   });
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    priority: {
+      high: false,
+      medium: false,
+      low: false,
+    },
+    status: {
+      pending: false,
+      inProgress: false,
+      completed: false,
+    },
+  });
 
   const fetchTasks = async () => {
     try {
@@ -98,6 +111,50 @@ const TasksPage = () => {
     }));
   };
 
+  const handleFilterChange = (category, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [value]: !prev[category][value],
+      },
+    }));
+  };
+
+  const filterTasks = (tasks) => {
+    // Convert tasks object to array if it's not already
+    const tasksArray = Array.isArray(tasks)
+      ? tasks
+      : [...tasks.pending, ...tasks.inProgress, ...tasks.completed];
+
+    // Check if any filters are active
+    const hasActiveFilters = Object.values(filters).some((category) =>
+      Object.values(category).some((value) => value)
+    );
+
+    // If no filters are active, return all tasks
+    if (!hasActiveFilters) return tasksArray;
+
+    return tasksArray.filter((task) => {
+      // Check priority filters
+      const priorityMatch =
+        filters.priority[task.priority.toLowerCase()] ||
+        !Object.values(filters.priority).some((v) => v);
+
+      // Check status filters
+      const statusMap = {
+        Pending: "pending",
+        "In Progress": "inProgress",
+        Completed: "completed",
+      };
+      const statusMatch =
+        filters.status[statusMap[task.status]] ||
+        !Object.values(filters.status).some((v) => v);
+
+      return priorityMatch && statusMatch;
+    });
+  };
+
   return (
     <div className="tasks-container">
       <div className="tasks-header">
@@ -160,23 +217,96 @@ const TasksPage = () => {
             </svg>
             List View
           </button>
-          <button className="view-btn">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="view-icon"
+          <div className="filter-dropdown">
+            <button
+              className={`view-btn ${showFilters ? "active" : ""}`}
+              onClick={() => setShowFilters(!showFilters)}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"
-              />
-            </svg>
-            Filter
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="view-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"
+                />
+              </svg>
+              Filter
+            </button>
+
+            {showFilters && (
+              <div className="filter-menu">
+                <div className="filter-section">
+                  <h4>Priority</h4>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="priority-high"
+                      checked={filters.priority.high}
+                      onChange={() => handleFilterChange("priority", "high")}
+                    />
+                    <label htmlFor="priority-high">High Priority</label>
+                  </div>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="priority-medium"
+                      checked={filters.priority.medium}
+                      onChange={() => handleFilterChange("priority", "medium")}
+                    />
+                    <label htmlFor="priority-medium">Medium Priority</label>
+                  </div>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="priority-low"
+                      checked={filters.priority.low}
+                      onChange={() => handleFilterChange("priority", "low")}
+                    />
+                    <label htmlFor="priority-low">Low Priority</label>
+                  </div>
+                </div>
+
+                <div className="filter-section">
+                  <h4>Status</h4>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="status-pending"
+                      checked={filters.status.pending}
+                      onChange={() => handleFilterChange("status", "pending")}
+                    />
+                    <label htmlFor="status-pending">To Do</label>
+                  </div>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="status-inProgress"
+                      checked={filters.status.inProgress}
+                      onChange={() =>
+                        handleFilterChange("status", "inProgress")
+                      }
+                    />
+                    <label htmlFor="status-inProgress">In Progress</label>
+                  </div>
+                  <div className="filter-option">
+                    <input
+                      type="checkbox"
+                      id="status-completed"
+                      checked={filters.status.completed}
+                      onChange={() => handleFilterChange("status", "completed")}
+                    />
+                    <label htmlFor="status-completed">Completed</label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="new-task-btn"
             onClick={() => setShowTaskForm(true)}
@@ -213,10 +343,12 @@ const TasksPage = () => {
                 </svg>
                 <h3>To Do</h3>
               </div>
-              <span className="task-count">{tasks.pending.length}</span>
+              <span className="task-count">
+                {filterTasks(tasks.pending).length}
+              </span>
             </div>
             <div className="task-list">
-              {tasks.pending.map((task) => (
+              {filterTasks(tasks.pending).map((task) => (
                 <TaskItem
                   key={task.id}
                   task={task}
@@ -246,10 +378,12 @@ const TasksPage = () => {
                 </svg>
                 <h3>Doing</h3>
               </div>
-              <span className="task-count">{tasks.inProgress.length}</span>
+              <span className="task-count">
+                {filterTasks(tasks.inProgress).length}
+              </span>
             </div>
             <div className="task-list">
-              {tasks.inProgress.map((task) => (
+              {filterTasks(tasks.inProgress).map((task) => (
                 <TaskItem
                   key={task.id}
                   task={task}
@@ -279,10 +413,12 @@ const TasksPage = () => {
                 </svg>
                 <h3>Done</h3>
               </div>
-              <span className="task-count">{tasks.completed.length}</span>
+              <span className="task-count">
+                {filterTasks(tasks.completed).length}
+              </span>
             </div>
             <div className="task-list">
-              {tasks.completed.map((task) => (
+              {filterTasks(tasks.completed).map((task) => (
                 <TaskItem
                   key={task.id}
                   task={task}
@@ -295,65 +431,67 @@ const TasksPage = () => {
         </div>
       ) : (
         <div className="tasks-list-view">
-          {[...tasks.pending, ...tasks.inProgress, ...tasks.completed].map(
-            (task) => (
-              <div key={task.id} className="list-task-item">
-                <div className="task-info">
-                  <div className="task-header">
-                    <h3>{task.title}</h3>
-                    <span
-                      className={`task-status ${task.status
-                        .toLowerCase()
-                        .replace(" ", "-")}`}
-                    >
-                      {task.status}
-                    </span>
-                    <span
-                      className={`task-priority ${task.priority.toLowerCase()}`}
-                    >
-                      {task.priority}
-                    </span>
-                    <span className="task-date">
-                      {formatDate(task.created_at)}
-                    </span>
-                  </div>
-                  <p className="task-description">{task.description}</p>
+          {filterTasks([
+            ...tasks.pending,
+            ...tasks.inProgress,
+            ...tasks.completed,
+          ]).map((task) => (
+            <div key={task.id} className="list-task-item">
+              <div className="task-info">
+                <div className="task-header">
+                  <h3>{task.title}</h3>
+                  <span
+                    className={`task-status ${task.status
+                      .toLowerCase()
+                      .replace(" ", "-")}`}
+                  >
+                    {task.status}
+                  </span>
+                  <span
+                    className={`task-priority ${task.priority.toLowerCase()}`}
+                  >
+                    {task.priority}
+                  </span>
+                  <span className="task-date">
+                    {formatDate(task.created_at)}
+                  </span>
                 </div>
-                <div className="task-actions">
-                  <button className="edit-btn">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
-                  </button>
-                  <button className="delete-btn">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                      />
-                    </svg>
-                  </button>
-                </div>
+                <p className="task-description">{task.description}</p>
               </div>
-            )
-          )}
+              <div className="task-actions">
+                <button className="edit-btn">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                </button>
+                <button className="delete-btn">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
