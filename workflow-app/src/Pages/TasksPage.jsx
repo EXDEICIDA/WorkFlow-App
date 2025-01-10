@@ -3,6 +3,15 @@ import "./TasksPage.css";
 import TaskForm from "../Components/TaskForm";
 import TaskItem from "../Components/TaskItem";
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 const TasksPage = () => {
   const [viewType, setViewType] = useState("board");
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -293,9 +302,19 @@ const TasksPage = () => {
                   <div className="task-header">
                     <h3>{task.title}</h3>
                     <span
-                      className={`task-status ${task.status.toLowerCase()}`}
+                      className={`task-status ${task.status
+                        .toLowerCase()
+                        .replace(" ", "-")}`}
                     >
                       {task.status}
+                    </span>
+                    <span
+                      className={`task-priority ${task.priority.toLowerCase()}`}
+                    >
+                      {task.priority}
+                    </span>
+                    <span className="task-date">
+                      {formatDate(task.created_at)}
                     </span>
                   </div>
                   <p className="task-description">{task.description}</p>
