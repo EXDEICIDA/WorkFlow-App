@@ -73,6 +73,22 @@ class TaskManager:
             return response.data[0]
         except Exception as e:
             raise Exception(f"Failed to update task: {str(e)}")
-
+    
+    
+    def mark_task_completed(self, task_id):
+        """Mark a task as completed in the database."""
+        try:
+            response = self._client.table('tasks')\
+                .update({"status": "completed"})\
+                .eq('id', task_id)\
+                .execute()
+            
+            if not response.data:
+                raise Exception("Failed to mark task as completed")
+            
+            return response.data[0]
+        except Exception as e:
+            raise Exception(f"Failed to mark task as completed: {str(e)}")
+    
 
    
