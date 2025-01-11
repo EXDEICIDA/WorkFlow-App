@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "./TaskItem.css";
+import PropTypes from "prop-types";
 
 const TaskItem = ({ task, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
+  const [isCompleted, setIsCompleted] = useState(task.completed);
 
   const handleEdit = async () => {
     try {
@@ -30,8 +32,42 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
     }
   };
 
+  const handleCheckboxChange = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/tasks/${task.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ completed: !isCompleted }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update task");
+      }
+
+      setIsCompleted(!isCompleted);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Check if task status is either Pending or In Progress
+  const showCheckbox =
+    task.status === "Pending" || task.status === "In Progress";
+
   return (
     <div className="task-item">
+      {showCheckbox && (
+        <input
+          type="checkbox"
+          checked={isCompleted}
+          onChange={handleCheckboxChange}
+        />
+      )}
       {isEditing ? (
         <div className="edit-mode">
           <input
@@ -121,6 +157,17 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
       )}
     </div>
   );
+};
+
+TaskItem.propTypes = {
+  task: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+    completed: PropTypes.bool.isRequired,
+  }).isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
 };
 
 export default TaskItem;
