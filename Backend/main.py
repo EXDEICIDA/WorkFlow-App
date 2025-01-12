@@ -46,10 +46,10 @@ def delete_task(task_id):
 def update_task(task_id):
     try:
         data = request.get_json()
-        if not data or 'title' not in data:
-            return jsonify({"error": "Title is required"}), 400
+        if not data :
+            return jsonify({"error": "No data provided"}), 400
             
-        task = task_manager.update_task(task_id, data['title'])
+        task = task_manager.update_task(task_id, data)
         return jsonify(task), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -89,26 +89,59 @@ const TasksPage = () => {
     }
   };
 
-  const handleDeleteTask = (taskId) => {
-    setTasks((prevTasks) => ({
-      pending: prevTasks.pending.filter((task) => task.id !== taskId),
-      inProgress: prevTasks.inProgress.filter((task) => task.id !== taskId),
-      completed: prevTasks.completed.filter((task) => task.id !== taskId),
-    }));
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/tasks/${taskId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete task");
+      }
+
+      // Only update local state after successful API call
+      setTasks((prevTasks) => ({
+        pending: prevTasks.pending.filter((task) => task.id !== taskId),
+        inProgress: prevTasks.inProgress.filter((task) => task.id !== taskId),
+        completed: prevTasks.completed.filter((task) => task.id !== taskId),
+      }));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
   const handleUpdateTask = (updatedTask) => {
-    setTasks((prevTasks) => ({
-      pending: prevTasks.pending.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
-      ),
-      inProgress: prevTasks.inProgress.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
-      ),
-      completed: prevTasks.completed.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
-      ),
-    }));
+    setTasks((prevTasks) => {
+      const newTasks = {
+        pending: prevTasks.pending.filter((task) => task.id !== updatedTask.id),
+        inProgress: prevTasks.inProgress.filter(
+          (task) => task.id !== updatedTask.id
+        ),
+        completed: prevTasks.completed.filter(
+          (task) => task.id !== updatedTask.id
+        ),
+      };
+
+      // Add the task to the correct column based on its status
+      switch (updatedTask.status) {
+        case "Pending":
+          newTasks.pending.push(updatedTask);
+          break;
+        case "In Progress":
+          newTasks.inProgress.push(updatedTask);
+          break;
+        case "Completed":
+          newTasks.completed.push(updatedTask);
+          break;
+        default:
+          break;
+      }
+
+      return newTasks;
+    });
   };
 
   const handleFilterChange = (category, value) => {

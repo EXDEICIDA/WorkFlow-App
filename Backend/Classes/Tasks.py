@@ -59,13 +59,13 @@ class TaskManager:
         except Exception as e:
             raise Exception(f"Failed to delete task: {str(e)}")
 
-    def update_task(self, task_id, title):
+    def update_task(self, task_id, data):
         """Update a task's title in the database."""
         try:
             response = self._client.table('tasks')\
-                .update({"title": title})\
-                .eq('id', task_id)\
-                .execute()
+                 .update(data)\
+                 .eq('id', task_id)\
+                 .execute()
             
             if not response.data:
                 raise Exception("Task update failed")

@@ -5,7 +5,9 @@ import PropTypes from "prop-types";
 const TaskItem = ({ task, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
-  const [isCompleted, setIsCompleted] = useState(task.completed);
+  const [isChecked, setIsChecked] = useState(task.status === "Completed");
+  // We can determine completion based on status
+  const isCompleted = task.status === "Completed";
 
   const handleEdit = async () => {
     try {
@@ -32,8 +34,13 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
     }
   };
 
-  const handleCheckboxChange = async () => {
+  const handleCheckboxChange = async (e) => {
+    setIsChecked(e.target.checked);
+
     try {
+      // When checked, move to Completed, when unchecked move back to Pending
+      const newStatus = task.status === "Completed" ? "Pending" : "Completed";
+
       const response = await fetch(
         `http://localhost:8080/api/tasks/${task.id}`,
         {
@@ -41,17 +48,20 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ completed: !isCompleted }),
+          body: JSON.stringify({ status: newStatus }),
         }
       );
 
       if (!response.ok) {
+        // Revert checkbox state if request fails
+        setIsChecked(!e.target.checked);
         throw new Error("Failed to update task");
       }
 
-      setIsCompleted(!isCompleted);
+      const updatedTask = await response.json();
+      onUpdate(updatedTask);
     } catch (error) {
-      console.error(error);
+      console.error("Error updating task status:", error);
     }
   };
 
@@ -64,8 +74,9 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
       {showCheckbox && (
         <input
           type="checkbox"
-          checked={isCompleted}
+          checked={isChecked}
           onChange={handleCheckboxChange}
+          className="task-checkbox"
         />
       )}
       {isEditing ? (
@@ -164,7 +175,6 @@ TaskItem.propTypes = {
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
-    completed: PropTypes.bool.isRequired,
   }).isRequired,
   onDelete: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
