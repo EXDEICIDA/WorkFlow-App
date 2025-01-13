@@ -96,7 +96,7 @@ const SettingsPage = () => {
         <div className="settings-section-content">
           <h2>Account</h2>
           <h3>Your account</h3>
-          <p>You're currently signed in as user@example.com</p>
+          <p>You are currently signed in as user@example.com</p>
         </div>
         <div className="settings-section-controls">
           <button className="settings-button secondary-button">Manage</button>

@@ -1,23 +1,86 @@
 .profile-container {
-  padding: 2rem;
-  width: 100%;
-  height: 100%;
+  margin-left: 250px;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  width: calc(100% - 250px);
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 2rem 2rem 2rem 1rem;
   overflow-y: auto;
+  box-shadow: -2px 0 0 #1a1a1a;
 }
 
-.profile-header {
-  margin-bottom: 2rem;
+body[data-sidebar="collapsed"] .profile-container {
+  margin-left: 70px;
+  width: calc(100% - 70px);
 }
 
-.profile-header h1 {
+.profile-container h1 {
   font-size: 2rem;
-  font-weight: 600;
-  color: #333;
+  margin-bottom: 2rem;
+  font-weight: normal;
 }
 
-.profile-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.profile-section {
+  padding: 1rem 0;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.profile-section-content {
+  flex: 1;
+  padding-right: 2rem;
+}
+
+.profile-section h2 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-bottom: 0.5rem;
+}
+
+.profile-section h3 {
+  font-size: 1rem;
+  font-weight: normal;
+  margin-bottom: 0.25rem;
+}
+
+.profile-section p {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.settings-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.secondary-button {
+  background-color: #2a2a2a;
+  color: white;
+  border: none;
+}
+
+.secondary-button:hover {
+  background-color: #333;
+}
+
+.danger-button {
+  background-color: #2a2a2a;
+  color: #ff4444;
+  border: none;
+}
+
+.danger-button:hover {
+  background-color: #333;
 }
