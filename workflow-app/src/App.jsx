@@ -7,6 +7,7 @@ import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
 import CanvasPage from "./Pages/CanvasPage";
 import ScriptsPage from "./Pages/ScriptsPage";
+
 import "./App.css";
 
 function App() {
