@@ -30,33 +30,23 @@
   text-overflow: ellipsis;
 }
 
-.task-actions {
-  display: flex;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.task-item:hover .task-actions {
-  opacity: 1;
-}
-
-.edit-btn,
 .delete-btn {
   background: none;
   border: none;
   padding: 0.25rem;
   cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
   color: #666;
   border-radius: 3px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  margin-left: 0.25rem;
 }
 
-.edit-btn:hover {
-  background-color: #363636;
-  color: #4a9eff;
+.task-item:hover .delete-btn {
+  opacity: 1;
 }
 
 .delete-btn:hover {
@@ -64,8 +54,7 @@
   color: #dc3545;
 }
 
-.delete-icon,
-.edit-icon {
+.delete-icon {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
@@ -92,6 +81,7 @@
   gap: 0.25rem;
 }
 
+.edit-btn,
 .save-btn,
 .cancel-btn {
   background: none;
@@ -99,51 +89,36 @@
   padding: 0.25rem;
   cursor: pointer;
   color: #888;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+  
 }
 
+.edit-btn:hover,
 .save-btn:hover {
   background-color: #363636;
-  color: #4ade80;
+  color: #fff;
 }
 
 .cancel-btn:hover {
-  background-color: #363636;
   color: #ff4444;
 }
 
-/*new*/
-.task-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  margin-right: 10px;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
+.edit-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
-.task-checkbox:checked {
-  background-color: #4caf50;
-  border-color: #4caf50;
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.task-checkbox:checked::after {
-  content: "✓";
-  position: absolute;
-  color: white;
-  font-size: 14px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+.task-item .edit-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.task-checkbox:hover {
-  border-color: #4caf50;
+.task-item:hover .edit-btn {
+  opacity: 1;
+  background-color: #363636;
 }
