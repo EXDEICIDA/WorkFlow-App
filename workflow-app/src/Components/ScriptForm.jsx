@@ -1,98 +1,174 @@
-/*Scripts form jsx here */
 import React, { useState } from "react";
-import PropTypes from "prop-types"; // Import PropTypes
+import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faJs,
+  faPython,
+  faHtml5,
+  faCss3Alt,
+  faJava,
+  faPhp,
+  faSwift,
+  faRust,
+} from "@fortawesome/free-brands-svg-icons";
 
 const languages = [
-  "JavaScript",
-  "Python",
-  "TypeScript",
-  "HTML",
-  "CSS",
-  "SQL",
-  "Java",
-  "C++",
-  "Ruby",
-  "Go",
-  "PHP",
-  "Swift",
-  "Kotlin",
-  "Rust",
+  { name: "JavaScript", icon: faJs },
+  { name: "Python", icon: faPython },
+  { name: "TypeScript", icon: null },
+  { name: "HTML", icon: faHtml5 },
+  { name: "CSS", icon: faCss3Alt },
+  { name: "SQL", icon: null },
+  { name: "Java", icon: faJava },
+  { name: "C++", icon: null },
+  { name: "Ruby", icon: null },
+  { name: "Go", icon: null },
+  { name: "PHP", icon: faPhp },
+  { name: "Swift", icon: faSwift },
+  { name: "Kotlin", icon: null },
+  { name: "Rust", icon: faRust },
 ];
 
-const ScriptsForm = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [code, setCode] = useState("");
-  const [language, setLanguage] = useState(languages[0]);
+const ScriptsForm = ({ onClose, onSubmit }) => {
+  const [scriptData, setScriptData] = useState({
+    title: "",
+    language: languages[0].name,
+    code: "",
+    description: "",
+  });
 
-  if (!isOpen) return null;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!scriptData.title.trim()) {
+      alert("Title is required!");
+      return;
+    }
+
+    try {
+      console.log("Sending script data:", scriptData);
+      await onSubmit(scriptData);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting script:", error);
+      alert(error.message || "Failed to create script");
+    }
+  };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="form-header">
-          <h2>Add New Script</h2>
-          <button className="secondary-button" onClick={onClose}>
-            Close
+    <div className="task-form-overlay">
+      <div className="task-form-container">
+        <div className="task-form-header">
+          <h2>Create New Script</h2>
+          <button className="close-button" onClick={onClose}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="close-icon"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           </button>
         </div>
 
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Title</label>
+            <label htmlFor="title">Script Title</label>
             <input
               type="text"
-              className="form-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter script title..."
+              id="title"
+              value={scriptData.title}
+              onChange={(e) =>
+                setScriptData({ ...scriptData, title: e.target.value })
+              }
+              placeholder="Enter script title"
+              required
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Language</label>
-            <select
-              className="form-input"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              {languages.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
-                </option>
-              ))}
-            </select>
+            <label htmlFor="language">Language</label>
+            <div className="language-select-container">
+              <select
+                id="language"
+                value={scriptData.language}
+                onChange={(e) =>
+                  setScriptData({
+                    ...scriptData,
+                    language: e.target.value,
+                  })
+                }
+              >
+                {languages.map(({ name, icon }) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              {languages.find((lang) => lang.name === scriptData.language)
+                ?.icon && (
+                <FontAwesomeIcon
+                  icon={
+                    languages.find((lang) => lang.name === scriptData.language)
+                      .icon
+                  }
+                  className="language-icon"
+                />
+              )}
+            </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Code</label>
+            <label htmlFor="code">Code</label>
             <textarea
-              className="form-input code-editor"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              id="code"
+              value={scriptData.code}
+              onChange={(e) =>
+                setScriptData({ ...scriptData, code: e.target.value })
+              }
               placeholder="Enter your code here..."
+              className="code-editor"
+              rows="8"
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Description (optional)</label>
+            <label htmlFor="description">Description</label>
             <textarea
-              className="form-input description-input"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              id="description"
+              value={scriptData.description}
+              onChange={(e) =>
+                setScriptData({ ...scriptData, description: e.target.value })
+              }
               placeholder="Add a description..."
+              rows="4"
             />
           </div>
 
-          <button className="primary-button">Save Script</button>
+          <div className="form-actions">
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="submit-btn">
+              Create Script
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
+
 ScriptsForm.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default ScriptsForm;

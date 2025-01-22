@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import "./TaskForm.css";
 
 const TaskForm = ({ onClose, onSubmit }) => {
@@ -135,5 +136,8 @@ const TaskForm = ({ onClose, onSubmit }) => {
     </div>
   );
 };
-
+TaskForm.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+};
 export default TaskForm;

@@ -1,5 +1,4 @@
-/*CSS Here*/
-.modal-overlay {
+.task-form-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,56 +11,138 @@
   z-index: 1000;
 }
 
-.modal-content {
-  background-color: #1a1a1a;
+.task-form-container {
+  background-color: #2a2a2a;
   border-radius: 8px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.form-header {
+.task-form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.task-form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.close-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .form-group {
   margin-bottom: 1.5rem;
 }
 
-.form-label {
+.form-group label {
   display: block;
   margin-bottom: 0.5rem;
   color: #888;
   font-size: 0.9rem;
 }
 
-.form-input {
+input[type="text"],
+textarea,
+select {
   width: 100%;
-  background-color: #2a2a2a;
-  border: 1px solid #333;
-  color: white;
   padding: 0.75rem;
+  background-color: #333;
+  border: 1px solid #444;
   border-radius: 4px;
+  color: #fff;
   font-size: 0.9rem;
 }
 
-.language-select {
-  position: relative;
-  width: 200px;
+textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .code-editor {
   font-family: monospace;
-  min-height: 300px;
-  resize: vertical;
+  white-space: pre;
+  tab-size: 2;
 }
 
-.description-input {
-  min-height: 100px;
-  resize: vertical;
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.language-select-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.language-select-container select {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23888'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+.language-icon {
+  position: absolute;
+  right: 2.5rem;
+  width: 1rem;
+  height: 1rem;
+  color: #888;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background-color: #333;
+}
+
+.submit-btn {
+  background-color: #8b6d3c;
+  border: none;
+  color: #fff;
+}
+
+.submit-btn:hover {
+  background-color: #9d7b44;
 }
