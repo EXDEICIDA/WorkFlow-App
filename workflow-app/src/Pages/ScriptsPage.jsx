@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import "./ScriptsPage.css";
+import ScriptsForm from "../Components/ScriptForm.jsx";
 
 const ScriptsPage = () => {
-  const scripts = [
+  const [scripts, setScripts] = useState([
     {
       id: 1,
       title: "Backup Database",
@@ -17,13 +18,20 @@ const ScriptsPage = () => {
       status: "inactive",
       lastRun: "5 days ago",
     },
-  ];
+  ]);
+
+  const [showForm, setShowForm] = useState(false);
+
+  const handleAddScript = (newScript) => {
+    setScripts([...scripts, { ...newScript, id: scripts.length + 1 }]);
+    setShowForm(false);
+  };
 
   return (
     <div className="scripts-container">
       <div className="header-container">
         <h1>Scripts</h1>
-        <button className="add-button">
+        <button className="add-button" onClick={() => setShowForm(true)}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -40,6 +48,13 @@ const ScriptsPage = () => {
           </svg>
         </button>
       </div>
+      {showForm && (
+        <ScriptsForm
+          isOpen={showForm}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleAddScript} // Optional, if used
+        />
+      )}
 
       <div className="scripts-section">
         <div className="scripts-grid">
