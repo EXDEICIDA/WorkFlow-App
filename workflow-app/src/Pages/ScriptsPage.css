@@ -1,8 +1,22 @@
 .scripts-container {
-  padding: 2rem;
-  width: 100%;
-  height: 100%;
+  margin-left: 250px;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  width: calc(100% - 250px);
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 2rem 2rem 2rem 1rem;
   overflow-y: auto;
+  box-shadow: -2px 0 0 #1a1a1a;
+}
+
+body[data-sidebar="collapsed"] .scripts-container {
+  margin-left: 70px;
+  width: calc(100% - 70px);
 }
 
 .scripts-header {
@@ -11,13 +25,119 @@
 
 .scripts-header h1 {
   font-size: 2rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: normal;
 }
 
-.scripts-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.scripts-section {
+  padding: 1rem 0;
+  border-top: 1px solid #333;
+  margin-bottom: 1.5rem;
+}
+
+.script-card {
+  background: #2a2a2a;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.script-info {
+  flex: 1;
+}
+
+.script-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.script-description {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.script-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.script-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.run-button {
+  background-color: #8b6d3c;
+  color: white;
+  border: none;
+}
+
+.run-button:hover {
+  background-color: #9d7b44;
+}
+
+.edit-button {
+  background-color: #2a2a2a;
+  color: white;
+  border: 1px solid #444;
+}
+
+.edit-button:hover {
+  background-color: #333;
+}
+
+.script-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-active {
+  background-color: #4caf50;
+}
+
+.status-inactive {
+  background-color: #888;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.add-button {
+  background-color: #333;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.add-button:hover {
+  background-color: #333;
+}
+
+.add-icon {
+  width: 24px;
+  height: 24px;
 }
