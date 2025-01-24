@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faJs,
@@ -10,23 +11,33 @@ import {
   faPhp,
   faSwift,
   faRust,
+  faGolang,
+  faCss,
+  faAngular,
+  faReact,
+  faFlutter,
+  faBootstrap,
 } from "@fortawesome/free-brands-svg-icons";
 
 const languages = [
-  { name: "JavaScript", icon: faJs },
-  { name: "Python", icon: faPython },
-  { name: "TypeScript", icon: null },
-  { name: "HTML", icon: faHtml5 },
-  { name: "CSS", icon: faCss3Alt },
-  { name: "SQL", icon: null },
-  { name: "Java", icon: faJava },
+  { name: "JavaScript", icon: faJs, color: "#F7DF1E" },
+  { name: "Python", icon: faPython, color: "#3776AB" },
+  { name: "HTML", icon: faHtml5, color: "#E34F26" },
+  { name: "CSS", icon: faCss3Alt, color: "#1572B6" },
+  { name: "Angular", icon: faAngular, color: "#DD0031" },
+  { name: "React", icon: faReact, color: "#61DAFB" },
+  { name: "SQL", icon: null, color: "#003B57" }, // Added icon
+  { name: "Bootstrap", icon: faBootstrap, color: "#7952B3" },
+  { name: "Java", icon: faJava, color: "#007396" },
   { name: "C++", icon: null },
-  { name: "Ruby", icon: null },
-  { name: "Go", icon: null },
-  { name: "PHP", icon: faPhp },
-  { name: "Swift", icon: faSwift },
+  { name: "Go", icon: faGolang, color: "#00ADD8" },
+  { name: "PHP", icon: faPhp, color: "#777BB4" },
+  { name: "Swift", icon: faSwift, color: "#FA7343" },
   { name: "Kotlin", icon: null },
-  { name: "Rust", icon: faRust },
+  { name: "Rust", icon: faRust, color: "#000000" },
+  { name: "Dart", icon: null, color: "#0175C2" },
+  { name: "Flutter", icon: faFlutter, color: "#02569B" },
+  { name: "C#", icon: faCss },
 ];
 
 const ScriptsForm = ({ onClose, onSubmit }) => {
@@ -119,6 +130,12 @@ const ScriptsForm = ({ onClose, onSubmit }) => {
                     languages.find((lang) => lang.name === scriptData.language)
                       .icon
                   }
+                  style={{
+                    color: languages.find(
+                      (lang) => lang.name === scriptData.language
+                    )?.color,
+                    fontSize: "1rem", // Optional: Adjust size
+                  }}
                   className="language-icon"
                 />
               )}
