@@ -14,7 +14,6 @@ import {
   faSwift,
   faRust,
   faGolang,
-  faCss,
   faAngular,
   faReact,
   faFlutter,
@@ -41,7 +40,7 @@ const languages = [
   { name: "Rust", icon: faRust, color: "#000000" },
   { name: "Dart", icon: faCodiepie, color: "#0175C2" },
   { name: "Flutter", icon: faFlutter, color: "#02569B" },
-  { name: "C#", icon: faCss },
+  { name: "C#", customIcon: "C#", color: "#8A2BE2" },
 ];
 
 const ScriptsPage = () => {
@@ -85,18 +84,34 @@ const ScriptsPage = () => {
       <div className="header-container">
         <h1>Scripts</h1>
         <div className="header-actions">
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="language-filter"
-          >
-            <option value="">All Languages</option>
-            {languages.map((lang) => (
-              <option key={lang.name} value={lang.name}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
+          <div className="language-filter-wrapper">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="language-filter-icon"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+              />
+            </svg>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="language-filter"
+            >
+              <option value="">All Languages</option>
+              {languages.map((lang) => (
+                <option key={lang.name} value={lang.name}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <button className="add-button" onClick={() => setShowForm(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

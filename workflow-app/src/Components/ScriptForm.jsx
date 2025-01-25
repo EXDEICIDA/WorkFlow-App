@@ -37,7 +37,7 @@ const languages = [
   { name: "Rust", icon: faRust, color: "#000000" },
   { name: "Dart", icon: faCodiepie, color: "#0175C2" },
   { name: "Flutter", icon: faFlutter, color: "#02569B" },
-  { name: "C#", icon: faCss },
+  { name: "C#", customIcon: "C#", color: "#8A2BE2" },
 ];
 
 const ScriptsForm = ({ onClose, onSubmit }) => {
