@@ -145,3 +145,17 @@ body[data-sidebar="collapsed"] .scripts-container {
 .language-info {
   margin-left: -1rem;
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.language-filter {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
