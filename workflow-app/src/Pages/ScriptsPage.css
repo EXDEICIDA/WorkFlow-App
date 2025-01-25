@@ -141,3 +141,7 @@ body[data-sidebar="collapsed"] .scripts-container {
   width: 24px;
   height: 24px;
 }
+
+.language-info {
+  margin-left: -1rem;
+}
