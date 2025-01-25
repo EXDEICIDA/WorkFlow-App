@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faJs,
@@ -26,7 +25,7 @@ const languages = [
   { name: "CSS", icon: faCss3Alt, color: "#1572B6" },
   { name: "Angular", icon: faAngular, color: "#DD0031" },
   { name: "React", icon: faReact, color: "#61DAFB" },
-  { name: "SQL", icon: null, color: "#003B57" }, // Added icon
+  { name: "SQL", icon: null, color: "#003B57" },
   { name: "Bootstrap", icon: faBootstrap, color: "#7952B3" },
   { name: "Java", icon: faJava, color: "#007396" },
   { name: "C++", icon: null },
@@ -117,7 +116,7 @@ const ScriptsForm = ({ onClose, onSubmit }) => {
                   })
                 }
               >
-                {languages.map(({ name, icon }) => (
+                {languages.map(({ name }) => (
                   <option key={name} value={name}>
                     {name}
                   </option>
@@ -134,7 +133,7 @@ const ScriptsForm = ({ onClose, onSubmit }) => {
                     color: languages.find(
                       (lang) => lang.name === scriptData.language
                     )?.color,
-                    fontSize: "1rem", // Optional: Adjust size
+                    fontSize: "1rem",
                   }}
                   className="language-icon"
                 />

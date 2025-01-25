@@ -1,30 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import ScriptsForm from "../Components/ScriptForm";
 import "./ScriptsPage.css";
-import ScriptsForm from "../Components/ScriptForm.jsx";
+
+const API_BASE_URL = "http://localhost:8080/api/scripts";
 
 const ScriptsPage = () => {
-  const [scripts, setScripts] = useState([
-    {
-      id: 1,
-      title: "Backup Database",
-      description: "Automated daily backup of the production database",
-      status: "active",
-      lastRun: "2 hours ago",
-    },
-    {
-      id: 2,
-      title: "Log Cleanup",
-      description: "Remove logs older than 30 days",
-      status: "inactive",
-      lastRun: "5 days ago",
-    },
-  ]);
-
+  const [scripts, setScripts] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddScript = (newScript) => {
-    setScripts([...scripts, { ...newScript, id: scripts.length + 1 }]);
-    setShowForm(false);
+  useEffect(() => {
+    fetchScripts();
+  }, []);
+
+  const fetchScripts = async () => {
+    try {
+      const response = await axios.get(API_BASE_URL);
+      setScripts(response.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching scripts:", error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddScript = async (newScript) => {
+    try {
+      const response = await axios.post(API_BASE_URL, newScript);
+      setScripts([...scripts, response.data]);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error adding script:", error);
+      alert("Failed to add script");
+    }
   };
 
   return (
@@ -48,32 +57,37 @@ const ScriptsPage = () => {
           </svg>
         </button>
       </div>
+
       {showForm && (
         <ScriptsForm
           isOpen={showForm}
           onClose={() => setShowForm(false)}
-          onSubmit={handleAddScript} // Optional, if used
+          onSubmit={handleAddScript}
         />
       )}
 
       <div className="scripts-section">
         <div className="scripts-grid">
-          {scripts.map((script) => (
-            <div key={script.id} className="script-card">
-              <div className="script-info">
-                <h3 className="script-title">{script.title}</h3>
-                <p className="script-description">{script.description}</p>
-                <div className="script-status">
-                  <div className={`status-indicator status-${script.status}`} />
-                  <span>Last run: {script.lastRun}</span>
+          {isLoading ? (
+            <div>Loading scripts...</div>
+          ) : (
+            scripts.map((script) => (
+              <div key={script.id} className="script-card">
+                <div className="script-info">
+                  <h3 className="script-title">{script.title}</h3>
+                  <p className="script-description">{script.description}</p>
+                  <div className="script-status">
+                    <div className="status-indicator" />
+                    <span>Language: {script.language}</span>
+                  </div>
+                </div>
+                <div className="script-controls">
+                  <button className="script-button edit-button">Edit</button>
+                  <button className="script-button run-button">Run</button>
                 </div>
               </div>
-              <div className="script-controls">
-                <button className="script-button edit-button">Edit</button>
-                <button className="script-button run-button">Run</button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

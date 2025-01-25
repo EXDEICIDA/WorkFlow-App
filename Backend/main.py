@@ -71,7 +71,7 @@ def mark_task_completed(task_id):
 
 # Script operations routes 
 
-@app.route('/api/scripts', methods=['Post'])
+@app.route('/api/scripts', methods=['POST'])
 def add_script():
     try:
         data = request.get_json()
@@ -79,19 +79,38 @@ def add_script():
         if not data or not data.get('title'):
             return jsonify({"error": "Title is required"}), 400
 
-
         language = data.get('language', 'Unknown')  # Default to 'Unknown' if not provided
 
+        # Create the new script
         script = script_manager.create_script(
             title=data.get('title'),
             description=data.get('description', ''),
             code=data.get('code', ''),
             language=language
         )
+
+        # Return the newly created script
+        return jsonify(script), 201  # 201 Created status code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/api/scripts', methods=['GET'])
+def get_scripts():
+    try:
         scripts = script_manager.fetch_scripts()
         return jsonify(scripts), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/scripts/<int:script_id>', methods=['DELETE'])
+def delete_script(script_id):
+    try:
+        script = script_manager.delete_script(script_id)
+        return jsonify(script), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
