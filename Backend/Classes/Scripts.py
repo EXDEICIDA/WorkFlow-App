@@ -5,20 +5,20 @@ class ScriptsManager:
 
 
 
-    def create_script(self, title, description, priority, status):
+    def create_script(self, title, description, code, language):
         """Create a new script in the database."""
         try:
             script_data = {
                 "title": title,
                 "description": description,
-                "priority": priority,
-                "status": status
+                "code": code,
+                "language": language
             }
         
             response = self._client.table('scripts').insert(script_data).execute()
             
             if not response.data:
-                raise Exception("Task creation failed")
+                raise Exception("Script creation failed")
                 
             return response.data[0]
             
