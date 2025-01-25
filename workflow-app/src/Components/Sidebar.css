@@ -79,7 +79,8 @@
   border: none;
   color: #fff;
   font-size: 0.9rem;
-  padding: 0 15px 0 32px; /* Adjusted left padding */
+  text-indent: 10px;
+  padding: 0 15px 0 40px; /* Increased left padding from 32px to 40px */
   outline: none;
 }
 
