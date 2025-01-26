@@ -171,3 +171,18 @@ body[data-sidebar="collapsed"] .scripts-container {
   height: 24px;
   color: #888;
 }
+
+.language-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.script-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #888;
+  font-size: 0.9rem;
+}

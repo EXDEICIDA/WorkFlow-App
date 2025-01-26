@@ -11,12 +11,11 @@ import {
   faSwift,
   faRust,
   faGolang,
-  faCss,
   faAngular,
   faReact,
   faFlutter,
   faBootstrap,
-  faCodiepie,
+  faDartLang,
 } from "@fortawesome/free-brands-svg-icons";
 
 const languages = [
@@ -26,16 +25,15 @@ const languages = [
   { name: "CSS", icon: faCss3Alt, color: "#1572B6" },
   { name: "Angular", icon: faAngular, color: "#DD0031" },
   { name: "React", icon: faReact, color: "#61DAFB" },
-  { name: "SQL", icon: faCodiepie, color: "#003B57" },
+  { name: "C", customIcon: "C", color: "#555555" },
   { name: "Bootstrap", icon: faBootstrap, color: "#7952B3" },
   { name: "Java", icon: faJava, color: "#007396" },
-  { name: "C++", icon: faCodiepie },
+  { name: "C++", customIcon: "C++", color: "#00599C" },
   { name: "Go", icon: faGolang, color: "#00ADD8" },
   { name: "PHP", icon: faPhp, color: "#777BB4" },
   { name: "Swift", icon: faSwift, color: "#FA7343" },
-  { name: "Kotlin", icon: faCodiepie },
   { name: "Rust", icon: faRust, color: "#000000" },
-  { name: "Dart", icon: faCodiepie, color: "#0175C2" },
+  { name: "Dart", icon: faDartLang, color: "#0175C2" },
   { name: "Flutter", icon: faFlutter, color: "#02569B" },
   { name: "C#", customIcon: "C#", color: "#8A2BE2" },
 ];
@@ -66,6 +64,9 @@ const ScriptsForm = ({ onClose, onSubmit }) => {
     }
   };
 
+  const selectedLanguage = languages.find(
+    (lang) => lang.name === scriptData.language
+  );
   return (
     <div className="task-form-overlay">
       <div className="task-form-container">
@@ -107,38 +108,45 @@ const ScriptsForm = ({ onClose, onSubmit }) => {
           <div className="form-group">
             <label htmlFor="language">Language</label>
             <div className="language-select-container">
-              <select
-                id="language"
-                value={scriptData.language}
-                onChange={(e) =>
-                  setScriptData({
-                    ...scriptData,
-                    language: e.target.value,
-                  })
-                }
-              >
-                {languages.map(({ name }) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              {languages.find((lang) => lang.name === scriptData.language)
-                ?.icon && (
-                <FontAwesomeIcon
-                  icon={
-                    languages.find((lang) => lang.name === scriptData.language)
-                      .icon
+              <div className="language-select-wrapper">
+                <select
+                  id="language"
+                  value={scriptData.language}
+                  onChange={(e) =>
+                    setScriptData({
+                      ...scriptData,
+                      language: e.target.value,
+                    })
                   }
-                  style={{
-                    color: languages.find(
-                      (lang) => lang.name === scriptData.language
-                    )?.color,
-                    fontSize: "1rem",
-                  }}
-                  className="language-icon"
-                />
-              )}
+                >
+                  {languages.map(({ name }) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                {selectedLanguage?.customIcon ? (
+                  <span
+                    className="language-icon"
+                    style={{
+                      color: selectedLanguage.color,
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {selectedLanguage.customIcon}
+                  </span>
+                ) : (
+                  <FontAwesomeIcon
+                    icon={selectedLanguage?.icon}
+                    className="language-icon"
+                    style={{
+                      color: selectedLanguage?.color,
+                      fontSize: "1rem",
+                    }}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
