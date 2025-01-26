@@ -131,6 +131,34 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
         <>
           <h3 className="task-title">{task.title}</h3>
           <div className="task-actions">
+            <button
+              className="status-btn"
+              onClick={() => {
+                const statusProgression = {
+                  Pending: "In Progress",
+                  "In Progress": "Completed",
+                  Completed: "Pending",
+                };
+                const newStatus = statusProgression[task.status];
+                onUpdate({ ...task, status: newStatus });
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+                style={{ width: "1.25rem", height: "1.25rem", color: "#666" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                />
+              </svg>
+            </button>
             <button className="edit-btn" onClick={() => setIsEditing(true)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -13,7 +13,7 @@ const languages = [
   { name: "React", color: "#61DAFB" },
   { name: "C", color: "#555555" },
   { name: "Bootstrap", color: "#7952B3" },
-  { name: "Java", color: "#007396" },
+  { name: "Java", color: "#2C241B" },
   { name: "C++", color: "#00599C" },
   { name: "Go", color: "#00ADD8" },
   { name: "PHP", color: "#777BB4" },
