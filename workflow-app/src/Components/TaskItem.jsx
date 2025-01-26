@@ -133,14 +133,35 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
           <div className="task-actions">
             <button
               className="status-btn"
-              onClick={() => {
+              onClick={async () => {
                 const statusProgression = {
                   Pending: "In Progress",
                   "In Progress": "Completed",
                   Completed: "Pending",
                 };
                 const newStatus = statusProgression[task.status];
-                onUpdate({ ...task, status: newStatus });
+
+                try {
+                  const response = await fetch(
+                    `http://localhost:8080/api/tasks/${task.id}/status`,
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ status: newStatus }),
+                    }
+                  );
+
+                  if (!response.ok) {
+                    throw new Error("Failed to update task status");
+                  }
+
+                  const updatedTask = await response.json();
+                  onUpdate(updatedTask);
+                } catch (error) {
+                  console.error("Error updating task status:", error);
+                }
               }}
             >
               <svg

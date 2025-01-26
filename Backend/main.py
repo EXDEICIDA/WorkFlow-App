@@ -68,6 +68,20 @@ def mark_task_completed(task_id):
         return jsonify({"error": str(e)}), 500
     
 
+@app.route('/api/tasks/<int:task_id>/status', methods=['PUT'])
+def update_task_status(task_id):
+    # Update the status of a task
+    try:
+        data = request.get_json()
+        if not data or 'status' not in data:
+            return jsonify({"error": "Status is required"}), 400
+        
+        task = task_manager.set_status(task_id, data['status'])
+        return jsonify(task), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 # Script operations routes 
 
@@ -110,6 +124,8 @@ def delete_script(script_id):
         return jsonify(script), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
 
 
 if __name__ == '__main__':
