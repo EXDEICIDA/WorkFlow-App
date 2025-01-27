@@ -1,0 +1,79 @@
+/* SearchButton.css */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  width: 40px;
+  height: 40px;
+}
+
+.search-wrapper.open {
+  width: 256px;
+}
+
+.search-button {
+  position: relative; /* Added for icon positioning */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background-color: #333;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+  padding: 0;
+}
+
+.search-button:hover {
+  background-color: #444;
+}
+
+.search-button.open {
+  border-radius: 4px 0 0 4px;
+}
+
+.search-icon {
+  position: absolute; /* Added for precise centering */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Perfect centering */
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.search-input {
+  height: 40px;
+  background-color: #1e1e1e;
+  color: white;
+  border: none;
+  outline: none;
+  padding: 0;
+  width: 0;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  -webkit-appearance: none; /* Remove default input styling */
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.search-input.open {
+  width: 100%;
+  opacity: 1;
+  padding: 0 16px;
+  border-radius: 0 4px 4px 0;
+}
+
+.search-input::placeholder {
+  color: #888;
+}

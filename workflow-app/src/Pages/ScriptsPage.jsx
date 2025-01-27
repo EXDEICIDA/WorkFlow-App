@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ScriptsForm from "../Components/ScriptForm";
+import SearchButton from "../Components/SearchButton";
 import "./ScriptsPage.css";
 
 const API_BASE_URL = "http://localhost:8080/api/scripts";
@@ -85,6 +86,7 @@ const ScriptsPage = () => {
       <div className="header-container">
         <h1>Scripts</h1>
         <div className="header-actions">
+          <SearchButton />
           <div className="language-filter-wrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
