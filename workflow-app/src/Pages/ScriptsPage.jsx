@@ -46,12 +46,11 @@ const ScriptsPage = () => {
     }
   };
 
-  // Combined date sorting and filter handling
-  const handleDateSortChange = (e, scriptsToSort, setScripts) => {
+  const handleDateSortChange = (e) => {
     const sortOrder = e.target.value;
     setDateSort(sortOrder);
 
-    const sortedScripts = [...scriptsToSort].sort((a, b) => {
+    const sortedScripts = [...scripts].sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
       return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
@@ -71,9 +70,15 @@ const ScriptsPage = () => {
     }
   };
 
-  const filteredScripts = selectedLanguage
-    ? scripts.filter((script) => script.language === selectedLanguage)
-    : scripts;
+  const filteredScripts = [...scripts]
+    .filter((script) =>
+      selectedLanguage ? script.language === selectedLanguage : true
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.createdat);
+      const dateB = new Date(b.createdat);
+      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
   return (
     <div className="scripts-container">
@@ -125,7 +130,7 @@ const ScriptsPage = () => {
             </svg>
             <select
               value={dateSort}
-              onChange={(e) => handleDateSortChange(e, scripts, setScripts)}
+              onChange={(e) => handleDateSortChange(e)}
               className="date-filter"
             >
               <option value="newest">Newest First</option>
