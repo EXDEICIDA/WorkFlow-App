@@ -45,6 +45,29 @@ class ScriptsManager:
             return {"id": script_id, "message": "Script deleted successfully"}
         except Exception as e:
             raise Exception(f"Failed to delete script: {str(e)}")
+        
+
+
+    # TODO: Implement the optimization methods # type: ignore
+    def edit_script(self, script_id, title, description, code, language):
+        """Edit a script in the database."""
+        try:
+            script_data = {
+                "title": title,
+                "description": description,
+                "code": code,
+                "language": language
+            }
+        
+            response = self._client.table('scripts').update(script_data).eq('id', script_id).execute()
+            
+            if not response.data:
+                raise Exception("Script not found or already deleted")
+                
+            return response.data[0]
+            
+        except Exception as e:
+            raise Exception(f"Failed to edit script: {str(e)}")    
     
 
 

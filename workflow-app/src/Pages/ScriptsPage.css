@@ -159,6 +159,25 @@ body[data-sidebar="collapsed"] .scripts-container {
   padding: 0.5rem;
   border-radius: 4px;
 }
+.date-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-filter-icon {
+  width: 24px;
+  height: 24px;
+  color: #888;
+}
+.date-filter {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
 .language-filter-wrapper {
   display: flex;
