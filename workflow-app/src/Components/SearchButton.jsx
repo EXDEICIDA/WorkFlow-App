@@ -1,12 +1,20 @@
-// SearchButton.jsx
 import React, { useState } from "react";
 import "./SearchButton.css";
+import PropTypes from "prop-types";
 
-const SearchButton = () => {
+const SearchButton = ({ value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSearch = () => {
     setIsOpen(!isOpen);
+    if (!isOpen) {
+      // Reset search when closing
+      onChange("");
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    onChange(e.target.value);
   };
 
   return (
@@ -34,12 +42,19 @@ const SearchButton = () => {
 
         <input
           type="text"
-          placeholder="Type to search..."
+          value={value}
+          onChange={handleSearchChange}
+          placeholder="Search scripts..."
           className={`search-input ${isOpen ? "open" : ""}`}
         />
       </div>
     </div>
   );
+};
+
+SearchButton.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 export default SearchButton;

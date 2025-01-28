@@ -31,11 +31,15 @@ const ScriptsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [dateSort, setDateSort] = useState("newest");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchScripts();
   }, []);
 
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+  };
   const fetchScripts = async () => {
     try {
       const response = await axios.get(API_BASE_URL);
@@ -73,6 +77,9 @@ const ScriptsPage = () => {
 
   const filteredScripts = [...scripts]
     .filter((script) =>
+      script.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((script) =>
       selectedLanguage ? script.language === selectedLanguage : true
     )
     .sort((a, b) => {
@@ -87,7 +94,7 @@ const ScriptsPage = () => {
         <h1>Scripts</h1>
         <div className="header-actions">
           <div className="search-button-wrapper">
-            <SearchButton />
+            <SearchButton value={searchTerm} onChange={handleSearch} />
           </div>
           <div className="language-filter-wrapper">
             <svg
