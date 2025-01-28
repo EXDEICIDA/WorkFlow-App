@@ -179,6 +179,19 @@ body[data-sidebar="collapsed"] .scripts-container {
   cursor: pointer;
 }
 
+/* Style for the search button container */
+.search-button-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: -1rem;
+  display: inline-block;
+}
+
 .language-filter-wrapper {
   display: flex;
   align-items: center;

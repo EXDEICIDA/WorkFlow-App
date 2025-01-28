@@ -86,7 +86,9 @@ const ScriptsPage = () => {
       <div className="header-container">
         <h1>Scripts</h1>
         <div className="header-actions">
-          <SearchButton />
+          <div className="search-button-wrapper">
+            <SearchButton />
+          </div>
           <div className="language-filter-wrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
