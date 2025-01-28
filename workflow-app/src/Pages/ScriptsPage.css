@@ -76,10 +76,20 @@ body[data-sidebar="collapsed"] .scripts-container {
   background-color: #8b6d3c;
   color: white;
   border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .run-button:hover {
   background-color: #9d7b44;
+}
+
+.run-button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
 }
 
 .edit-button {
