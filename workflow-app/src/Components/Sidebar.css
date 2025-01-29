@@ -68,6 +68,7 @@
   position: absolute;
   left: 5px; /* Reduced from 12px */
   top: 50%;
+  margin-left: -92px;
   transform: translateY(-50%); /* Centers icon vertically */
   pointer-events: none;
 }
@@ -79,7 +80,7 @@
   border: none;
   color: #fff;
   font-size: 0.9rem;
-  text-indent: 10px;
+  text-indent: 15px;
   padding: 0 15px 0 40px; /* Increased left padding from 32px to 40px */
   outline: none;
 }

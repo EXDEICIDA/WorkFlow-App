@@ -1,17 +1,32 @@
+// CodeCard.jsx
 import { useState } from "react";
-import PropTypes from "prop-types";
 import { Check, Copy, ChevronDown } from "lucide-react";
+import "./CodeCard.css";
+import PropTypes from "prop-types";
+
+const languages = [
+  { name: "JavaScript", color: "#F7DF1E" },
+  { name: "Python", color: "#3776AB" },
+  { name: "HTML", color: "#E34F26" },
+  { name: "CSS", color: "#1572B6" },
+  { name: "Angular", color: "#DD0031" },
+  { name: "React", color: "#61DAFB" },
+  { name: "C", color: "#555555" },
+  { name: "Bootstrap", color: "#7952B3" },
+  { name: "Java", color: "#2C241B" },
+  { name: "C++", color: "#00599C" },
+  { name: "Go", color: "#00ADD8" },
+  { name: "PHP", color: "#777BB4" },
+  { name: "Swift", color: "#FA7343" },
+  { name: "Rust", color: "#000000" },
+  { name: "Flutter", color: "#02569B" },
+  { name: "Dart", color: "#0175C2" },
+  { name: "C#", color: "#239120" },
+];
 
 const CodeCard = ({ code, language, onLanguageChange }) => {
   const [showLanguages, setShowLanguages] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  const languages = [
-    { name: "JavaScript", color: "#F7DF1E" },
-    { name: "Python", color: "#3776AB" },
-    { name: "HTML", color: "#E34F26" },
-    { name: "CSS", color: "#1572B6" },
-  ];
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -19,38 +34,40 @@ const CodeCard = ({ code, language, onLanguageChange }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const currentLang = languages.find((l) => l.name === language) || {
+    name: language,
+    color: "#888",
+  };
+
   return (
-    <div className="w-full bg-zinc-900 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 bg-zinc-800 border-b border-zinc-700">
-        <div className="relative">
+    <div className="code-card">
+      <div className="code-card-header">
+        <div className="language-selector">
           <button
             onClick={() => setShowLanguages(!showLanguages)}
-            className="flex items-center gap-2 text-zinc-300 hover:text-white"
+            className="language-button"
           >
             <div
-              className="w-3 h-3 rounded-full"
-              style={{
-                backgroundColor:
-                  languages.find((l) => l.name === language)?.color || "#888",
-              }}
+              className="language-dot"
+              style={{ backgroundColor: currentLang.color }}
             />
             <span>{language}</span>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="chevron-icon" />
           </button>
 
           {showLanguages && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-zinc-800 rounded-md shadow-lg border border-zinc-700">
+            <div className="language-dropdown">
               {languages.map((lang) => (
                 <button
                   key={lang.name}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
+                  className="language-option"
                   onClick={() => {
                     onLanguageChange(lang.name);
                     setShowLanguages(false);
                   }}
                 >
                   <div
-                    className="w-2 h-2 rounded-full"
+                    className="language-dot small"
                     style={{ backgroundColor: lang.color }}
                   />
                   {lang.name}
@@ -60,20 +77,13 @@ const CodeCard = ({ code, language, onLanguageChange }) => {
           )}
         </div>
 
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-zinc-400 hover:text-white"
-        >
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
+        <button onClick={handleCopy} className="copy-button">
+          {copied ? <Check className="icon" /> : <Copy className="icon" />}
         </button>
       </div>
 
-      <div className="p-4 font-mono text-sm text-zinc-300 overflow-x-auto">
-        <pre className="whitespace-pre-wrap">{code}</pre>
+      <div className="code-content">
+        <pre>{code}</pre>
       </div>
     </div>
   );
