@@ -228,3 +228,17 @@ body[data-sidebar="collapsed"] .scripts-container {
   color: #888;
   font-size: 0.9rem;
 }
+.script-detail {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.script-card {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.script-card:hover {
+  background-color: #333;
+}

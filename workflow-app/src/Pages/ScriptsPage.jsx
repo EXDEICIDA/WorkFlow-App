@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ScriptsForm from "../Components/ScriptForm";
 import SearchButton from "../Components/SearchButton";
+import CodeCard from "../Components/CodeCard";
+import { ChevronLeft } from "lucide-react";
+
 import "./ScriptsPage.css";
 
 const API_BASE_URL = "http://localhost:8080/api/scripts";
@@ -32,6 +35,7 @@ const ScriptsPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [dateSort, setDateSort] = useState("newest");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedScript, setSelectedScript] = useState(null);
 
   useEffect(() => {
     fetchScripts();
@@ -49,6 +53,14 @@ const ScriptsPage = () => {
       console.error("Error fetching scripts:", error);
       setIsLoading(false);
     }
+  };
+  //new function
+  const handleScriptClick = (script) => {
+    setSelectedScript(script);
+  };
+
+  const handleBackClick = () => {
+    setSelectedScript(null);
   };
 
   const handleDateSortChange = (e) => {
@@ -75,6 +87,14 @@ const ScriptsPage = () => {
     }
   };
 
+  const handleLanguageChange = (newLanguage) => {
+    if (selectedScript) {
+      const updatedScript = { ...selectedScript, language: newLanguage };
+      setSelectedScript(updatedScript);
+      // Here you would typically also update the script in your backend
+    }
+  };
+
   const filteredScripts = [...scripts]
     .filter((script) =>
       script.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -90,144 +110,183 @@ const ScriptsPage = () => {
 
   return (
     <div className="scripts-container">
-      <div className="header-container">
-        <h1>Scripts</h1>
-        <div className="header-actions">
-          <div className="search-button-wrapper">
-            <SearchButton value={searchTerm} onChange={handleSearch} />
+      {!selectedScript ? (
+        // Original List View
+        <>
+          <div className="header-container">
+            <h1>Scripts</h1>
+            <div className="header-actions">
+              <div className="search-button-wrapper">
+                <SearchButton value={searchTerm} onChange={handleSearch} />
+              </div>
+              <div className="language-filter-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="language-filter-icon"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+                  />
+                </svg>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="language-filter"
+                >
+                  <option value="">All Languages</option>
+                  {languages.map((lang) => (
+                    <option key={lang.name} value={lang.name}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="date-filter-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="date-filter-icon"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
+                  />
+                </svg>
+                <select
+                  value={dateSort}
+                  onChange={(e) => handleDateSortChange(e)}
+                  className="date-filter"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                </select>
+              </div>
+              <button className="add-button" onClick={() => setShowForm(true)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="add-icon"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div className="language-filter-wrapper">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="language-filter-icon"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
-              />
-            </svg>
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="language-filter"
-            >
-              <option value="">All Languages</option>
-              {languages.map((lang) => (
-                <option key={lang.name} value={lang.name}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="date-filter-wrapper">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="date-filter-icon"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
-              />
-            </svg>
-            <select
-              value={dateSort}
-              onChange={(e) => handleDateSortChange(e)}
-              className="date-filter"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-            </select>
-          </div>
-          <button className="add-button" onClick={() => setShowForm(true)}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="add-icon"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
 
-      {showForm && (
-        <ScriptsForm
-          isOpen={showForm}
-          onClose={() => setShowForm(false)}
-          onSubmit={handleAddScript}
-        />
-      )}
-
-      <div className="scripts-section">
-        <div className="scripts-grid">
-          {isLoading ? (
-            <div>Loading scripts...</div>
-          ) : (
-            filteredScripts.map((script) => {
-              const languageData = languages.find(
-                (lang) => lang.name === script.language
-              );
-
-              return (
-                <div key={script.id} className="script-card">
-                  <div className="script-info">
-                    <h3 className="script-title">{script.title}</h3>
-                    <p className="script-description">{script.description}</p>
-                    <div className="script-status">
-                      <span
-                        className="language-dot"
-                        style={{
-                          backgroundColor: languageData
-                            ? languageData.color
-                            : "#888",
-                          marginRight: "0.2rem",
-                        }}
-                      />
-                      <span className="language-name">{script.language}</span>
-                    </div>
-                  </div>
-                  <div className="script-controls">
-                    <button className="script-button edit-button">Edit</button>
-                    <button className="script-button run-button">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              );
-            })
+          {showForm && (
+            <ScriptsForm
+              isOpen={showForm}
+              onClose={() => setShowForm(false)}
+              onSubmit={handleAddScript}
+            />
           )}
+
+          <div className="scripts-section">
+            <div className="scripts-grid">
+              {isLoading ? (
+                <div>Loading scripts...</div>
+              ) : (
+                filteredScripts.map((script) => {
+                  const languageData = languages.find(
+                    (lang) => lang.name === script.language
+                  );
+
+                  return (
+                    <div
+                      key={script.id}
+                      className="script-card"
+                      onClick={() => handleScriptClick(script)}
+                    >
+                      <div className="script-info">
+                        <h3 className="script-title">{script.title}</h3>
+                        <p className="script-description">
+                          {script.description}
+                        </p>
+                        <div className="script-status">
+                          <span
+                            className="language-dot"
+                            style={{
+                              backgroundColor: languageData
+                                ? languageData.color
+                                : "#888",
+                              marginRight: "0.2rem",
+                            }}
+                          />
+                          <span className="language-name">
+                            {script.language}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="script-controls">
+                        <button className="script-button edit-button">
+                          Edit
+                        </button>
+                        <button className="script-button run-button">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-6"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        // Detail View
+        <div className="script-detail">
+          <div className="flex items-center gap-4 mb-6">
+            <button
+              onClick={handleBackClick}
+              className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Back to Scripts
+            </button>
+          </div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">
+              {selectedScript.title}
+            </h2>
+            <p className="text-zinc-400 mb-4">{selectedScript.description}</p>
+          </div>
+          <CodeCard
+            code={selectedScript.code}
+            language={selectedScript.language}
+            onLanguageChange={handleLanguageChange}
+          />
         </div>
-      </div>
+      )}
     </div>
   );
 };
