@@ -7,28 +7,27 @@ import SettingsPage from "./Pages/SettingsPage";
 import ProfilePage from "./Pages/ProfilePage";
 import CanvasPage from "./Pages/CanvasPage";
 import ScriptsPage from "./Pages/ScriptsPage";
+import AuthPage from "./Pages/Auth/AuthPage";
+import Layout from "./Components/Layout";
 
 import "./App.css";
 
 function App() {
   return (
     <Router>
-      <div className="app">
-        <Sidebar />
-        <main className="main-content">
-          <Routes>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/canvas" element={<CanvasPage />} />
-            <Route path="/scripts" element={<ScriptsPage />} />
-            <Route path="/tasks" element={<TasksPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
-        </main>
-      </div>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<AuthPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/canvas" element={<CanvasPage />} />
+          <Route path="/scripts" element={<ScriptsPage />} />
+          <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Routes>
+      </Layout>
     </Router>
   );
 }
-
 export default App;

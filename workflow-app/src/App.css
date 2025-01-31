@@ -46,3 +46,7 @@ body {
 .page-container h1 {
   margin-bottom: 20px;
 }
+.main-content.no-sidebar {
+  margin-left: 0;
+  width: 100%;
+}
