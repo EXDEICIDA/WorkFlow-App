@@ -110,7 +110,8 @@ body[data-sidebar="collapsed"] .scripts-container {
 }
 
 .delete-button:hover {
-  background-color: #333;
+  background-color: #2a2a2a;
+  color: #dc2626;
 }
 
 .script-status {

@@ -2,13 +2,15 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from Classes.Tasks import TaskManager
 from Classes.Scripts import ScriptsManager
+from auth.AuthConfig import Auth
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize the TaskManager class
+# Initializing The Manager Classes 
 task_manager = TaskManager()
 script_manager = ScriptsManager()
+auth_manager = Auth()
 
 # Defining the API routes based on task operations
 @app.route('/api/tasks', methods=['POST'])
@@ -124,7 +126,10 @@ def delete_script(script_id):
         return jsonify(script), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+
+   
+# Auth Routes For The App
 
 
 
