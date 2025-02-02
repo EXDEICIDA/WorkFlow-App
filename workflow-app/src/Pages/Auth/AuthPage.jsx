@@ -1,14 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import "./AuthPage.css";
 
-const SignUpPage = () => {
+const AuthPage = () => {
+  const [showLogin, setShowLogin] = useState(false);
+  const handleLoginClick = () => {
+    console.log("Login clicked, current state:", showLogin); // Debug log
+    setShowLogin(true);
+  };
+
   return (
     <div style={{ width: "100%", overflow: "hidden" }}>
       <div className="signup-container">
         {/* Left Section */}
         <div className="left-section">
           <div className="brand">Acme Inc</div>
-
           <div className="testimonial">
             <blockquote>
               This library has saved me countless hours of work and helped me
@@ -22,7 +27,9 @@ const SignUpPage = () => {
         <div className="right-section">
           <div className="header">
             <div className="mobile-brand">Acme Inc</div>
-            <button className="login-button">Login</button>
+            <button className="login-button" onClick={() => setShowLogin(true)}>
+              Login
+            </button>
           </div>
 
           <div className="form-container">
@@ -67,9 +74,63 @@ const SignUpPage = () => {
             </p>
           </div>
         </div>
+
+        {/* Login Form */}
+        <div className={`login-slide ${showLogin ? "show" : ""}`}>
+          <div className="login-content">
+            <h1 className="login-title">Login</h1>
+            <p className="login-subtitle">
+              Enter your email below to login to your account
+            </p>
+
+            <form className="login-form">
+              <input
+                type="email"
+                placeholder="m@example.com"
+                className="login-input"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="login-input"
+              />
+              <button
+                onClick={() => setShowLogin(false)}
+                type="submit"
+                className="login-submit-button"
+              >
+                Login
+              </button>
+            </form>
+
+            <div className="login-alt-container">
+              <button className="login-google-button">Login with Google</button>
+            </div>
+
+            <p className="forgot-password">
+              <a href="#" className="forgot-password-link">
+                Forgot your password?
+              </a>
+            </p>
+
+            <div className="switch-signup">
+              Don&apos;t have an account?
+              <button
+                onClick={() => setShowLogin(false)}
+                className="switch-signup-link"
+              >
+                Sign up
+              </button>
+            </div>
+          </div>
+
+          <button onClick={() => setShowLogin(false)} className="close-button">
+            ✕
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default SignUpPage;
+export default AuthPage;

@@ -1,4 +1,3 @@
-/* Reset the base styles first */
 * {
   margin: 0;
   padding: 0;
@@ -11,17 +10,18 @@ html {
   height: 100%;
   overflow-x: hidden;
 }
+
 .signup-container {
   display: flex;
   min-height: 100vh;
-  width: 100vw; /* Use viewport width */
+  width: 100vw;
   background-color: black;
-  position: relative; /* Add this */
-  overflow: hidden; /* Add this */
+  position: relative;
+  overflow: hidden;
 }
 
 .left-section {
-  flex: 1; /* Change to flex: 1 */
+  flex: 1;
   background-color: #18181b;
   padding: 2rem;
   display: none;
@@ -57,12 +57,14 @@ html {
 }
 
 .right-section {
-  flex: 1; /* Change to flex: 1 */
+  flex: 1;
   background-color: black;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   width: 100%;
+  /* Added to center the content vertically */
+  justify-content: center;
 }
 
 @media (min-width: 768px) {
@@ -76,6 +78,11 @@ html {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4rem;
+  /* Position header absolutely to maintain centering of form */
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  left: 2rem;
 }
 
 .mobile-brand {
@@ -106,7 +113,10 @@ html {
   width: 100%;
   margin: 0 auto;
   padding: 0 1rem;
+  /* Center text content */
+  text-align: center;
 }
+
 .form-container h1 {
   font-size: 2rem;
   font-weight: bold;
@@ -123,6 +133,8 @@ html {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  /* Add some space between form and header text */
+  margin-top: 2rem;
 }
 
 .input-field {
@@ -198,4 +210,163 @@ html {
 
 .terms-link:hover {
   color: white;
+}
+
+/* Add these new styles for the login slide */
+.login-slide {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100vh;
+  background-color: black;
+  transition: all 0.3s ease-in-out;
+  padding: 2rem;
+  z-index: 1000;
+  transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+  .login-slide {
+    width: 50%;
+  }
+}
+
+.login-slide.show {
+  right: 0;
+  transform: translateX(0);
+}
+
+.login-content {
+  max-width: 400px;
+  margin: 0 auto;
+  padding-top: 4rem;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.login-subtitle {
+  color: #a1a1aa;
+  margin-bottom: 2rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #18181b;
+  border-radius: 0.375rem;
+  border: 1px solid #27272a;
+  color: white;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.login-input::placeholder {
+  color: #a1a1aa;
+}
+
+.login-input:focus {
+  border-color: #71717a;
+}
+
+.login-submit-button {
+  width: 100%;
+  background-color: white;
+  color: black;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.login-submit-button:hover {
+  background-color: #e5e5e5;
+}
+
+.login-alt-container {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.login-google-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #18181b;
+  color: white;
+  border-radius: 0.375rem;
+  border: 1px solid #27272a;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-google-button:hover {
+  background-color: #27272a;
+}
+
+.forgot-password {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.forgot-password-link {
+  color: #a1a1aa;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-password-link:hover {
+  color: white;
+}
+
+.switch-signup {
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.switch-signup-link {
+  color: white;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.switch-signup-link:hover {
+  color: #e5e5e5;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: #a1a1aa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: color 0.3s;
+}
+
+.close-button:hover {
+  color: white;
+}
+.close-button:focus {
+  outline: none;
 }
