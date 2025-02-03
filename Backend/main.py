@@ -129,7 +129,64 @@ def delete_script(script_id):
 
 
    
-# Auth Routes For The App
+# Auth Routes/Endpoints For User Authentication
+@app.route('/api/auth/register', methods=['POST'])
+def register_user():
+    try:
+        data = request.get_json()
+        if not data or not data.get('username') or not data.get('password'):
+            return jsonify({"error": "Username and password are required"}), 400
+        
+        user = auth_manager.register(
+            username=data.get('username'),
+            password=data.get('password'),
+            email=data.get('email', '')
+        )
+        return jsonify(user), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def login_user():
+    try:
+        data = request.get_json()
+        if not data or not data.get('username') or not data.get('password'):
+            return jsonify({"error": "Username and password are required"}), 400
+        
+        token = auth_manager.login(data.get('username'), data.get('password'))
+        if not token:
+            return jsonify({"error": "Invalid credentials"}), 401
+        
+        return jsonify({"token": token}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout_user():
+    try:
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({"error": "Token required"}), 400
+        
+        result = auth_manager.logout(token)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/auth/user', methods=['GET'])
+def get_user():
+    try:
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({"error": "Token required"}), 400
+        
+        user = auth_manager.get_user_from_token(token)
+        if not user:
+            return jsonify({"error": "Invalid token"}), 401
+        
+        return jsonify(user), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

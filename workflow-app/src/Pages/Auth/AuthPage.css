@@ -221,9 +221,13 @@ html {
   height: 100vh;
   background-color: black;
   transition: all 0.3s ease-in-out;
-  padding: 2rem;
   z-index: 1000;
   transform: translateX(0);
+  /* Add these properties to create a flex container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Remove the padding since we'll handle spacing in login-content */
 }
 
 @media (min-width: 768px) {
@@ -238,9 +242,16 @@ html {
 }
 
 .login-content {
+  /* Modify these properties for better positioning */
   max-width: 400px;
-  margin: 0 auto;
-  padding-top: 4rem;
+  width: 100%;
+  /* Remove margin and padding-top since we're using flex centering */
+  padding: 0 2rem;
+  /* Add some space from top and bottom */
+  margin: 2rem 0;
+  /* Optional: limit the height to ensure it doesn't get too tall */
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
 }
 
 .login-title {
@@ -336,11 +347,12 @@ html {
   font-size: 0.875rem;
   text-align: center;
   margin-top: 2rem;
+  outline: none;
 }
 
 .switch-signup-link {
   color: white;
-  text-decoration: underline;
+
   margin-left: 0.25rem;
   background: none;
   border: none;
@@ -350,6 +362,11 @@ html {
 
 .switch-signup-link:hover {
   color: #e5e5e5;
+  text-decoration: underline;
+}
+
+.switch-signup-link:focus {
+  outline: none; /* This specifically removes the outline on focus */
 }
 
 .close-button {
