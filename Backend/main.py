@@ -130,19 +130,25 @@ def delete_script(script_id):
 
    
 # Auth Routes/Endpoints For User Authentication
+
 @app.route('/api/auth/register', methods=['POST'])
 def register_user():
     try:
         data = request.get_json()
-        if not data or not data.get('username') or not data.get('password'):
-            return jsonify({"error": "Username and password are required"}), 400
+        if not data or not data.get('username') or not data.get('password') or not data.get('email'):
+            return jsonify({"error": "Username, email, and password are required"}), 400
         
-        user = auth_manager.register(
-            username=data.get('username'),
+        # Changed from auth_manager.register to auth_manager.sign_up
+        result = auth_manager.sign_up(
+            email=data.get('email'),
             password=data.get('password'),
-            email=data.get('email', '')
+            username=data.get('username')
         )
-        return jsonify(user), 201
+        
+        if "error" in result:
+            return jsonify(result), 400
+            
+        return jsonify(result), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -150,14 +156,19 @@ def register_user():
 def login_user():
     try:
         data = request.get_json()
-        if not data or not data.get('username') or not data.get('password'):
-            return jsonify({"error": "Username and password are required"}), 400
+        if not data or not data.get('email') or not data.get('password'):
+            return jsonify({"error": "Email and password are required"}), 400
         
-        token = auth_manager.login(data.get('username'), data.get('password'))
-        if not token:
-            return jsonify({"error": "Invalid credentials"}), 401
+        # Changed from auth_manager.login to match the Auth class implementation
+        result = auth_manager.login(
+            email=data.get('email'),
+            password=data.get('password')
+        )
         
-        return jsonify({"token": token}), 200
+        if "error" in result:
+            return jsonify(result), 401
+            
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

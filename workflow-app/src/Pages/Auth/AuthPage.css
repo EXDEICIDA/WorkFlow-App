@@ -100,12 +100,20 @@ html {
 
 .login-button {
   margin-left: auto;
-  color: #a1a1aa;
-  transition: color 0.3s;
+  padding: 8px 16px;
+  color: #71717a;
+  font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .login-button:hover {
-  color: white;
+  color: #ffffff;
+  background-color: #27272a;
 }
 
 .form-container {
@@ -242,10 +250,9 @@ html {
 }
 
 .login-content {
-  /* Modify these properties for better positioning */
   max-width: 400px;
   width: 100%;
-  /* Remove margin and padding-top since we're using flex centering */
+
   padding: 0 2rem;
   /* Add some space from top and bottom */
   margin: 2rem 0;
@@ -342,33 +349,71 @@ html {
   color: white;
 }
 
-.switch-signup {
-  color: #a1a1aa;
-  font-size: 0.875rem;
+.switch-form {
+  margin: 1.5rem 0;
   text-align: center;
-  margin-top: 2rem;
-  outline: none;
+  font-size: 0.875rem;
+  color: #71717a;
 }
 
-.switch-signup-link {
-  color: white;
+.switch-form p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+}
 
-  margin-left: 0.25rem;
+.switch-link {
   background: none;
   border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: #3b82f6;
   cursor: pointer;
-  transition: color 0.3s;
+  position: relative;
+  padding-bottom: 2px;
 }
 
-.switch-signup-link:hover {
-  color: #e5e5e5;
-  text-decoration: underline;
+.switch-link::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #3b82f6;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.2s ease;
 }
 
-.switch-signup-link:focus {
-  outline: none; /* This specifically removes the outline on focus */
+.switch-link:hover::after,
+.switch-link:focus::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
 }
 
+.switch-link:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .switch-form {
+    color: #a1a1aa;
+  }
+
+  .switch-link {
+    color: #60a5fa;
+  }
+
+  .switch-link::after {
+    background-color: #60a5fa;
+  }
+}
 .close-button {
   position: absolute;
   top: 1rem;
@@ -386,4 +431,67 @@ html {
 }
 .close-button:focus {
   outline: none;
+}
+
+/*Brand Logo*/
+.brand-container,
+.mobile-brand-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-logo,
+.mobile-brand-logo {
+  width: 48px;
+  height: 48px;
+}
+
+@media (max-width: 768px) {
+  .brand-container {
+    display: none; /* Hide desktop logo on mobile */
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-brand-container {
+    display: none; /* Hide mobile logo on desktop */
+  }
+}
+
+/* Update left section styling */
+.left-section {
+  flex: 1;
+  background-color: #18181b;
+  padding: 2rem;
+  display: none;
+  position: relative; /* For absolute positioning of logo */
+}
+
+@media (min-width: 768px) {
+  .left-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 50%;
+  }
+}
+
+/* Position the cover logo container absolutely in the center */
+.cover-logo-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cover-logo {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 20px;
 }
