@@ -6,38 +6,27 @@ class Auth:
 
     @staticmethod
     def sign_up(email: str, password: str, username: str):
-        """Registers a new user and saves details in the 'users' table."""
+        """Registers a new user using Supabase Auth."""
         client: Client = DataConfig.get_client()
 
         # Sign up user in Supabase Auth
         auth_response = client.auth.sign_up({
             "email": email, 
-            "password": password
+            "password": password,
+            "options": {
+                "data": {
+                    "full_name": username  # This sets the Display name
+                }
+            }
         })
 
-        user = auth_response.user  # Corrected access
+        user = auth_response.user
         if not user:
             return {"error": "Failed to create user"}
 
-        user_id = user.id  # Corrected access
-        if not user_id:
-            return {"error": "User ID not returned from authentication."}
+        return {"success": "User registered successfully.", "user_id": user.id}
 
-        # Store user details in the 'users' table
-        try:
-            db_response = client.table("users").insert({
-                "id": user_id,
-                "username": username,
-                "email": email
-            }).execute()
-
-            if hasattr(db_response, 'error') and db_response.error:
-                return {"error": str(db_response.error)}
-
-            return {"success": "User registered successfully.", "user_id": user_id}
-        except Exception as e:
-            return {"error": str(e)}
-
+       
     @staticmethod
     def login(email: str, password: str):
         """Authenticates a user and returns session details."""
