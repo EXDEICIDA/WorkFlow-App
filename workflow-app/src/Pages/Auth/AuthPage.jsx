@@ -106,14 +106,6 @@ const AuthPage = () => {
           <div className="cover-logo-container">
             <img src={CoverLogo} alt="Cover Logo" className="cover-logo" />
           </div>
-
-          <div className="testimonial">
-            <blockquote>
-              This library has saved me countless hours of work and helped me
-              deliver stunning designs to my clients faster than ever before.
-            </blockquote>
-            <div className="author">Sofia Davis</div>
-          </div>
         </div>
 
         {/* Right Section */}
