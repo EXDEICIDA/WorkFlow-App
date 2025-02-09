@@ -276,3 +276,31 @@ body[data-sidebar="collapsed"] .canvas-page {
   width: 20px;
   height: 20px;
 }
+
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.drawing-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-items-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* This allows clicks to pass through to canvas */
+}
+
+.canvas-items-layer .canvas-item {
+  pointer-events: auto; /* This re-enables interaction with the items */
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./CanvasPage.css";
+import CanvasItem from "../Components/CanvasItem"; // Adjust the path as necessary
 
 const CanvasPage = () => {
   const [tabs, setTabs] = useState([]);
@@ -10,7 +11,37 @@ const CanvasPage = () => {
   const [zoom, setZoom] = useState(1);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const activeCanvasRef = tabs[activeTabIndex]?.canvasRef || null;
+  const [canvasItems, setCanvasItems] = useState([]);
+  const [connections, setConnections] = useState([]);
+  const [nextItemId, setNextItemId] = useState(1);
 
+  const handleCanvasClick = (e) => {
+    if (e.target === activeCanvasRef?.current) {
+      const rect = e.target.getBoundingClientRect();
+      const x = (e.clientX - rect.left - pan.x) / zoom;
+      const y = (e.clientY - rect.top - pan.y) / zoom;
+
+      const newItem = {
+        id: nextItemId,
+        position: { x, y },
+      };
+
+      setCanvasItems([...canvasItems, newItem]);
+      setNextItemId(nextItemId + 1);
+    }
+  };
+
+  const handleItemPositionChange = (itemId, newPosition) => {
+    setCanvasItems((items) =>
+      items.map((item) =>
+        item.id === itemId ? { ...item, position: newPosition } : item
+      )
+    );
+  };
+
+  const handleConnect = (fromId, toId) => {
+    setConnections([...connections, { from: fromId, to: toId }]);
+  };
   // Add zoom constants
   const MIN_ZOOM = 0.25; // Maximum zoom out (25%)
   const MAX_ZOOM = 2; // Maximum zoom in (200%)
@@ -32,6 +63,35 @@ const CanvasPage = () => {
         setIsSpacePressed(true);
         document.body.style.cursor = "grab";
       }
+    };
+
+    ////methods
+    const handleCanvasClick = (e) => {
+      if (e.target === activeCanvasRef?.current) {
+        const rect = e.target.getBoundingClientRect();
+        const x = (e.clientX - rect.left - pan.x) / zoom;
+        const y = (e.clientY - rect.top - pan.y) / zoom;
+
+        const newItem = {
+          id: nextItemId,
+          position: { x, y },
+        };
+
+        setCanvasItems([...canvasItems, newItem]);
+        setNextItemId(nextItemId + 1);
+      }
+    };
+
+    const handleItemPositionChange = (itemId, newPosition) => {
+      setCanvasItems((items) =>
+        items.map((item) =>
+          item.id === itemId ? { ...item, position: newPosition } : item
+        )
+      );
+    };
+
+    const handleConnect = (fromId, toId) => {
+      setConnections([...connections, { from: fromId, to: toId }]);
     };
 
     const handleKeyUp = (e) => {
@@ -472,8 +532,22 @@ const CanvasPage = () => {
             ref={tab.canvasRef}
             className="drawing-canvas"
             style={{ display: index === activeTabIndex ? "block" : "none" }}
+            onClick={handleCanvasClick}
           />
         ))}
+
+        {/* Add this new div for canvas items */}
+        <div className="canvas-items-layer">
+          {canvasItems.map((item) => (
+            <CanvasItem
+              key={item.id}
+              id={item.id}
+              position={item.position}
+              onConnect={handleConnect}
+              onPositionChange={handleItemPositionChange}
+            />
+          ))}
+        </div>
 
         {/* Show help text only when no tabs exist */}
         {hasNoTabs && (
