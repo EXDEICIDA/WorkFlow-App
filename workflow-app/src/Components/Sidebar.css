@@ -142,3 +142,40 @@
 .sidebar.collapsed + .main-content {
   margin-left: 70px;
 }
+/*Logo*/
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px; /* This prevents layout shift when collapsing */
+}
+
+.flow-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Update existing styles */
+.workspace-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+/* Remove the collapsed state styles since we're hiding the logo completely */
+.sidebar.collapsed .logo-container {
+  width: 0;
+  margin: 0;
+}
+
+/* Ensure the collapse button is properly positioned when sidebar is collapsed */
+.sidebar.collapsed .workspace-title {
+  justify-content: center;
+}

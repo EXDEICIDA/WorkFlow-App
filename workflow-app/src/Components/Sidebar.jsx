@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import FlowCentricLogo from "/src/assets/image.png";
 import "./Sidebar.css";
 
 const Sidebar = () => {
@@ -17,7 +18,18 @@ const Sidebar = () => {
       {/* Header */}
       <div className="sidebar-header">
         <div className="workspace-title">
-          <span>{!isCollapsed && "Workflow"}</span>
+          <div className="logo-container">
+            {!isCollapsed && (
+              <>
+                <img
+                  src={FlowCentricLogo}
+                  alt="Flow-Centric Logo"
+                  className="flow-logo"
+                />
+                <span className="logo-text">Flow-Centric</span>
+              </>
+            )}
+          </div>
           <button className="collapse-btn" onClick={toggleSidebar}>
             {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
           </button>

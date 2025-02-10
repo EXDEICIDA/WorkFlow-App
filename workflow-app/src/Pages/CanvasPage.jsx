@@ -556,15 +556,6 @@ const CanvasPage = () => {
           </div>
         )}
 
-        {/* Show drag help only when a tab exists but not dragging */}
-        {!hasNoTabs && !isDragging && (
-          <div className="canvas-help">
-            <p>Drag from below or double click</p>
-            <p>Space + Drag to pan</p>
-            <p>Ctrl + scroll to zoom</p>
-          </div>
-        )}
-
         <div className="tools-panel">
           <button className="tool-btn">
             <svg
