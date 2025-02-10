@@ -1,75 +1,71 @@
-/* CanvasItem.css */
 .canvas-item {
   position: absolute;
-  width: 200px;
-  height: 120px;
-  background: #2a2a2a;
-  border: 1px solid #3a3a3a;
-  border-radius: 8px;
-  cursor: move;
   user-select: none;
+}
+
+.canvas-item:hover .toolbar {
   display: flex;
-  flex-direction: column;
-  padding: 12px;
-  color: #fff;
+}
+
+.item-wrapper {
+  position: relative;
+}
+
+.toolbar {
+  position: absolute;
+  top: -32px;
+  right: 0;
+  display: none;
+  background-color: #1e1e1e;
+  border-radius: 6px;
+  padding: 4px;
+  gap: 4px;
+  z-index: 10;
+}
+
+.toolbar button {
+  padding: 4px;
+  border-radius: 4px;
+  color: #888;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar button:hover {
+  background-color: #2a2a2a;
+  color: #aaa;
+}
+
+.content-box {
+  min-width: 240px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 198, 10, 0.5);
+  padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.item-content {
-  flex: 1;
-}
-
-.item-content h3 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-}
-
-.item-content p {
-  margin: 0;
+.content-input {
+  width: 100%;
+  background: transparent;
+  color: #e0e0e0;
+  border: none;
+  outline: none;
   font-size: 14px;
-  color: #888;
 }
 
-.connection-point {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #4a4a4a;
-  border: 2px solid #5a5a5a;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.content-text {
+  color: #e0e0e0;
+  min-height: 24px;
+  cursor: text;
+  font-size: 14px;
 }
 
-.connection-point:hover {
-  background: #6a6a6a;
-}
-
-.connection-point.top {
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.connection-point.right {
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.connection-point.bottom {
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.connection-point.left {
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Add to your existing CanvasPage.css */
+/* Canvas container styles */
 .canvas-container {
   position: relative;
   overflow: hidden;
