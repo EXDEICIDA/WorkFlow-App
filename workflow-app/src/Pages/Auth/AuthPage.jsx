@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./AuthPage.css";
 import FlowCentricLogo from "../../assets/image.png";
 import CoverLogo from "../../assets/workflow-app-cover.png";
+import Loader from "../Util/Loader";
 
 const AuthPage = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -102,7 +103,6 @@ const AuthPage = () => {
             />
             <div className="brand">Flow-Centric INC</div>
           </div>
-          {/* Center-positioned cover logo */}
           <div className="cover-logo-container">
             <img src={CoverLogo} alt="Cover Logo" className="cover-logo" />
           </div>
@@ -127,7 +127,18 @@ const AuthPage = () => {
               </div>
             )}
 
-            {!showLogin ? (
+            {loading ? (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "400px", // Adjust this value based on your form height
+                }}
+              >
+                <Loader />
+              </div>
+            ) : !showLogin ? (
               <>
                 <h1>Create an account</h1>
                 <p>Enter your details below to create your account</p>
@@ -160,12 +171,8 @@ const AuthPage = () => {
                     onChange={handleInputChange}
                     required
                   />
-                  <button
-                    type="submit"
-                    className="submit-button"
-                    disabled={loading}
-                  >
-                    {loading ? "Creating Account..." : "Sign Up"}
+                  <button type="submit" className="submit-button">
+                    Sign Up
                   </button>
                 </form>
 
@@ -218,12 +225,8 @@ const AuthPage = () => {
                     onChange={handleInputChange}
                     required
                   />
-                  <button
-                    type="submit"
-                    className="submit-button"
-                    disabled={loading}
-                  >
-                    {loading ? "Logging in..." : "Login"}
+                  <button type="submit" className="submit-button">
+                    Login
                   </button>
                 </form>
 
@@ -248,29 +251,31 @@ const AuthPage = () => {
               </>
             )}
 
-            <div className="switch-form">
-              {showLogin ? (
-                <p>
-                  Don&apos;t have an account?{" "}
-                  <button
-                    onClick={() => setShowLogin(false)}
-                    className="switch-link"
-                  >
-                    Sign up
-                  </button>
-                </p>
-              ) : (
-                <p>
-                  Already have an account?{" "}
-                  <button
-                    onClick={() => setShowLogin(true)}
-                    className="switch-link"
-                  >
-                    Login
-                  </button>
-                </p>
-              )}
-            </div>
+            {!loading && (
+              <div className="switch-form">
+                {showLogin ? (
+                  <p>
+                    Don&apos;t have an account?{" "}
+                    <button
+                      onClick={() => setShowLogin(false)}
+                      className="switch-link"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Already have an account?{" "}
+                    <button
+                      onClick={() => setShowLogin(true)}
+                      className="switch-link"
+                    >
+                      Login
+                    </button>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
