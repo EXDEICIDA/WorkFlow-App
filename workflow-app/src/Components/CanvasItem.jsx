@@ -1,18 +1,51 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Trash2, Copy, RefreshCw, Edit } from "lucide-react";
+import { Trash2, Copy, RefreshCw, Edit, Palette } from "lucide-react";
 import "./CanvasItem.css";
 import PropTypes from "prop-types";
 
-const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
+const COLORS = [
+  "#808080", // gray
+  "#FF6B6B", // red
+  "#FFB86C", // orange
+  "#F1FA8C", // yellow
+  "#50FA7B", // green
+  "#8BE9FD", // cyan
+  "#BD93F9", // purple
+  "#FF79C6", // pink
+];
+
+const CanvasItem = ({
+  id,
+  position,
+  onPositionChange,
+  onUpdate,
+  onDelete,
+  onConnect,
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [content, setContent] = useState(`Item ${id}`);
   const [isEditing, setIsEditing] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+  const [isConnecting, setIsConnecting] = useState(false);
   const itemRef = useRef(null);
   const inputRef = useRef(null);
 
   const handleMouseDown = (e) => {
-    if (e.target.tagName === "INPUT" || e.target.closest(".toolbar")) {
+    if (
+      e.target.tagName === "INPUT" ||
+      e.target.closest(".toolbar") ||
+      e.target.closest(".color-picker")
+    ) {
+      return;
+    }
+
+    if (e.target.classList.contains("connection-point")) {
+      setIsConnecting(true);
+      if (onConnect) {
+        onConnect(id, e.target.dataset.position);
+      }
       return;
     }
 
@@ -34,6 +67,7 @@ const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setIsConnecting(false);
   };
 
   const handleInputChange = (e) => {
@@ -41,6 +75,14 @@ const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
     if (onUpdate) {
       onUpdate(id, { content: e.target.value });
     }
+  };
+
+  const handleColorSelect = (color) => {
+    setSelectedColor(color);
+    if (onUpdate) {
+      onUpdate(id, { color });
+    }
+    setShowColorPicker(false);
   };
 
   useEffect(() => {
@@ -75,6 +117,9 @@ const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
           <button onClick={() => setIsEditing(true)}>
             <Edit size={16} />
           </button>
+          <button onClick={() => setShowColorPicker(!showColorPicker)}>
+            <Palette size={16} />
+          </button>
           <button>
             <Copy size={16} />
           </button>
@@ -86,7 +131,23 @@ const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
           </button>
         </div>
 
-        <div className="content-box">
+        {showColorPicker && (
+          <div className="color-picker">
+            {COLORS.map((color) => (
+              <button
+                key={color}
+                className="color-option"
+                style={{ backgroundColor: color }}
+                onClick={() => handleColorSelect(color)}
+              />
+            ))}
+          </div>
+        )}
+
+        <div
+          className="content-box"
+          style={{ borderColor: `${selectedColor}50` }}
+        >
           {isEditing ? (
             <input
               ref={inputRef}
@@ -103,6 +164,11 @@ const CanvasItem = ({ id, position, onPositionChange, onUpdate, onDelete }) => {
             </div>
           )}
         </div>
+
+        <div className="connection-point top" data-position="top" />
+        <div className="connection-point right" data-position="right" />
+        <div className="connection-point bottom" data-position="bottom" />
+        <div className="connection-point left" data-position="left" />
       </div>
     </div>
   );
@@ -117,6 +183,7 @@ CanvasItem.propTypes = {
   onPositionChange: PropTypes.func.isRequired,
   onUpdate: PropTypes.func,
   onDelete: PropTypes.func,
+  onConnect: PropTypes.func,
 };
 
 export default CanvasItem;
