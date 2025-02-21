@@ -11,12 +11,14 @@ const CanvasPage = () => {
   const [zoom, setZoom] = useState(1);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const activeCanvasRef = tabs[activeTabIndex]?.canvasRef || null;
-  const [canvasItems, setCanvasItems] = useState([]);
-  const [connections, setConnections] = useState([]);
   const [nextItemId, setNextItemId] = useState(1);
 
+  // Get active tab's canvas items and connections
+  const canvasItems = tabs[activeTabIndex]?.canvasItems || [];
+  const connections = tabs[activeTabIndex]?.connections || [];
+
   const handleCanvasClick = (e) => {
-    if (e.target === activeCanvasRef?.current) {
+    if (e.target === activeCanvasRef?.current && activeTabIndex !== null) {
       const rect = e.target.getBoundingClientRect();
       const x = (e.clientX - rect.left - pan.x) / zoom;
       const y = (e.clientY - rect.top - pan.y) / zoom;
@@ -26,22 +28,45 @@ const CanvasPage = () => {
         position: { x, y },
       };
 
-      setCanvasItems([...canvasItems, newItem]);
+      setTabs(prevTabs => prevTabs.map((tab, index) => {
+        if (index === activeTabIndex) {
+          return {
+            ...tab,
+            canvasItems: [...(tab.canvasItems || []), newItem]
+          };
+        }
+        return tab;
+      }));
       setNextItemId(nextItemId + 1);
     }
   };
 
   const handleItemPositionChange = (itemId, newPosition) => {
-    setCanvasItems((items) =>
-      items.map((item) =>
-        item.id === itemId ? { ...item, position: newPosition } : item
-      )
-    );
+    setTabs(prevTabs => prevTabs.map((tab, index) => {
+      if (index === activeTabIndex) {
+        return {
+          ...tab,
+          canvasItems: (tab.canvasItems || []).map(item =>
+            item.id === itemId ? { ...item, position: newPosition } : item
+          )
+        };
+      }
+      return tab;
+    }));
   };
 
   const handleConnect = (fromId, toId) => {
-    setConnections([...connections, { from: fromId, to: toId }]);
+    setTabs(prevTabs => prevTabs.map((tab, index) => {
+      if (index === activeTabIndex) {
+        return {
+          ...tab,
+          connections: [...(tab.connections || []), { from: fromId, to: toId }]
+        };
+      }
+      return tab;
+    }));
   };
+
   // Add zoom constants
   const MIN_ZOOM = 0.25; // Maximum zoom out (25%)
   const MAX_ZOOM = 2; // Maximum zoom in (200%)
@@ -63,35 +88,6 @@ const CanvasPage = () => {
         setIsSpacePressed(true);
         document.body.style.cursor = "grab";
       }
-    };
-
-    ////methods
-    const handleCanvasClick = (e) => {
-      if (e.target === activeCanvasRef?.current) {
-        const rect = e.target.getBoundingClientRect();
-        const x = (e.clientX - rect.left - pan.x) / zoom;
-        const y = (e.clientY - rect.top - pan.y) / zoom;
-
-        const newItem = {
-          id: nextItemId,
-          position: { x, y },
-        };
-
-        setCanvasItems([...canvasItems, newItem]);
-        setNextItemId(nextItemId + 1);
-      }
-    };
-
-    const handleItemPositionChange = (itemId, newPosition) => {
-      setCanvasItems((items) =>
-        items.map((item) =>
-          item.id === itemId ? { ...item, position: newPosition } : item
-        )
-      );
-    };
-
-    const handleConnect = (fromId, toId) => {
-      setConnections([...connections, { from: fromId, to: toId }]);
     };
 
     const handleKeyUp = (e) => {
@@ -118,6 +114,8 @@ const CanvasPage = () => {
       active: false,
       isEditing: true,
       canvasRef: { current: null },
+      canvasItems: [], // Initialize empty canvas items array
+      connections: [], // Initialize empty connections array
     };
     setTabs([...tabs, newTab]);
     setActiveTabIndex(tabs.length);
@@ -453,19 +451,10 @@ const CanvasPage = () => {
               activeTabIndex === tabs.length - 1 || activeTabIndex === null
             }
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+</svg>
+
           </button>
 
           <div className="canvas-tabs">
@@ -626,6 +615,11 @@ const CanvasPage = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
           </button>
