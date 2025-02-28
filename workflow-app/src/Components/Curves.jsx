@@ -103,15 +103,18 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
     e.stopPropagation();
     
     // Get the SVG container's position
-    const svgContainer = e.target.closest('.connections-layer');
+    const svgContainer = e.target.closest('svg');
     const svgRect = svgContainer.getBoundingClientRect();
     
-    // Calculate position relative to the SVG container
+    // Calculate position relative to the viewport
     const x = e.clientX;
     const y = e.clientY;
     
     setSelectedConnection(index);
-    setPopupPosition({ x, y });
+    setPopupPosition({ 
+      x: x - svgRect.left,  // Adjust for SVG position
+      y: y - svgRect.top    // Adjust for SVG position
+    });
     setShowDirectionMenu(false);
     setShowColorPicker(false);
   };
@@ -127,6 +130,14 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
     if (selectedConnection !== null && onDeleteConnection) {
       onDeleteConnection(selectedConnection);
     }
+    setSelectedConnection(null);
+  };
+
+  const handleColorChange = (color) => {
+    if (selectedConnection !== null && onUpdateConnection) {
+      onUpdateConnection(selectedConnection, { color });
+    }
+    setShowColorPicker(false);
     setSelectedConnection(null);
   };
 
@@ -256,10 +267,7 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
                   key={color}
                   className="color-option"
                   style={{ backgroundColor: color }}
-                  onClick={() => {
-                    onUpdateConnection(selectedConnection, { color });
-                    setShowColorPicker(false);
-                  }}
+                  onClick={() => handleColorChange(color)}
                 />
               ))}
             </div>

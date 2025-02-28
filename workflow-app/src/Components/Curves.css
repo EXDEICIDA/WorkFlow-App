@@ -5,7 +5,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .connection-popup {
@@ -72,7 +72,8 @@
   padding: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  transform: translate(-50%, -100%); /* Move up by full height and center horizontally */
+  position: absolute;
+  transform: translate(-50%, -50%);
   pointer-events: all;
 }
 
@@ -115,25 +116,32 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
+  width: calc(100% - 8px);
+  margin: 2px 4px;
   padding: 6px 8px;
   background: transparent;
   border: none;
-  color: #e0e0e0;
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   text-align: left;
   font-size: 13px;
   border-radius: 3px;
+  position: relative;
 }
 
 .menu-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .menu-item.active {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   color: #fff;
+}
+
+.menu-item:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .menu-icon {
@@ -144,9 +152,11 @@
   font-family: monospace;
   font-size: 16px;
   opacity: 0.8;
+  transition: opacity 0.15s ease;
 }
 
-.menu-item:hover .menu-icon {
+.menu-item:hover .menu-icon,
+.menu-item.active .menu-icon {
   opacity: 1;
 }
 
