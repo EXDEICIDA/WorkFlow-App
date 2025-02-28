@@ -3,29 +3,35 @@ import PropTypes from "prop-types";
 
 const Curves = ({ connections, items }) => {
   const getConnectionPoint = (item, position) => {
-    const width = 200; // Width of the item
-    const height = 60;  // Height of the item
+    const width = 240; // Min-width from CSS content-box
+    const height = 40; // Approximate height based on padding and content
+    const dotSize = 8; // From CSS .connection-point
+    const borderWidth = 4; // From CSS content-box border
+    
+    // Account for the border in calculations
+    const totalWidth = width + (borderWidth * 2);
+    const totalHeight = height + (borderWidth * 2);
 
     switch (position) {
       case "top":
         return {
-          x: item.position.x + width / 2,
-          y: item.position.y
+          x: item.position.x + totalWidth / 2,
+          y: item.position.y // The dot is already offset by CSS transform
         };
       case "right":
         return {
-          x: item.position.x + width,
-          y: item.position.y + height / 2
+          x: item.position.x + totalWidth,
+          y: item.position.y + totalHeight / 2
         };
       case "bottom":
         return {
-          x: item.position.x + width / 2,
-          y: item.position.y + height
+          x: item.position.x + totalWidth / 2,
+          y: item.position.y + totalHeight
         };
       case "left":
         return {
           x: item.position.x,
-          y: item.position.y + height / 2
+          y: item.position.y + totalHeight / 2
         };
       default:
         return item.position;
@@ -35,44 +41,36 @@ const Curves = ({ connections, items }) => {
   const calculateControlPoints = (start, end, startPoint, endPoint) => {
     const deltaX = Math.abs(end.x - start.x);
     const deltaY = Math.abs(end.y - start.y);
-    const midX = (start.x + end.x) / 2;
-    const midY = (start.y + end.y) / 2;
-
-    // Adjust control points based on connection positions
+    
+    // Calculate dynamic offset based on distance between points
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const baseOffset = Math.min(100, Math.max(50, distance * 0.25));
+    
+    // Adjust offset based on connection points
     let cp1 = { x: start.x, y: start.y };
     let cp2 = { x: end.x, y: end.y };
 
-    const offset = Math.min(100, Math.max(deltaX, deltaY) * 0.4);
+    // Use exact offsets based on the connection point position
+    const applyOffset = (point, position, offset) => {
+      switch (position) {
+        case "top":
+          point.y -= offset;
+          break;
+        case "right":
+          point.x += offset;
+          break;
+        case "bottom":
+          point.y += offset;
+          break;
+        case "left":
+          point.x -= offset;
+          break;
+      }
+      return point;
+    };
 
-    switch (startPoint) {
-      case "top":
-        cp1.y = start.y - offset;
-        break;
-      case "right":
-        cp1.x = start.x + offset;
-        break;
-      case "bottom":
-        cp1.y = start.y + offset;
-        break;
-      case "left":
-        cp1.x = start.x - offset;
-        break;
-    }
-
-    switch (endPoint) {
-      case "top":
-        cp2.y = end.y - offset;
-        break;
-      case "right":
-        cp2.x = end.x + offset;
-        break;
-      case "bottom":
-        cp2.y = end.y + offset;
-        break;
-      case "left":
-        cp2.x = end.x - offset;
-        break;
-    }
+    cp1 = applyOffset(cp1, startPoint, baseOffset);
+    cp2 = applyOffset(cp2, endPoint, baseOffset);
 
     return { cp1, cp2 };
   };
