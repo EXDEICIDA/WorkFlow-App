@@ -102,19 +102,16 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
   const handleConnectionClick = (e, index, path) => {
     e.stopPropagation();
     
-    // Get the path's bounding box
-    const pathElement = e.target;
-    const bbox = pathElement.getBoundingClientRect();
+    // Get the SVG container's position
+    const svgContainer = e.target.closest('.connections-layer');
+    const svgRect = svgContainer.getBoundingClientRect();
     
-    // Calculate position near the click point
-    const clickX = e.clientX;
-    const clickY = e.clientY;
+    // Calculate position relative to the SVG container
+    const x = e.clientX;
+    const y = e.clientY;
     
     setSelectedConnection(index);
-    setPopupPosition({ 
-      x: clickX, 
-      y: clickY - 10 // Small offset to not cover the click point
-    });
+    setPopupPosition({ x, y });
     setShowDirectionMenu(false);
     setShowColorPicker(false);
   };
@@ -206,10 +203,9 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
       
       {selectedConnection !== null && (
         <div className="connection-toolbar" style={{
-          position: 'fixed',
-          left: popupPosition.x,
-          top: popupPosition.y,
-          transform: 'translate(-50%, -50%)'
+          position: 'absolute',
+          left: `${popupPosition.x}px`,
+          top: `${popupPosition.y}px`,
         }}>
           <button className="toolbar-button" onClick={handleDelete}>
             <Trash2 size={16} />
@@ -233,21 +229,21 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
                 className={`menu-item ${connections[selectedConnection]?.direction === 'nondirectional' ? 'active' : ''}`}
                 onClick={() => handleDirectionChange('nondirectional')}
               >
-                <span className="menu-icon">—</span>
+                <span className="menu-icon">━</span>
                 <span>Nondirectional</span>
               </button>
               <button
                 className={`menu-item ${connections[selectedConnection]?.direction === 'unidirectional' ? 'active' : ''}`}
                 onClick={() => handleDirectionChange('unidirectional')}
               >
-                <span className="menu-icon">→</span>
+                <span className="menu-icon">⟶</span>
                 <span>Unidirectional</span>
               </button>
               <button
                 className={`menu-item ${connections[selectedConnection]?.direction === 'bidirectional' ? 'active' : ''}`}
                 onClick={() => handleDirectionChange('bidirectional')}
               >
-                <span className="menu-icon">↔</span>
+                <span className="menu-icon">⟷</span>
                 <span>Bidirectional</span>
               </button>
             </div>
