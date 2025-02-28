@@ -13,6 +13,7 @@ const CanvasPage = () => {
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [nextItemId, setNextItemId] = useState(1);
+  const [editingTabId, setEditingTabId] = useState(null);
   const containerRef = useRef(null);
 
   // Get active tab's canvas items and connections
@@ -130,6 +131,40 @@ const CanvasPage = () => {
     setPan({ x: 0, y: 0 });
   };
 
+  const handleTabDoubleClick = (tabId) => {
+    setEditingTabId(tabId);
+  };
+
+  const handleTabNameChange = (tabId, newName) => {
+    setTabs(prevTabs => prevTabs.map(tab =>
+      tab.id === tabId ? { ...tab, name: newName } : tab
+    ));
+  };
+
+  const handleTabNameBlur = () => {
+    setEditingTabId(null);
+  };
+
+  const handleTabNameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      setEditingTabId(null);
+    }
+  };
+
+  const handleCloseTab = (tabId, event) => {
+    event.stopPropagation();
+    if (tabs.length > 1) {
+      const tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      const newTabs = tabs.filter(tab => tab.id !== tabId);
+      setTabs(newTabs);
+      
+      // If we're closing the active tab or a tab before it, adjust the active index
+      if (tabIndex <= activeTabIndex) {
+        setActiveTabIndex(Math.max(0, activeTabIndex - 1));
+      }
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === "Space") {
@@ -165,13 +200,33 @@ const CanvasPage = () => {
       <div className="canvas-header">
         <div className="tab-list">
           {tabs.map((tab, index) => (
-            <button
+            <div
               key={tab.id}
               className={`tab ${index === activeTabIndex ? 'active' : ''}`}
-              onClick={() => setActiveTabIndex(index)}
+              onDoubleClick={() => handleTabDoubleClick(tab.id)}
             >
-              {tab.name}
-            </button>
+              {editingTabId === tab.id ? (
+                <input
+                  type="text"
+                  className="tab-name-input"
+                  value={tab.name}
+                  onChange={(e) => handleTabNameChange(tab.id, e.target.value)}
+                  onBlur={handleTabNameBlur}
+                  onKeyDown={handleTabNameKeyDown}
+                  autoFocus
+                />
+              ) : (
+                <>
+                  <span onClick={() => setActiveTabIndex(index)}>{tab.name}</span>
+                  <button 
+                    className="close-tab-btn"
+                    onClick={(e) => handleCloseTab(tab.id, e)}
+                  >
+                    ×
+                  </button>
+                </>
+              )}
+            </div>
           ))}
           <button
             className="new-tab"
