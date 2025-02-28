@@ -372,3 +372,34 @@
   background-color: #444;
   color: #fff;
 }
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #121212;
+  background-image: radial-gradient(circle, #1f1f1f 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.empty-state-content {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  border-radius: 8px;
+  background-color: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.empty-state-content h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #888;
+}
+
+.empty-state-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}

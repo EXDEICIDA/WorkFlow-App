@@ -4,8 +4,8 @@ import CanvasItem from "../Components/CanvasItem";
 import Curves from "../Components/Curves";
 
 const CanvasPage = () => {
-  const [tabs, setTabs] = useState([{ id: 1, name: "Canvas 1", canvasItems: [], connections: [] }]);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [tabs, setTabs] = useState([]);
+  const [activeTabIndex, setActiveTabIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -153,15 +153,14 @@ const CanvasPage = () => {
 
   const handleCloseTab = (tabId, event) => {
     event.stopPropagation();
-    if (tabs.length > 1) {
-      const tabIndex = tabs.findIndex(tab => tab.id === tabId);
-      const newTabs = tabs.filter(tab => tab.id !== tabId);
-      setTabs(newTabs);
-      
-      // If we're closing the active tab or a tab before it, adjust the active index
-      if (tabIndex <= activeTabIndex) {
-        setActiveTabIndex(Math.max(0, activeTabIndex - 1));
-      }
+    const tabIndex = tabs.findIndex(tab => tab.id === tabId);
+    const newTabs = tabs.filter(tab => tab.id !== tabId);
+    setTabs(newTabs);
+    
+    if (newTabs.length === 0) {
+      setActiveTabIndex(null);
+    } else if (tabIndex <= activeTabIndex) {
+      setActiveTabIndex(Math.max(0, activeTabIndex - 1));
     }
   };
 
@@ -231,12 +230,13 @@ const CanvasPage = () => {
           <button
             className="new-tab"
             onClick={() => {
-              setTabs([...tabs, {
-                id: tabs.length + 1,
+              const newTab = {
+                id: Date.now(),
                 name: `Canvas ${tabs.length + 1}`,
                 canvasItems: [],
                 connections: []
-              }]);
+              };
+              setTabs([...tabs, newTab]);
               setActiveTabIndex(tabs.length);
             }}
           >
@@ -245,39 +245,41 @@ const CanvasPage = () => {
         </div>
       </div>
 
-      <div 
-        ref={containerRef}
-        className="canvas-container"
-        onClick={handleCanvasClick}
-        onMouseDown={handleMouseDown}
-        style={{
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          cursor: isSpacePressed ? (isDragging ? "grabbing" : "grab") : "default"
-        }}
-      >
-        <Curves 
-          connections={connections}
-          items={canvasItems.reduce((acc, item) => {
-            acc[item.id] = item;
-            return acc;
-          }, {})}
-        />
-        {canvasItems.map((item) => (
-          <CanvasItem
-            key={item.id}
-            id={item.id}
-            position={item.position}
-            onPositionChange={handleItemPositionChange}
-            onConnect={handleConnect}
-            isConnecting={!!connectingFrom}
+      {activeTabIndex !== null ? (
+        <div 
+          ref={containerRef}
+          className="canvas-container"
+          onClick={handleCanvasClick}
+          onMouseDown={handleMouseDown}
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            cursor: isSpacePressed ? (isDragging ? "grabbing" : "grab") : "default"
+          }}
+        >
+          <Curves 
+            connections={connections}
+            items={canvasItems.reduce((acc, item) => {
+              acc[item.id] = item;
+              return acc;
+            }, {})}
           />
-        ))}
-      </div>
-
-      {/* Show help text only when no tabs exist */}
-      {tabs.length === 0 && (
-        <div className="canvas-help">
-          <p>Click the + button above to create a new canvas</p>
+          {canvasItems.map((item) => (
+            <CanvasItem
+              key={item.id}
+              id={item.id}
+              position={item.position}
+              onPositionChange={handleItemPositionChange}
+              onConnect={handleConnect}
+              isConnecting={!!connectingFrom}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state">
+          <div className="empty-state-content">
+            <h2>No Canvas Selected</h2>
+            <p>Click the + button to create a new canvas</p>
+          </div>
         </div>
       )}
 
