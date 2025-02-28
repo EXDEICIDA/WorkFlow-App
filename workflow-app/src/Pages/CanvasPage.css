@@ -1,21 +1,139 @@
 .canvas-page {
-  margin-left: 250px;
-  min-height: 100vh;
-  background-color: #1a1a1a;
-  color: #ffffff;
-  transition: all 0.3s ease;
-  width: calc(100% - 250px);
-  position: fixed;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  overflow-y: auto;
-  box-shadow: -2px 0 0 #1a1a1a;
+  width: 100%;
+  height: 100vh;
+  background-color: #1e1e1e;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-body[data-sidebar="collapsed"] .canvas-page {
-  margin-left: 70px;
-  width: calc(100% - 70px);
+.canvas-header {
+  background-color: #2d2d2d;
+  padding: 8px;
+  border-bottom: 1px solid #3d3d3d;
+  z-index: 10;
+}
+
+.tab-list {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.tab {
+  padding: 6px 12px;
+  background-color: #3d3d3d;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tab.active {
+  background-color: #4d4d4d;
+}
+
+.new-tab {
+  padding: 6px 12px;
+  background-color: #2d2d2d;
+  border: 1px solid #4d4d4d;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.new-tab:hover {
+  background-color: #3d3d3d;
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  transform-origin: 0 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(255, 255, 255, 0.02) 75%
+  ),
+  linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.02) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(255, 255, 255, 0.02) 75%
+  );
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  min-height: 0;
+  will-change: transform;
+}
+
+.canvas-help {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  pointer-events: none;
+}
+
+.tools-panel {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #2d2d2d;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.bottom-tools {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background-color: #2d2d2d;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+}
+
+.tool-btn {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-btn:hover {
+  background-color: #3d3d3d;
+}
+
+.tool-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .canvas-toolbar {
@@ -71,16 +189,6 @@ body[data-sidebar="collapsed"] .canvas-page {
   margin-left: 0.5rem;
 }
 
-.canvas-container {
-  flex: 1;
-  position: relative;
-  background-color: #121212;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  padding-right: 60px;
-}
-
 .drawing-canvas {
   position: absolute;
   top: 0;
@@ -89,21 +197,6 @@ body[data-sidebar="collapsed"] .canvas-page {
   height: 100%;
   cursor: crosshair;
   display: block;
-}
-
-.canvas-help {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: #666;
-  pointer-events: none;
-}
-
-.canvas-help p {
-  margin: 8px 0;
-  font-size: 14px;
 }
 
 .canvas-footer {
@@ -141,42 +234,48 @@ body[data-sidebar="collapsed"] .canvas-page {
   height: 1.25rem;
 }
 
-.tools-panel {
-  position: fixed;
-  right: 25px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  background-color: #1a1a1a;
-  border-radius: 8px;
-  border: 1px solid #2a2a2a;
-  z-index: 100;
+.canvas-items-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* This allows clicks to pass through to canvas */
 }
 
-.tool-btn {
-  background: none;
-  border: none;
-  color: #666;
-  padding: 8px;
+.canvas-items-layer .canvas-item {
+  pointer-events: auto; /* This re-enables interaction with the items */
+}
+
+.connections-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.connection-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
   cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all 0.2s ease;
 }
 
-.tool-btn:hover {
-  background-color: #2a2a2a;
-  color: #fff;
+.connection-point:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.2);
 }
 
-.tool-btn svg {
-  width: 20px;
-  height: 20px;
+.connection-point.connecting {
+  background-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .canvas-tabs {
@@ -238,69 +337,4 @@ body[data-sidebar="collapsed"] .canvas-page {
   min-width: 80px;
   outline: none;
   background-color: #333;
-}
-
-.bottom-tools {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  background-color: #1a1a1a;
-  border-radius: 8px;
-  border: 1px solid #2a2a2a;
-  z-index: 100;
-}
-
-.bottom-tools .tool-btn {
-  background: none;
-  border: none;
-  color: #666;
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.bottom-tools .tool-btn:hover {
-  background-color: #2a2a2a;
-  color: #fff;
-}
-
-.bottom-tools .tool-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-.canvas-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.drawing-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.canvas-items-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* This allows clicks to pass through to canvas */
-}
-
-.canvas-items-layer .canvas-item {
-  pointer-events: auto; /* This re-enables interaction with the items */
 }
