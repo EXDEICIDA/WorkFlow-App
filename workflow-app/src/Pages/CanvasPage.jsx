@@ -71,7 +71,9 @@ const CanvasPage = () => {
                 startId: connectingFrom.id,
                 endId: itemId,
                 startPoint: connectingFrom.point,
-                endPoint: connectionPoint
+                endPoint: connectionPoint,
+                direction: 'unidirectional', 
+                color: '#6a6a6a' 
               }]
             };
           }
@@ -80,6 +82,22 @@ const CanvasPage = () => {
       }
       setConnectingFrom(null);
     }
+  };
+  const handleUpdateConnection = (connectionIndex, updates) => {
+    setTabs(prevTabs => prevTabs.map((tab, index) => {
+      if (index === activeTabIndex) {
+        const newConnections = [...tab.connections];
+        newConnections[connectionIndex] = {
+          ...newConnections[connectionIndex],
+          ...updates
+        };
+        return {
+          ...tab,
+          connections: newConnections
+        };
+      }
+      return tab;
+    }));
   };
 
   const handleDeleteConnection = (connectionIndex) => {
@@ -256,13 +274,12 @@ const CanvasPage = () => {
             cursor: isSpacePressed ? (isDragging ? "grabbing" : "grab") : "default"
           }}
         >
-          <Curves 
-            connections={connections}
-            items={canvasItems.reduce((acc, item) => {
-              acc[item.id] = item;
-              return acc;
-            }, {})}
-          />
+         <Curves
+  connections={connections}
+  items={canvasItems}
+  onDeleteConnection={handleDeleteConnection}
+  onUpdateConnection={handleUpdateConnection}
+/>
           {canvasItems.map((item) => (
             <CanvasItem
               key={item.id}
