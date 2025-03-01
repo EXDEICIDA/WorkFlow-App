@@ -173,7 +173,7 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
                 d={path}
                 fill="none"
                 stroke={connection.color || "#6a6a6a"}
-                strokeWidth="2"
+                strokeWidth="3"
                 onClick={(e) => handleConnectionClick(e, index, path)}
                 style={{ pointerEvents: 'all' }}
               />

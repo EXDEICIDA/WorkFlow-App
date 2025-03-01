@@ -83,6 +83,7 @@ const CanvasPage = () => {
       setConnectingFrom(null);
     }
   };
+
   const handleUpdateConnection = (connectionIndex, updates) => {
     setTabs(prevTabs => prevTabs.map((tab, index) => {
       if (index === activeTabIndex) {
@@ -107,6 +108,25 @@ const CanvasPage = () => {
         newConnections.splice(connectionIndex, 1);
         return {
           ...tab,
+          connections: newConnections
+        };
+      }
+      return tab;
+    }));
+  };
+
+  const handleDeleteItem = (itemId) => {
+    setTabs(prevTabs => prevTabs.map((tab, index) => {
+      if (index === activeTabIndex) {
+        // Remove the item
+        const newCanvasItems = tab.canvasItems.filter(item => item.id !== itemId);
+        // Remove any connections involving this item
+        const newConnections = tab.connections.filter(
+          conn => conn.startId !== itemId && conn.endId !== itemId
+        );
+        return {
+          ...tab,
+          canvasItems: newCanvasItems,
           connections: newConnections
         };
       }
@@ -287,6 +307,7 @@ const CanvasPage = () => {
               position={item.position}
               onPositionChange={handleItemPositionChange}
               onConnect={handleConnect}
+              onDelete={handleDeleteItem}
               isConnecting={!!connectingFrom}
             />
           ))}
