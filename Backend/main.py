@@ -128,6 +128,34 @@ def delete_script(script_id):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/scripts/<int:script_id>/language', methods=['PUT'])
+def update_script_language(script_id):
+    try:
+        data = request.get_json()
+        if not data or 'language' not in data:
+            return jsonify({"error": "Language is required"}), 400
+        
+        # Get the current script
+        scripts = script_manager.fetch_scripts()
+        script = next((s for s in scripts if s['id'] == script_id), None)
+        
+        if not script:
+            return jsonify({"error": "Script not found"}), 404
+            
+        # Update the script with the new language
+        updated_script = script_manager.edit_script(
+            script_id=script_id,
+            title=script['title'],
+            description=script['description'],
+            code=script['code'],
+            language=data['language']
+        )
+        
+        return jsonify(updated_script), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
    
 # Auth Routes/Endpoints For User Authentication
 

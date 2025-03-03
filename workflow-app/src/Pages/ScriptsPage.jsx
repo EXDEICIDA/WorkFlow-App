@@ -102,8 +102,31 @@ const ScriptsPage = () => {
 
   const handleLanguageChange = (newLanguage) => {
     if (selectedScript) {
+      // First update the UI
       const updatedScript = { ...selectedScript, language: newLanguage };
       setSelectedScript(updatedScript);
+      
+      // Then update in the backend
+      updateScriptLanguage(selectedScript.id, newLanguage);
+    }
+  };
+
+  const updateScriptLanguage = async (scriptId, newLanguage) => {
+    try {
+      await axios.put(`${API_BASE_URL}/${scriptId}/language`, { language: newLanguage });
+      // Update the script in the scripts array as well
+      setScripts(scripts.map(script => 
+        script.id === scriptId ? { ...script, language: newLanguage } : script
+      ));
+    } catch (error) {
+      console.error("Error updating script language:", error);
+      // Revert UI change if the backend update fails
+      if (selectedScript && selectedScript.id === scriptId) {
+        const originalScript = scripts.find(script => script.id === scriptId);
+        if (originalScript) {
+          setSelectedScript(originalScript);
+        }
+      }
     }
   };
 
