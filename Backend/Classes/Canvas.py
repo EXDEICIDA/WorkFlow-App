@@ -5,5 +5,7 @@ class CanvasManager:
    def __init__(self):
         self._client = DataConfig.get_client()
 
+        
+
 
         
