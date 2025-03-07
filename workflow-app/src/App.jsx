@@ -9,6 +9,7 @@ import CanvasPage from "./Pages/CanvasPage";
 import ScriptsPage from "./Pages/ScriptsPage";
 import AuthPage from "./Pages/Auth/AuthPage";
 import Layout from "./Components/Layout";
+import Items from "./Pages/Items";
 
 import "./App.css";
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/canvas" element={<CanvasPage />} />
           <Route path="/scripts" element={<ScriptsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/items" element={<Items />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
