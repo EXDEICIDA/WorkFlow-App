@@ -92,28 +92,28 @@ body[data-sidebar="collapsed"] .scripts-container {
   stroke-width: 2;
 }
 
-.delete-button svg {
-  width: 16px;
-  height: 16px;
-
-  stroke: currentColor;
-  stroke-width: 2;
-}
-
-.delete-button {
+/* Add specific styling for script delete button */
+.script-delete-button {
   background-color: #2a2a2a;
   color: white;
   gap: 0.25rem;
   display: flex;
   align-items: center;
   border: 1px solid #444;
+  padding: 0.4rem 0.8rem;
 }
 
-.delete-button:hover {
+.script-delete-button:hover {
   background-color: #2a2a2a;
   color: #dc2626;
 }
 
+.script-delete-button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+}
 .script-status {
   display: flex;
   align-items: center;
@@ -292,3 +292,4 @@ body[data-sidebar="collapsed"] .scripts-container {
   color: #71717a; /* text-zinc-400 */
   margin-bottom: 1rem; /* mb-4 */
 }
+

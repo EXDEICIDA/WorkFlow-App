@@ -271,8 +271,8 @@ const ScriptsPage = () => {
                       </div>
                       <div className="script-controls">
                         <button
-                          className="script-button delete-button"
-                          onClick={(e) => handleDeleteScript(script.id, e)}
+  className="script-button script-delete-button"
+  onClick={(e) => handleDeleteScript(script.id, e)}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
