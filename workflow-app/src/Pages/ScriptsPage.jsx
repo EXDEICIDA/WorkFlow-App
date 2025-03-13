@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { apiRequest } from "../services/apiService";
 import ScriptsForm from "../Components/ScriptForm";
 import SearchButton from "../Components/SearchButton";
 import CodeCard from "../Components/CodeCard";
@@ -36,6 +37,7 @@ const ScriptsPage = () => {
   const [dateSort, setDateSort] = useState("newest");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedScript, setSelectedScript] = useState(null);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     fetchScripts();
@@ -44,16 +46,22 @@ const ScriptsPage = () => {
   const handleSearch = (value) => {
     setSearchTerm(value);
   };
+  
   const fetchScripts = async () => {
     try {
-      const response = await axios.get(API_BASE_URL);
-      setScripts(response.data);
+      const response = await apiRequest(API_BASE_URL);
+      if (!response.ok) {
+        throw new Error("Failed to fetch scripts");
+      }
+      const data = await response.json();
+      setScripts(data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching scripts:", error);
       setIsLoading(false);
     }
   };
+  
   //new function
   const handleScriptClick = (script) => {
     setSelectedScript(script);
@@ -78,19 +86,41 @@ const ScriptsPage = () => {
 
   const handleAddScript = async (newScript) => {
     try {
-      const response = await axios.post(API_BASE_URL, newScript);
-      setScripts([...scripts, response.data]);
+      // Add user_id to the script
+      const scriptWithUserId = {
+        ...newScript,
+        user_id: currentUser.id
+      };
+      
+      const response = await apiRequest(API_BASE_URL, {
+        method: "POST",
+        body: JSON.stringify(scriptWithUserId)
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to add script");
+      }
+      
+      const data = await response.json();
+      setScripts([...scripts, data]);
       setShowForm(false);
     } catch (error) {
       console.error("Error adding script:", error);
       alert("Failed to add script");
     }
   };
+  
   const handleDeleteScript = async (scriptId, event) => {
     event.stopPropagation();
     try {
       // Call the delete API endpoint
-      await axios.delete(`${API_BASE_URL}/${scriptId}`);
+      const response = await apiRequest(`${API_BASE_URL}/${scriptId}`, {
+        method: "DELETE"
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete script");
+      }
 
       // Remove the script from the local state
       setScripts(scripts.filter((script) => script.id !== scriptId));
@@ -113,7 +143,15 @@ const ScriptsPage = () => {
 
   const updateScriptLanguage = async (scriptId, newLanguage) => {
     try {
-      await axios.put(`${API_BASE_URL}/${scriptId}/language`, { language: newLanguage });
+      const response = await apiRequest(`${API_BASE_URL}/${scriptId}/language`, {
+        method: "PUT",
+        body: JSON.stringify({ language: newLanguage })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update script language");
+      }
+      
       // Update the script in the scripts array as well
       setScripts(scripts.map(script => 
         script.id === scriptId ? { ...script, language: newLanguage } : script
@@ -138,8 +176,8 @@ const ScriptsPage = () => {
       selectedLanguage ? script.language === selectedLanguage : true
     )
     .sort((a, b) => {
-      const dateA = new Date(a.createdat);
-      const dateB = new Date(b.createdat);
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
       return dateSort === "newest" ? dateB - dateA : dateA - dateB;
     });
 
@@ -271,8 +309,8 @@ const ScriptsPage = () => {
                       </div>
                       <div className="script-controls">
                         <button
-  className="script-button script-delete-button"
-  onClick={(e) => handleDeleteScript(script.id, e)}
+                          className="script-button script-delete-button"
+                          onClick={(e) => handleDeleteScript(script.id, e)}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

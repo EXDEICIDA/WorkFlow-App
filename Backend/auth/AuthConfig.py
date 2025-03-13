@@ -1,5 +1,7 @@
 from Classes.DataConfig import DataConfig
 from supabase import Client
+from functools import wraps
+from flask import request, jsonify
 
 class Auth:
     """Handles user authentication with Supabase."""
@@ -47,6 +49,7 @@ class Auth:
                 "success": "User logged in successfully.",
                 "session": {
                     "access_token": session.access_token,
+                    "refresh_token": session.refresh_token,
                     "user": {
                         "id": session.user.id,
                         "email": session.user.email
@@ -117,3 +120,57 @@ class Auth:
             return {"error": str(db_response.error)}
 
         return {"success": "User deleted successfully."}
+        
+    @staticmethod
+    def verify_token(token: str):
+        """Verifies a JWT token and returns the user information if valid."""
+        client: Client = DataConfig.get_client()
+        
+        try:
+            # Verify the token
+            response = client.auth.get_user(token)
+            if not response.user:
+                return None
+                
+            return response.user
+        except Exception:
+            return None
+            
+    @staticmethod
+    def refresh_token(refresh_token: str):
+        """Refreshes an access token using a refresh token."""
+        client: Client = DataConfig.get_client()
+        
+        try:
+            response = client.auth.refresh_session(refresh_token)
+            if not response.session:
+                return {"error": "Failed to refresh token"}
+                
+            return {
+                "access_token": response.session.access_token,
+                "refresh_token": response.session.refresh_token
+            }
+        except Exception as e:
+            return {"error": str(e)}
+            
+    @staticmethod
+    def auth_required(f):
+        """Decorator to protect routes that require authentication."""
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            auth_header = request.headers.get('Authorization')
+            
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({"error": "Authentication required"}), 401
+                
+            token = auth_header.split(' ')[1]
+            user = Auth.verify_token(token)
+            
+            if not user:
+                return jsonify({"error": "Invalid or expired token"}), 401
+                
+            # Add user to request context
+            request.user = user
+            return f(*args, **kwargs)
+            
+        return decorated

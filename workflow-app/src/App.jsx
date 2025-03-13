@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./Components/Sidebar";
 import DashboardPage from "./Pages/DashboardPage";
 import ProjectsPage from "./Pages/ProjectsPage";
 import TasksPage from "./Pages/TasksPage";
@@ -10,26 +9,63 @@ import ScriptsPage from "./Pages/ScriptsPage";
 import AuthPage from "./Pages/Auth/AuthPage";
 import Layout from "./Components/Layout";
 import Items from "./Pages/Items";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import "./App.css";
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/canvas" element={<CanvasPage />} />
-          <Route path="/scripts" element={<ScriptsPage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/items" element={<Items />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <ProjectsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/canvas" element={
+              <ProtectedRoute>
+                <CanvasPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/scripts" element={
+              <ProtectedRoute>
+                <ScriptsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/tasks" element={
+              <ProtectedRoute>
+                <TasksPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/items" element={
+              <ProtectedRoute>
+                <Items />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 export default App;

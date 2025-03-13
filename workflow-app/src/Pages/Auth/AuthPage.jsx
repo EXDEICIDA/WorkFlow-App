@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { login as loginService, register as registerService } from "../../services/authService";
 import "./AuthPage.css";
 import FlowCentricLogo from "../../assets/image.png";
 import CoverLogo from "../../assets/workflow-app-cover.png";
@@ -14,6 +17,16 @@ const AuthPage = () => {
     password: "",
   });
 
+  const { login: authLogin, currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect if user is already logged in
+    if (currentUser) {
+      navigate("/dashboard");
+    }
+  }, [currentUser, navigate]);
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -27,26 +40,14 @@ const AuthPage = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          username: formData.username,
-        }),
-      });
+      const result = await registerService(
+        formData.username,
+        formData.email,
+        formData.password
+      );
 
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.success) {
-        alert(data.success);
+      if (result.success) {
+        alert(result.success);
         setShowLogin(true);
       }
     } catch (err) {
@@ -62,26 +63,12 @@ const AuthPage = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const result = await loginService(formData.email, formData.password);
 
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.success && data.session) {
-        localStorage.setItem("session", JSON.stringify(data.session));
-        window.location.href = "/dashboard";
+      if (result.success && result.session) {
+        // Use the auth context to login
+        authLogin(result.session);
+        navigate("/dashboard");
       }
     } catch (err) {
       setError(err.message);
