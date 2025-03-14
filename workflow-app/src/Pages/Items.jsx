@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+// React is needed for JSX
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { Folder, File, Plus, Search, ChevronDown, Trash2, Edit, ChevronLeft } from "lucide-react";
+import { Folder, File, Plus, Search, ChevronDown, Trash2, Edit, ChevronLeft, Upload } from "lucide-react";
 import "./Items.css";
+import { useAuth } from "../context/AuthContext";
 
 const API_BASE_URL = "http://localhost:8080/api/items";
 
+// Define item types for file type detection
 const ItemTypes = [
   { name: "Document", icon: <File size={16} />, color: "#4285F4" },
   { name: "Spreadsheet", icon: <File size={16} />, color: "#0F9D58" },
@@ -16,9 +19,9 @@ const ItemTypes = [
 ];
 
 const Items = () => {
+  const { authTokens } = useAuth();
   const [items, setItems] = useState([]);
   const [folders, setFolders] = useState([]);
-  const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -29,56 +32,57 @@ const Items = () => {
     name: "",
     description: "",
     type: "Document",
-    folderId: null
+    file: null
   });
   const [newFolder, setNewFolder] = useState({
-    name: "",
-    description: ""
+    name: ""
   });
   const [showItemForm, setShowItemForm] = useState(false);
   const [showFolderForm, setShowFolderForm] = useState(false);
   const [currentFolder, setCurrentFolder] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchItems();
-    fetchFolders();
-  }, []);
+  // Wrap axiosConfig in useMemo to prevent dependency cycle
+  const axiosConfig = useMemo(() => ({
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${authTokens?.access_token || ''}`
+    }
+  }), [authTokens]);
 
-  const fetchItems = async () => {
+  // Wrap fetchItems in useCallback to prevent dependency cycle
+  const fetchItems = useCallback(async () => {
     try {
-      // In a real app, this would fetch from your backend
-      // For now, we'll use mock data
-      const mockItems = [
-        { id: 1, name: "Project Proposal", description: "Q4 Project Proposal", type: "Document", createdAt: "2023-11-15T10:30:00Z", folderId: 1 },
-        { id: 2, name: "Budget Spreadsheet", description: "Annual budget", type: "Spreadsheet", createdAt: "2023-11-10T14:20:00Z", folderId: 1 },
-        { id: 3, name: "Logo Design", description: "Company logo", type: "Image", createdAt: "2023-11-05T09:15:00Z", folderId: 2 },
-        { id: 4, name: "Presentation", description: "Client presentation", type: "Document", createdAt: "2023-10-28T16:45:00Z", folderId: null },
-        { id: 5, name: "Meeting Recording", description: "Team meeting", type: "Audio", createdAt: "2023-10-20T11:00:00Z", folderId: null },
-      ];
+      setIsLoading(true);
+      setError(null);
       
-      setItems(mockItems);
+      const parentId = currentFolder ? currentFolder.id : null;
+      const response = await axios.get(API_BASE_URL, {
+        ...axiosConfig,
+        params: { parent_id: parentId }
+      });
+      
+      const allItems = response.data || [];
+      console.log("Fetched items:", allItems);
+      
+      const folderItems = allItems.filter(item => item.type === 'folder');
+      const fileItems = allItems.filter(item => item.type === 'file');
+      
+      setFolders(folderItems);
+      setItems(fileItems);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching items:", error);
+      setError(`Failed to load items: ${error.response?.data?.error || error.message}`);
       setIsLoading(false);
     }
-  };
+  }, [currentFolder, axiosConfig]);
 
-  const fetchFolders = async () => {
-    try {
-      // In a real app, this would fetch from your backend
-      // For now, we'll use mock data
-      const mockFolders = [
-        { id: 1, name: "Work Documents", description: "Work-related documents", createdAt: "2023-11-01T08:00:00Z" },
-        { id: 2, name: "Design Assets", description: "Graphics and design files", createdAt: "2023-10-15T13:30:00Z" },
-        { id: 3, name: "Archives", description: "Archived projects", createdAt: "2023-09-20T15:45:00Z" },
-      ];
-      
-      setFolders(mockFolders);
-    } catch (error) {
-      console.error("Error fetching folders:", error);
+  useEffect(() => {
+    if (authTokens) {
+      fetchItems();
     }
-  };
+  }, [authTokens, fetchItems]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -87,85 +91,196 @@ const Items = () => {
   const handleDateSortChange = (e) => {
     const sortOrder = e.target.value;
     setDateSort(sortOrder);
-
-    const sortedItems = [...items].sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-    });
-
-    setItems(sortedItems);
   };
 
   const handleAddItem = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, this would send to your backend
-      const newItemWithId = {
-        ...newItem,
-        id: items.length + 1,
-        createdAt: new Date().toISOString(),
+      setIsLoading(true);
+      setError(null);
+      
+      if (!newItem.file) {
+        setError("Please select a file to upload");
+        setIsLoading(false);
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', newItem.file);
+      
+      const fileName = newItem.file.name;
+      const fileType = fileName.split('.').pop().toLowerCase();
+      
+      // In a real implementation, you would first upload to storage and get a URL back
+      // For now, we'll use a placeholder URL
+      const fileUrl = `https://storage.example.com/${Date.now()}-${fileName}`;
+      
+      const fileData = {
+        name: newItem.name || fileName, // Use filename if name is empty
+        file_type: fileType,
+        file_url: fileUrl,
+        parent_id: currentFolder ? currentFolder.id : null,
+        size: newItem.file.size
       };
       
-      setItems([...items, newItemWithId]);
+      console.log("Creating file with data:", fileData);
+      
+      // Make sure we're sending the data as JSON
+      const response = await axios.post(
+        `${API_BASE_URL}/file`, 
+        fileData, 
+        axiosConfig
+      );
+      
+      console.log("File creation response:", response.data);
+      
+      // Refresh the items list
+      fetchItems();
+      
+      // Reset form
       setNewItem({
         name: "",
         description: "",
         type: "Document",
-        folderId: currentFolder ? currentFolder.id : null
+        file: null
       });
       setShowItemForm(false);
     } catch (error) {
       console.error("Error adding item:", error);
-      alert("Failed to add item");
+      setError(`Failed to add item: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleAddFolder = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, this would send to your backend
-      const newFolderWithId = {
-        ...newFolder,
-        id: folders.length + 1,
-        createdAt: new Date().toISOString(),
+      setIsLoading(true);
+      setError(null);
+      
+      if (!newFolder.name.trim()) {
+        setError("Folder name cannot be empty");
+        setIsLoading(false);
+        return;
+      }
+      
+      const folderData = {
+        name: newFolder.name,
+        parent_id: currentFolder ? currentFolder.id : null
       };
       
-      setFolders([...folders, newFolderWithId]);
+      console.log("Creating folder with data:", folderData);
+      
+      // Use the axiosConfig with Content-Type header
+      const response = await axios.post(
+        `${API_BASE_URL}/folder`, 
+        folderData, 
+        axiosConfig
+      );
+      
+      console.log("Folder creation response:", response.data);
+      
+      // Refresh the items list
+      fetchItems();
+      
+      // Reset form
       setNewFolder({
-        name: "",
-        description: ""
+        name: ""
       });
       setShowFolderForm(false);
     } catch (error) {
       console.error("Error adding folder:", error);
-      alert("Failed to add folder");
+      setError(`Failed to add folder: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteItem = async (itemId, event) => {
     event.stopPropagation();
     try {
-      // In a real app, this would call your backend
-      setItems(items.filter((item) => item.id !== itemId));
+      setIsLoading(true);
+      setError(null);
+      
+      await axios.delete(`${API_BASE_URL}/${itemId}`, axiosConfig);
+      
+      // Refresh the items list
+      fetchItems();
+      
+      // If the deleted item was selected, clear selection
+      if (selectedItem && selectedItem.id === itemId) {
+        setSelectedItem(null);
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
-      alert("Failed to delete item");
+      setError(`Failed to delete item: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteFolder = async (folderId, event) => {
     event.stopPropagation();
     try {
-      // In a real app, this would call your backend
-      setFolders(folders.filter((folder) => folder.id !== folderId));
-      // Also remove items in this folder or move them to root
-      setItems(items.map(item => 
-        item.folderId === folderId ? { ...item, folderId: null } : item
-      ));
+      setIsLoading(true);
+      setError(null);
+      
+      await axios.delete(`${API_BASE_URL}/${folderId}`, axiosConfig);
+      
+      // Refresh the items list
+      fetchItems();
+      
+      // If the deleted folder was current, go back to parent
+      if (currentFolder && currentFolder.id === folderId) {
+        setCurrentFolder(null);
+      }
     } catch (error) {
       console.error("Error deleting folder:", error);
-      alert("Failed to delete folder");
+      setError(`Failed to delete folder: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRenameItem = async (itemId, newName) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await axios.put(`${API_BASE_URL}/${itemId}/rename`, { new_name: newName }, axiosConfig);
+      
+      // Refresh the items list
+      fetchItems();
+      
+      // Update selected item if it was renamed
+      if (selectedItem && selectedItem.id === itemId) {
+        setSelectedItem({...selectedItem, name: newName});
+      }
+    } catch (error) {
+      console.error("Error renaming item:", error);
+      setError(`Failed to rename item: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // We'll keep this function even though it's not used yet
+  // It will be useful for future feature implementation
+  const handleMoveItem = async (itemId, newParentId) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await axios.put(`${API_BASE_URL}/${itemId}/move`, { new_parent_id: newParentId }, axiosConfig);
+      
+      // Refresh the items list
+      fetchItems();
+    } catch (error) {
+      console.error("Error moving item:", error);
+      setError(`Failed to move item: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -185,127 +300,155 @@ const Items = () => {
     }
   };
 
-  const filteredItems = items
-    .filter((item) => 
-      (currentFolder ? item.folderId === currentFolder.id : item.folderId === null) &&
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedType ? item.type === selectedType : true)
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
-    });
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewItem({
+        ...newItem,
+        name: file.name,
+        file: file
+      });
+    }
+  };
 
-  const filteredFolders = folders
-    .filter((folder) => 
-      folder.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
-    });
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const handleNameChange = (e) => {
+    setNewItem({
+      ...newItem,
+      name: e.target.value
     });
   };
 
-  const getItemTypeColor = (type) => {
-    const itemType = ItemTypes.find(t => t.name === type);
+  const handleDescriptionChange = (e) => {
+    setNewItem({
+      ...newItem,
+      description: e.target.value
+    });
+  };
+
+  const handleFolderNameChange = (e) => {
+    setNewFolder({
+      ...newFolder,
+      name: e.target.value
+    });
+  };
+
+  const getItemTypeColor = (fileType) => {
+    let itemTypeName = "Other";
+    
+    if (fileType) {
+      const lowerFileType = fileType.toLowerCase();
+      if (['doc', 'docx', 'txt', 'pdf'].includes(lowerFileType)) {
+        itemTypeName = "Document";
+      } else if (['xls', 'xlsx', 'csv'].includes(lowerFileType)) {
+        itemTypeName = "Spreadsheet";
+      } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(lowerFileType)) {
+        itemTypeName = "Image";
+      } else if (['mp4', 'avi', 'mov', 'wmv'].includes(lowerFileType)) {
+        itemTypeName = "Video";
+      } else if (['mp3', 'wav', 'ogg'].includes(lowerFileType)) {
+        itemTypeName = "Audio";
+      } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(lowerFileType)) {
+        itemTypeName = "Archive";
+      }
+    }
+    
+    const itemType = ItemTypes.find(type => type.name === itemTypeName);
     return itemType ? itemType.color : "#607D8B";
   };
+
+  const filteredItems = items.filter(item => {
+    const nameMatch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const typeMatch = !selectedType || (item.file_type && item.file_type.toLowerCase() === selectedType.toLowerCase());
+    return nameMatch && typeMatch;
+  });
+
+  const filteredFolders = folders.filter(folder => 
+    folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="items-container">
       {selectedItem ? (
-        // Item Detail View
         <div className="item-detail-view">
           <button className="back-button" onClick={handleBackClick}>
             <ChevronLeft size={20} />
-            <span>Back</span>
+            Back
           </button>
-          
-          <div className="item-detail-header">
-            <div className="item-type-indicator" style={{ backgroundColor: getItemTypeColor(selectedItem.type) }}>
-              {ItemTypes.find(t => t.name === selectedItem.type)?.icon}
+          <div className="item-details">
+            <div className="item-icon" style={{ backgroundColor: getItemTypeColor(selectedItem.file_type) }}>
+              <File size={32} color="#fff" />
             </div>
-            <h1>{selectedItem.name}</h1>
-          </div>
-          
-          <div className="item-detail-info">
-            <div className="info-row">
-              <span className="info-label">Type:</span>
-              <span className="info-value">{selectedItem.type}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Created:</span>
-              <span className="info-value">{formatDate(selectedItem.createdAt)}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Description:</span>
-              <span className="info-value">{selectedItem.description}</span>
+            <div className="item-info">
+              <h2>{selectedItem.name}</h2>
+              <p>Type: {selectedItem.file_type || "Unknown"}</p>
+              <p>Size: {selectedItem.size ? `${Math.round(selectedItem.size / 1024)} KB` : "Unknown"}</p>
+              <p>Created: {new Date(selectedItem.created_at).toLocaleString()}</p>
+              {selectedItem.description && <p>Description: {selectedItem.description}</p>}
             </div>
           </div>
-          
           <div className="item-actions">
-            <button className="edit-button">
-              <Edit size={16} />
-              <span>Edit</span>
+            <button className="action-button">
+              <Edit size={20} />
+              Edit
             </button>
-            <button className="delete-button" onClick={(e) => handleDeleteItem(selectedItem.id, e)}>
-              <Trash2 size={16} />
-              <span>Delete</span>
+            <button className="action-button" onClick={(e) => handleDeleteItem(selectedItem.id, e)}>
+              <Trash2 size={20} />
+              Delete
             </button>
+            <button className="action-button">
+              <Upload size={20} />
+              Download
+            </button>
+          </div>
+          <div className="item-preview">
+            {selectedItem.file_type && ['jpg', 'jpeg', 'png', 'gif'].includes(selectedItem.file_type.toLowerCase()) ? (
+              <img src={selectedItem.file_url} alt={selectedItem.name} className="preview-image" />
+            ) : (
+              <div className="no-preview">
+                <File size={64} />
+                <p>No preview available</p>
+              </div>
+            )}
           </div>
         </div>
       ) : (
-        // Items List View
         <>
           <div className="header-container">
             <div className="header-title">
               {currentFolder ? (
-                <div className="folder-navigation">
+                <div className="breadcrumb">
                   <button className="back-button" onClick={handleBackClick}>
                     <ChevronLeft size={20} />
                   </button>
                   <h1>{currentFolder.name}</h1>
                 </div>
               ) : (
-                <h1>Items</h1>
+                <h1>My Files</h1>
               )}
             </div>
-            
             <div className="header-actions">
-              <div className="search-wrapper">
-                <Search size={18} className="search-icon" />
+              <div className="search-container">
                 <input
                   type="text"
-                  placeholder="Search items..."
+                  placeholder="Search files..."
                   value={searchTerm}
                   onChange={handleSearch}
                   className="search-input"
                 />
+                <Search size={20} className="search-icon" />
               </div>
-              
-              <div className="type-filter-wrapper">
-                <div className="dropdown">
-                  <button 
-                    className="dropdown-toggle"
+              <div className="filter-container">
+                <div className="filter-dropdown">
+                  <button
+                    className="filter-button"
                     onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   >
                     {selectedType || "All Types"}
                     <ChevronDown size={16} />
                   </button>
-                  
                   {showTypeDropdown && (
                     <div className="dropdown-menu">
-                      <div 
+                      <div
                         className="dropdown-item"
                         onClick={() => {
                           setSelectedType("");
@@ -315,7 +458,7 @@ const Items = () => {
                         All Types
                       </div>
                       {ItemTypes.map((type) => (
-                        <div 
+                        <div
                           key={type.name}
                           className="dropdown-item"
                           onClick={() => {
@@ -323,193 +466,174 @@ const Items = () => {
                             setShowTypeDropdown(false);
                           }}
                         >
-                          <div className="type-color" style={{ backgroundColor: type.color }}></div>
+                          <div className="type-icon" style={{ backgroundColor: type.color }}>
+                            {type.icon}
+                          </div>
                           {type.name}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-              </div>
-              
-              <div className="date-filter-wrapper">
                 <select
+                  className="date-sort"
                   value={dateSort}
                   onChange={handleDateSortChange}
-                  className="date-filter"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                 </select>
               </div>
-              
               <div className="add-buttons">
-                <button 
-                  className="add-button"
-                  onClick={() => setShowItemForm(true)}
-                >
-                  <Plus size={16} />
-                  <span>Add Item</span>
+                <button className="add-button" onClick={() => setShowFolderForm(true)}>
+                  <Folder size={16} />
+                  New Folder
                 </button>
-                
-                {!currentFolder && (
-                  <button 
-                    className="add-button folder-button"
-                    onClick={() => setShowFolderForm(true)}
-                  >
-                    <Plus size={16} />
-                    <span>Add Folder</span>
-                  </button>
+                <button className="add-button" onClick={() => setShowItemForm(true)}>
+                  <Plus size={16} />
+                  Upload
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {error && <div className="error-message">{error}</div>}
+          
+          {isLoading ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading...</p>
+            </div>
+          ) : (
+            <>
+              {filteredFolders.length > 0 && (
+                <div className="folders-section">
+                  <h2>Folders</h2>
+                  <div className="folders-grid">
+                    {filteredFolders.map((folder) => (
+                      <div
+                        key={folder.id}
+                        className="folder-card"
+                        onClick={() => handleFolderClick(folder)}
+                      >
+                        <div className="folder-icon">
+                          <Folder size={24} />
+                        </div>
+                        <div className="folder-info">
+                          <h3>{folder.name}</h3>
+                          <p>{new Date(folder.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => handleDeleteFolder(folder.id, e)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="items-section">
+                <h2>Files</h2>
+                {filteredItems.length > 0 ? (
+                  <div className="items-grid">
+                    {filteredItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="item-card"
+                        onClick={() => handleItemClick(item)}
+                      >
+                        <div
+                          className="item-icon"
+                          style={{ backgroundColor: getItemTypeColor(item.file_type) }}
+                        >
+                          <File size={24} color="#fff" />
+                        </div>
+                        <div className="item-info">
+                          <h3>{item.name}</h3>
+                          <p>{item.file_type || "Unknown"}</p>
+                          <p>{item.size ? `${Math.round(item.size / 1024)} KB` : "Unknown"}</p>
+                        </div>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => handleDeleteItem(item.id, e)}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <File size={48} />
+                    <p>No files found</p>
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-          
-          {/* Folders Section (only shown at root level) */}
-          {!currentFolder && filteredFolders.length > 0 && (
-            <div className="folders-section">
-              <h2>Folders</h2>
-              <div className="folders-grid">
-                {filteredFolders.map((folder) => (
-                  <div 
-                    key={folder.id} 
-                    className="folder-card"
-                    onClick={() => handleFolderClick(folder)}
-                  >
-                    <div className="folder-icon">
-                      <Folder size={24} />
-                    </div>
-                    <div className="folder-info">
-                      <h3 className="folder-name">{folder.name}</h3>
-                      <p className="folder-date">{formatDate(folder.createdAt)}</p>
-                    </div>
-                    <button 
-                      className="folder-delete"
-                      onClick={(e) => handleDeleteFolder(folder.id, e)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
+            </>
           )}
-          
-          {/* Items Section */}
-          <div className="items-section">
-            <h2>{currentFolder ? "Items" : "All Items"}</h2>
-            {filteredItems.length > 0 ? (
-              <div className="items-grid">
-                {filteredItems.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="item-card"
-                    onClick={() => handleItemClick(item)}
-                  >
-                    <div className="item-type-icon" style={{ backgroundColor: getItemTypeColor(item.type) }}>
-                      {ItemTypes.find(t => t.name === item.type)?.icon}
-                    </div>
-                    <div className="item-info">
-                      <h3 className="item-name">{item.name}</h3>
-                      <p className="item-description">{item.description}</p>
-                      <p className="item-date">{formatDate(item.createdAt)}</p>
-                    </div>
-                    <button 
-                      className="item-delete"
-                      onClick={(e) => handleDeleteItem(item.id, e)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No items found. Add a new item to get started.</p>
-              </div>
-            )}
-          </div>
         </>
       )}
       
-      {/* Add Item Form Modal */}
       {showItemForm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Add New Item</h2>
+            <h2>Upload File</h2>
             <form onSubmit={handleAddItem}>
               <div className="form-group">
-                <label>Name</label>
+                <label>File</label>
                 <input
-                  type="text"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                  type="file"
+                  onChange={handleFileChange}
                   required
                 />
               </div>
-              
               <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={newItem.description}
-                  onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                <label>Name (optional)</label>
+                <input
+                  type="text"
+                  value={newItem.name}
+                  onChange={handleNameChange}
+                  placeholder="File name (will use filename if empty)"
                 />
               </div>
-              
               <div className="form-group">
-                <label>Type</label>
-                <select
-                  value={newItem.type}
-                  onChange={(e) => setNewItem({...newItem, type: e.target.value})}
-                >
-                  {ItemTypes.map((type) => (
-                    <option key={type.name} value={type.name}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
+                <label>Description (optional)</label>
+                <textarea
+                  value={newItem.description}
+                  onChange={handleDescriptionChange}
+                  placeholder="Add a description..."
+                />
               </div>
-              
               <div className="form-actions">
-                <button type="button" onClick={() => setShowItemForm(false)}>
-                  Cancel
-                </button>
-                <button type="submit">Add Item</button>
+                <button type="button" onClick={() => setShowItemForm(false)}>Cancel</button>
+                <button type="submit">Upload</button>
               </div>
             </form>
           </div>
         </div>
       )}
       
-      {/* Add Folder Form Modal */}
       {showFolderForm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Add New Folder</h2>
+            <h2>Create Folder</h2>
             <form onSubmit={handleAddFolder}>
               <div className="form-group">
-                <label>Name</label>
+                <label>Folder Name</label>
                 <input
                   type="text"
                   value={newFolder.name}
-                  onChange={(e) => setNewFolder({...newFolder, name: e.target.value})}
+                  onChange={handleFolderNameChange}
+                  placeholder="Enter folder name"
                   required
                 />
               </div>
-              
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={newFolder.description}
-                  onChange={(e) => setNewFolder({...newFolder, description: e.target.value})}
-                />
-              </div>
-              
               <div className="form-actions">
-                <button type="button" onClick={() => setShowFolderForm(false)}>
-                  Cancel
-                </button>
-                <button type="submit">Add Folder</button>
+                <button type="button" onClick={() => setShowFolderForm(false)}>Cancel</button>
+                <button type="submit">Create</button>
               </div>
             </form>
           </div>

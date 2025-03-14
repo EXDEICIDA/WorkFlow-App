@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from Classes.Tasks import TaskManager
 from Classes.Scripts import ScriptsManager
+from Classes.Items import ItemsManager
 from auth.AuthConfig import Auth
 
 app = Flask(__name__)
@@ -10,6 +11,7 @@ CORS(app)
 # Initializing The Manager Classes 
 task_manager = TaskManager()
 script_manager = ScriptsManager()
+items_manager = ItemsManager()
 auth_manager = Auth()
 
 # Token refresh endpoint
@@ -187,6 +189,98 @@ def update_script_language(script_id):
 
 
    
+# Items operations routes
+@app.route('/api/items/folder', methods=['POST'])
+@Auth.auth_required
+def create_folder():
+    try:
+        data = request.get_json()
+        if not data or not data.get('name'):
+            return jsonify({"error": "Folder name is required"}), 400
+
+        folder = items_manager.create_folder(
+            name=data.get('name'),
+            parent_id=data.get('parent_id'),
+            user_id=request.user.id
+        )
+        return jsonify(folder), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/items/file', methods=['POST'])
+@Auth.auth_required
+def create_file():
+    try:
+        data = request.get_json()
+        if not data or not data.get('name') or not data.get('file_url'):
+            return jsonify({"error": "File name and URL are required"}), 400
+
+        file = items_manager.create_file(
+            name=data.get('name'),
+            file_type=data.get('file_type'),
+            file_url=data.get('file_url'),
+            parent_id=data.get('parent_id'),
+            user_id=request.user.id,
+            size=data.get('size')
+        )
+        return jsonify(file), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/items', methods=['GET'])
+@Auth.auth_required
+def get_items():
+    try:
+        parent_id = request.args.get('parent_id', None)
+        items = items_manager.fetch_items(user_id=request.user.id, parent_id=parent_id)
+        return jsonify(items), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/items/<int:item_id>', methods=['DELETE'])
+@Auth.auth_required
+def delete_item(item_id):
+    try:
+        result = items_manager.delete_item(item_id, user_id=request.user.id)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/items/<int:item_id>/move', methods=['PUT'])
+@Auth.auth_required
+def move_item(item_id):
+    try:
+        data = request.get_json()
+        if not data or 'new_parent_id' not in data:
+            return jsonify({"error": "New parent ID is required"}), 400
+
+        item = items_manager.move_item(
+            item_id=item_id,
+            new_parent_id=data['new_parent_id'],
+            user_id=request.user.id
+        )
+        return jsonify(item), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/items/<int:item_id>/rename', methods=['PUT'])
+@Auth.auth_required
+def rename_item(item_id):
+    try:
+        data = request.get_json()
+        if not data or 'new_name' not in data:
+            return jsonify({"error": "New name is required"}), 400
+
+        item = items_manager.rename_item(
+            item_id=item_id,
+            new_name=data['new_name'],
+            user_id=request.user.id
+        )
+        return jsonify(item), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # Auth Routes/Endpoints For User Authentication
 
 @app.route('/api/auth/register', methods=['POST'])
