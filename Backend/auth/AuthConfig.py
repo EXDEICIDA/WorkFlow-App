@@ -79,19 +79,30 @@ class Auth:
 
     @staticmethod
     def get_user(user_id: str):
-        """Fetches user details from the database."""
+        """Fetches user details from the current authenticated session."""
         client: Client = DataConfig.get_client()
 
-        response = client.table("users").select("*").eq("id", user_id).execute()
-
-        if hasattr(response, 'error') and response.error:
-            return {"error": str(response.error)}
-
-        user_data = response.data
-        if not user_data:
-            return {"error": "User not found."}
-
-        return {"user": user_data[0]}
+        try:
+            # Get the current user from the session
+            # This uses the user's own token, not admin privileges
+            current_user = client.auth.get_user()
+            
+            if not current_user or not current_user.user:
+                return {"error": "User not found or not authenticated."}
+                
+            user = current_user.user
+            
+            # Extract user data
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.user_metadata.get("full_name", ""),
+                "created_at": user.created_at
+            }
+            
+            return {"user": user_data}
+        except Exception as e:
+            return {"error": f"Failed to fetch user data: {str(e)}"}
 
     @staticmethod
     def logout():

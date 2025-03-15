@@ -341,12 +341,18 @@ def logout_user():
 @Auth.auth_required
 def get_user():
     try:
-        result = auth_manager.get_user(request.user.id)
+        # Use the user object that was added to the request by the auth_required decorator
+        user = request.user
         
-        if "error" in result:
-            return jsonify(result), 400
-            
-        return jsonify(result), 200
+        # Format the user data to return to the client
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.user_metadata.get("full_name", ""),
+            "created_at": user.created_at
+        }
+        
+        return jsonify({"user": user_data}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

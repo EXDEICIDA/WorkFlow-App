@@ -1,26 +1,84 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import "./ProfilePage.css";
+import { useAuth } from "../context/AuthContext";
 
 const ProfilePage = () => {
+  const { currentUser, authTokens } = useAuth();
+  const [profileData, setProfileData] = useState({
+    name: "Loading...",
+    email: "Loading..."
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!currentUser || !authTokens) {
+        setError("You must be logged in to view your profile");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8080/api/auth/user", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authTokens.access_token}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Extract user data from the response
+          const userData = data.user;
+          
+          setProfileData({
+            name: userData.full_name || currentUser.email.split('@')[0],
+            email: userData.email
+          });
+        } else {
+          setError(data.error || "Failed to fetch profile data");
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        setError("An error occurred while fetching your profile data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [currentUser, authTokens]);
+
   return (
     <div className="profile-container">
       <h1>Your profile</h1>
 
-      <div className="profile-section">
-        <div className="profile-section-content">
-          <h2>Name</h2>
-          <h3>John Doe</h3>
-        </div>
-        <button className="settings-button secondary-button">Change</button>
-      </div>
+      {loading ? (
+        <div className="loading-indicator">Loading profile data...</div>
+      ) : error ? (
+        <div className="error-message">{error}</div>
+      ) : (
+        <>
+          <div className="profile-section">
+            <div className="profile-section-content">
+              <h2>Name</h2>
+              <h3>{profileData.name}</h3>
+            </div>
+            <button className="settings-button secondary-button">Change</button>
+          </div>
 
-      <div className="profile-section">
-        <div className="profile-section-content">
-          <h2>Email</h2>
-          <h3>example@gmail.com</h3>
-        </div>
-        <button className="settings-button secondary-button">Change</button>
-      </div>
+          <div className="profile-section">
+            <div className="profile-section-content">
+              <h2>Email</h2>
+              <h3>{profileData.email}</h3>
+            </div>
+            <button className="settings-button secondary-button">Change</button>
+          </div>
+        </>
+      )}
 
       <div className="profile-section">
         <div className="profile-section-content">

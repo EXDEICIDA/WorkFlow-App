@@ -84,3 +84,18 @@ body[data-sidebar="collapsed"] .profile-container {
 .danger-button:hover {
   background-color: #333;
 }
+
+/* Loading and Error States */
+.loading-indicator {
+  padding: 1rem 0;
+  color: #888;
+  font-style: italic;
+  border-top: 1px solid #333;
+}
+
+.error-message {
+  padding: 1rem 0;
+  color: #ff4444;
+  border-top: 1px solid #333;
+  margin-bottom: 1rem;
+}
