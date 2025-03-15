@@ -14,7 +14,8 @@ class ItemsManager:
                 "type": "folder"
             }
             
-            response = self._client.table('items').insert(folder_data).execute()
+            # Make sure we're using the authenticated client
+            response = self._client.from_('items').insert(folder_data).execute()
             
             if not response.data:
                 raise Exception("Folder creation failed")
@@ -37,7 +38,8 @@ class ItemsManager:
                 "size": size
             }
             
-            response = self._client.table('items').insert(file_data).execute()
+            # Make sure we're using the authenticated client
+            response = self._client.from_('items').insert(file_data).execute()
             
             if not response.data:
                 raise Exception("File creation failed")
@@ -50,7 +52,7 @@ class ItemsManager:
     def fetch_items(self, user_id, parent_id=None):
         """Fetch all items (files and folders) from a specific folder for a user."""
         try:
-            query = self._client.table('items').select('*').eq('user_id', user_id)
+            query = self._client.from_('items').select('*').eq('user_id', user_id)
             
             if parent_id is not None:
                 query = query.eq('parent_id', parent_id)
@@ -67,7 +69,7 @@ class ItemsManager:
         """Delete an item (file or folder) from the database."""
         try:
             # First check if it's a folder and has children
-            children = self._client.table('items').select('id').eq('parent_id', item_id).execute()
+            children = self._client.from_('items').select('id').eq('parent_id', item_id).execute()
             
             if children.data:
                 # Recursively delete all children
@@ -75,7 +77,7 @@ class ItemsManager:
                     self.delete_item(child['id'], user_id)
             
             # Delete the item itself
-            response = self._client.table('items').delete().eq('id', item_id).eq('user_id', user_id).execute()
+            response = self._client.from_('items').delete().eq('id', item_id).eq('user_id', user_id).execute()
             
             if not response.data:
                 raise Exception("Item not found or already deleted")
@@ -90,7 +92,7 @@ class ItemsManager:
         try:
             update_data = {"parent_id": new_parent_id}
             
-            response = self._client.table('items').update(update_data)\
+            response = self._client.from_('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
                 .execute()
@@ -108,7 +110,7 @@ class ItemsManager:
         try:
             update_data = {"name": new_name}
             
-            response = self._client.table('items').update(update_data)\
+            response = self._client.from_('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
                 .execute()
