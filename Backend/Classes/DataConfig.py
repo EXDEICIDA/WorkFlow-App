@@ -23,3 +23,14 @@ class DataConfig:
             cls._client = create_client(url, key)
         
         return cls._client
+        
+    @classmethod
+    def get_auth_client(cls, auth_token=None) -> Client:
+        """Get a client with auth token for RLS policies."""
+        client = cls.get_client()
+        
+        if auth_token:
+            # Set the auth header for RLS policies
+            client.postgrest.auth(auth_token)
+            
+        return client

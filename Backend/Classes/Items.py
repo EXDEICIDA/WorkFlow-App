@@ -3,7 +3,12 @@ from Classes.DataConfig import DataConfig
 class ItemsManager:
     def __init__(self):
         self._client = DataConfig.get_client()
-
+        self._auth_token = None
+        
+    def set_auth_token(self, auth_token):
+        """Set the auth token for authenticated requests."""
+        self._auth_token = auth_token
+        
     def create_folder(self, name, parent_id, user_id):
         """Create a new folder in the database."""
         try:
@@ -14,8 +19,13 @@ class ItemsManager:
                 "type": "folder"
             }
             
-            # Make sure we're using the authenticated client
-            response = self._client.from_('items').insert(folder_data).execute()
+            # Ensure user_id is properly set for RLS
+            if not user_id:
+                raise Exception("User ID is required for folder creation")
+                
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            response = client.table('items').insert(folder_data).execute()
             
             if not response.data:
                 raise Exception("Folder creation failed")
@@ -38,8 +48,9 @@ class ItemsManager:
                 "size": size
             }
             
-            # Make sure we're using the authenticated client
-            response = self._client.from_('items').insert(file_data).execute()
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            response = client.table('items').insert(file_data).execute()
             
             if not response.data:
                 raise Exception("File creation failed")
@@ -52,7 +63,9 @@ class ItemsManager:
     def fetch_items(self, user_id, parent_id=None):
         """Fetch all items (files and folders) from a specific folder for a user."""
         try:
-            query = self._client.from_('items').select('*').eq('user_id', user_id)
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            query = client.table('items').select('*').eq('user_id', user_id)
             
             if parent_id is not None:
                 query = query.eq('parent_id', parent_id)
@@ -68,8 +81,11 @@ class ItemsManager:
     def delete_item(self, item_id, user_id):
         """Delete an item (file or folder) from the database."""
         try:
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            
             # First check if it's a folder and has children
-            children = self._client.from_('items').select('id').eq('parent_id', item_id).execute()
+            children = client.table('items').select('id').eq('parent_id', item_id).execute()
             
             if children.data:
                 # Recursively delete all children
@@ -77,7 +93,7 @@ class ItemsManager:
                     self.delete_item(child['id'], user_id)
             
             # Delete the item itself
-            response = self._client.from_('items').delete().eq('id', item_id).eq('user_id', user_id).execute()
+            response = client.table('items').delete().eq('id', item_id).eq('user_id', user_id).execute()
             
             if not response.data:
                 raise Exception("Item not found or already deleted")
@@ -92,7 +108,9 @@ class ItemsManager:
         try:
             update_data = {"parent_id": new_parent_id}
             
-            response = self._client.from_('items').update(update_data)\
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            response = client.table('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
                 .execute()
@@ -110,7 +128,9 @@ class ItemsManager:
         try:
             update_data = {"name": new_name}
             
-            response = self._client.from_('items').update(update_data)\
+            # Use auth client for RLS-protected operations
+            client = DataConfig.get_auth_client(self._auth_token)
+            response = client.table('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
                 .execute()
