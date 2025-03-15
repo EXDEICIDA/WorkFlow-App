@@ -1,7 +1,7 @@
 // React is needed for JSX
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { Folder, File, Plus, Search, ChevronDown, Trash2, Edit, ChevronLeft, Upload } from "lucide-react";
+import { Folder, File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash } from "lucide-react";
 import "./Items.css";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,12 +9,12 @@ const API_BASE_URL = "http://localhost:8080/api/items";
 
 // Define item types for file type detection
 const ItemTypes = [
-  { name: "Document", icon: <File size={16} />, color: "#4285F4" },
-  { name: "Spreadsheet", icon: <File size={16} />, color: "#0F9D58" },
-  { name: "Image", icon: <File size={16} />, color: "#DB4437" },
-  { name: "Video", icon: <File size={16} />, color: "#F4B400" },
-  { name: "Audio", icon: <File size={16} />, color: "#AB47BC" },
-  { name: "Archive", icon: <File size={16} />, color: "#795548" },
+  { name: "Document", icon: <FileText size={16} />, color: "#4285F4" },
+  { name: "Spreadsheet", icon: <Table size={16} />, color: "#0F9D58" },
+  { name: "Image", icon: <Image size={16} />, color: "#DB4437" },
+  { name: "Video", icon: <Video size={16} />, color: "#F4B400" },
+  { name: "Audio", icon: <Music size={16} />, color: "#AB47BC" },
+  { name: "Archive", icon: <Archive size={16} />, color: "#795548" },
   { name: "Other", icon: <File size={16} />, color: "#607D8B" },
 ];
 
@@ -332,7 +332,7 @@ const Items = () => {
     });
   };
 
-  const getItemTypeColor = (fileType) => {
+  const getItemTypeIcon = (fileType) => {
     let itemTypeName = "Other";
     
     if (fileType) {
@@ -353,7 +353,27 @@ const Items = () => {
     }
     
     const itemType = ItemTypes.find(type => type.name === itemTypeName);
-    return itemType ? itemType.color : "#607D8B";
+    return itemType ? itemType.icon : <File size={24} />;
+  };
+
+  // Format date to show relative time for recent dates and full date for older ones
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 1) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else if (diffDays < 30) {
+      return `${Math.floor(diffDays / 7)} weeks ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
   };
 
   const filteredItems = items.filter(item => {
@@ -375,14 +395,14 @@ const Items = () => {
             Back
           </button>
           <div className="item-details">
-            <div className="item-icon" style={{ backgroundColor: getItemTypeColor(selectedItem.file_type) }}>
-              <File size={32} color="#fff" />
+            <div className="item-icon">
+              {getItemTypeIcon(selectedItem.file_type)}
             </div>
             <div className="item-info">
               <h2>{selectedItem.name}</h2>
               <p>Type: {selectedItem.file_type || "Unknown"}</p>
               <p>Size: {selectedItem.size ? `${Math.round(selectedItem.size / 1024)} KB` : "Unknown"}</p>
-              <p>Created: {new Date(selectedItem.created_at).toLocaleString()}</p>
+              <p>Created: {formatDate(selectedItem.created_at)}</p>
               {selectedItem.description && <p>Description: {selectedItem.description}</p>}
             </div>
           </div>
@@ -392,7 +412,7 @@ const Items = () => {
               Edit
             </button>
             <button className="action-button" onClick={(e) => handleDeleteItem(selectedItem.id, e)}>
-              <Trash2 size={20} />
+              <Trash size={20} />
               Delete
             </button>
             <button className="action-button">
@@ -400,23 +420,13 @@ const Items = () => {
               Download
             </button>
           </div>
-          <div className="item-preview">
-            {selectedItem.file_type && ['jpg', 'jpeg', 'png', 'gif'].includes(selectedItem.file_type.toLowerCase()) ? (
-              <img src={selectedItem.file_url} alt={selectedItem.name} className="preview-image" />
-            ) : (
-              <div className="no-preview">
-                <File size={64} />
-                <p>No preview available</p>
-              </div>
-            )}
-          </div>
         </div>
       ) : (
         <>
           <div className="header-container">
             <div className="header-title">
               {currentFolder ? (
-                <div className="breadcrumb">
+                <div className="folder-navigation">
                   <button className="back-button" onClick={handleBackClick}>
                     <ChevronLeft size={20} />
                   </button>
@@ -427,23 +437,25 @@ const Items = () => {
               )}
             </div>
             <div className="header-actions">
-              <div className="search-container">
+              <div className="search-wrapper">
                 <input
                   type="text"
-                  placeholder="Search files..."
+                  className="search-input"
+                  placeholder="Search files and folders..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="search-input"
                 />
-                <Search size={20} className="search-icon" />
               </div>
-              <div className="filter-container">
-                <div className="filter-dropdown">
+              <div className="type-filter-wrapper">
+                <div className="dropdown">
                   <button
-                    className="filter-button"
+                    className="dropdown-toggle"
                     onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   >
-                    {selectedType || "All Types"}
+                    <div className="dropdown-label">
+                      <Filter size={16} />
+                      {selectedType || "All Types"}
+                    </div>
                     <ChevronDown size={16} />
                   </button>
                   {showTypeDropdown && (
@@ -462,21 +474,21 @@ const Items = () => {
                           key={type.name}
                           className="dropdown-item"
                           onClick={() => {
-                            setSelectedType(type.name);
+                            setSelectedType(type.name.toLowerCase());
                             setShowTypeDropdown(false);
                           }}
                         >
-                          <div className="type-icon" style={{ backgroundColor: type.color }}>
-                            {type.icon}
-                          </div>
+                          {type.icon}
                           {type.name}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
+              </div>
+              <div className="date-filter-wrapper">
                 <select
-                  className="date-sort"
+                  className="date-filter"
                   value={dateSort}
                   onChange={handleDateSortChange}
                 >
@@ -485,7 +497,7 @@ const Items = () => {
                 </select>
               </div>
               <div className="add-buttons">
-                <button className="add-button" onClick={() => setShowFolderForm(true)}>
+                <button className="add-button folder-button" onClick={() => setShowFolderForm(true)}>
                   <Folder size={16} />
                   New Folder
                 </button>
@@ -497,7 +509,12 @@ const Items = () => {
             </div>
           </div>
           
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="error-message">
+              <AlertCircle size={20} />
+              {error}
+            </div>
+          )}
           
           {isLoading ? (
             <div className="loading-container">
@@ -517,17 +534,17 @@ const Items = () => {
                         onClick={() => handleFolderClick(folder)}
                       >
                         <div className="folder-icon">
-                          <Folder size={24} />
+                          <Folder size={40} />
                         </div>
                         <div className="folder-info">
-                          <h3>{folder.name}</h3>
-                          <p>{new Date(folder.created_at).toLocaleDateString()}</p>
+                          <h3 className="folder-name">{folder.name}</h3>
+                          <p className="folder-date">{formatDate(folder.created_at)}</p>
                         </div>
                         <button
                           className="delete-button"
                           onClick={(e) => handleDeleteFolder(folder.id, e)}
                         >
-                          <Trash2 size={16} />
+                          <Trash size={16} />
                         </button>
                       </div>
                     ))}
@@ -545,22 +562,19 @@ const Items = () => {
                         className="item-card"
                         onClick={() => handleItemClick(item)}
                       >
-                        <div
-                          className="item-icon"
-                          style={{ backgroundColor: getItemTypeColor(item.file_type) }}
-                        >
-                          <File size={24} color="#fff" />
+                        <div className="item-icon">
+                          {getItemTypeIcon(item.file_type)}
                         </div>
                         <div className="item-info">
-                          <h3>{item.name}</h3>
-                          <p>{item.file_type || "Unknown"}</p>
-                          <p>{item.size ? `${Math.round(item.size / 1024)} KB` : "Unknown"}</p>
+                          <h3 className="item-name">{item.name}</h3>
+                          <p className="item-type">{item.file_type || "Unknown"}</p>
+                          <p className="item-date">{formatDate(item.created_at)}</p>
                         </div>
                         <button
                           className="delete-button"
                           onClick={(e) => handleDeleteItem(item.id, e)}
                         >
-                          <Trash2 size={16} />
+                          <Trash size={16} />
                         </button>
                       </div>
                     ))}
