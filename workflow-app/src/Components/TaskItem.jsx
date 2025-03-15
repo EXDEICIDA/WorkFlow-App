@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./TaskItem.css";
 import PropTypes from "prop-types";
+import { apiRequest } from "../services/apiService";
 
 // TaskItem component
 
@@ -13,13 +14,10 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
 
   const handleEdit = async () => {
     try {
-      const response = await fetch(
+      const response = await apiRequest(
         `http://localhost:8080/api/tasks/${task.id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({ title: editedTitle }),
         }
       );
@@ -43,13 +41,10 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
       // When checked, move to Completed, when unchecked move back to Pending
       const newStatus = task.status === "Completed" ? "Pending" : "Completed";
 
-      const response = await fetch(
+      const response = await apiRequest(
         `http://localhost:8080/api/tasks/${task.id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({ status: newStatus }),
         }
       );
@@ -144,13 +139,10 @@ const TaskItem = ({ task, onDelete, onUpdate }) => {
                 const newStatus = statusProgression[task.status];
 
                 try {
-                  const response = await fetch(
+                  const response = await apiRequest(
                     `http://localhost:8080/api/tasks/${task.id}/status`,
                     {
                       method: "PUT",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
                       body: JSON.stringify({ status: newStatus }),
                     }
                   );
