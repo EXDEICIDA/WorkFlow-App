@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./TaskItem.css";
 import PropTypes from "prop-types";
 
+// TaskItem component
+
 const TaskItem = ({ task, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
