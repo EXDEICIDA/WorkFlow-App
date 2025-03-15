@@ -495,9 +495,10 @@ body[data-sidebar="collapsed"] .items-container {
   border: none;
   border-radius: 4px;
   color: white;
-  resize: vertical;
+  resize: none;
   min-height: 100px;
-  max-height: 200px;
+  height: 100px;
+  overflow-y: auto;
 }
 
 .form-group input:focus,
