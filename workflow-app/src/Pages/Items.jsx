@@ -1,7 +1,7 @@
 // React is needed for JSX
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { Folder, File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash } from "lucide-react";
+import { File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash } from "lucide-react";
 import "./Items.css";
 import { useAuth } from "../context/AuthContext";
 
@@ -9,13 +9,13 @@ const API_BASE_URL = "http://localhost:8080/api/items";
 
 // Define item types for file type detection
 const ItemTypes = [
-  { name: "Document", icon: <FileText size={16} />, color: "#4285F4" },
-  { name: "Spreadsheet", icon: <Table size={16} />, color: "#0F9D58" },
-  { name: "Image", icon: <Image size={16} />, color: "#DB4437" },
-  { name: "Video", icon: <Video size={16} />, color: "#F4B400" },
-  { name: "Audio", icon: <Music size={16} />, color: "#AB47BC" },
-  { name: "Archive", icon: <Archive size={16} />, color: "#795548" },
-  { name: "Other", icon: <File size={16} />, color: "#607D8B" },
+  { name: "Document", icon: <FileText size={24} />, color: "#4285F4" },
+  { name: "Spreadsheet", icon: <Table size={24} />, color: "#0F9D58" },
+  { name: "Image", icon: <Image size={24} />, color: "#DB4437" },
+  { name: "Video", icon: <Video size={24} />, color: "#F4B400" },
+  { name: "Audio", icon: <Music size={24} />, color: "#AB47BC" },
+  { name: "Archive", icon: <Archive size={24} />, color: "#795548" },
+  { name: "Other", icon: <File size={24} />, color: "#607D8B" },
 ];
 
 const Items = () => {
@@ -353,7 +353,7 @@ const Items = () => {
     }
     
     const itemType = ItemTypes.find(type => type.name === itemTypeName);
-    return itemType ? itemType.icon : <File size={24} />;
+    return itemType ? itemType.icon : <File size={32} />;
   };
 
   // Format date to show relative time for recent dates and full date for older ones
@@ -498,7 +498,9 @@ const Items = () => {
               </div>
               <div className="add-buttons">
                 <button className="add-button folder-button" onClick={() => setShowFolderForm(true)}>
-                  <Folder size={16} />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" width="16" height="16">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                  </svg>
                   New Folder
                 </button>
                 <button className="add-button" onClick={() => setShowItemForm(true)}>
@@ -533,18 +535,22 @@ const Items = () => {
                         className="folder-card"
                         onClick={() => handleFolderClick(folder)}
                       >
-                        <div className="folder-icon">
-                          <Folder size={40} />
+                        <div className="folder-header">
+                          <div className="folder-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" width="40" height="40">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                            </svg>
+                          </div>
+                          <h3 className="folder-name">{folder.name}</h3>
                         </div>
                         <div className="folder-info">
-                          <h3 className="folder-name">{folder.name}</h3>
                           <p className="folder-date">{formatDate(folder.created_at)}</p>
                         </div>
                         <button
                           className="delete-button"
                           onClick={(e) => handleDeleteFolder(folder.id, e)}
                         >
-                          <Trash size={16} />
+                          <Trash size={18} />
                         </button>
                       </div>
                     ))}
