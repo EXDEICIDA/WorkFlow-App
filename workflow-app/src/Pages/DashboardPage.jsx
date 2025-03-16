@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiRequest } from "../services/apiService";
 import Calendar from "../Components/Calendar/Calendar";
 import "./DashboardPage.css";
 
 const DashboardPage = () => {
-  const [stats] = useState({
-    totalTasks: 12,
-    completedTasks: 8,
+  const [stats, setStats] = useState({
+    totalTasks: 0,
+    completedTasks: 0,
     activeProjects: 3,
     upcomingDeadlines: 2,
   });
@@ -16,6 +17,35 @@ const DashboardPage = () => {
     { type: "comment", text: "Comment added to Project X", time: "Yesterday" },
     { type: "update", text: "Updated deadline for Task Y", time: "2 days ago" },
   ]);
+
+  // Fetch tasks and calculate statistics
+  const fetchTaskStats = async () => {
+    try {
+      // The API endpoint already filters by the authenticated user through the auth middleware
+      const response = await apiRequest("http://localhost:8080/api/tasks");
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+
+      const tasks = await response.json();
+      
+      // Calculate task statistics
+      const completedTasks = tasks.filter(task => task.status === "Completed").length;
+      const totalTasks = tasks.length;
+      
+      setStats(prevStats => ({
+        ...prevStats,
+        totalTasks,
+        completedTasks,
+      }));
+    } catch (error) {
+      console.error("Error fetching task statistics:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTaskStats();
+  }, []);
 
   return (
     <div className="dashboard-container">
