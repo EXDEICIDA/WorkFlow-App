@@ -2,10 +2,12 @@
 import { useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import PropTypes from "prop-types";
+import { useAuth } from "../context/AuthContext";
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const isAuthPage = location.pathname === "/";
+  const { currentUser } = useAuth();
+  const isAuthPage = location.pathname === "/" || location.pathname === "/login" || !currentUser;
 
   return (
     <div className="app">
