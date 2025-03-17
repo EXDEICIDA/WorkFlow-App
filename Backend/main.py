@@ -368,6 +368,7 @@ def login_user():
 @Auth.auth_required
 def logout_user():
     try:
+        # Call the logout method from Auth class
         result = auth_manager.logout()
         
         if "error" in result:

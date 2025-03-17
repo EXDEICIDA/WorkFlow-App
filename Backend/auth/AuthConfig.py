@@ -108,12 +108,17 @@ class Auth:
     def logout():
         """Logs out the user and ends the session."""
         client: Client = DataConfig.get_client()
-        response = client.auth.sign_out()
-
-        if hasattr(response, 'error') and response.error:
-            return {"error": str(response.error)}
-
-        return {"success": "User logged out successfully."}
+        
+        try:
+            # Sign out the user
+            response = client.auth.sign_out()
+            
+            if hasattr(response, 'error') and response.error:
+                return {"error": str(response.error)}
+                
+            return {"success": "User logged out successfully."}
+        except Exception as e:
+            return {"error": f"Logout failed: {str(e)}"}
 
     @staticmethod
     def delete_user(user_id: str):

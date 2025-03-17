@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import "./ProfilePage.css";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
-  const { currentUser, authTokens } = useAuth();
+  const { currentUser, authTokens, logout } = useAuth();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState({
     name: "Loading...",
     email: "Loading..."
@@ -51,6 +53,29 @@ const ProfilePage = () => {
 
     fetchUserProfile();
   }, [currentUser, authTokens]);
+
+  const handleLogout = async () => {
+    try {
+      // Call the backend logout endpoint
+      if (authTokens) {
+        await fetch("http://localhost:8080/api/auth/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authTokens.access_token}`
+          }
+        });
+      }
+      
+      // Use the logout function from AuthContext to clear local state
+      logout();
+      
+      // Redirect to login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="profile-container">
@@ -112,7 +137,12 @@ const ProfilePage = () => {
             again on each device.
           </p>
         </div>
-        <button className="settings-button secondary-button">Log out</button>
+        <button 
+          className="settings-button secondary-button"
+          onClick={handleLogout}
+        >
+          Log out
+        </button>
       </div>
 
       <div className="profile-section">
