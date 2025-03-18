@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import { Trash2, ChevronRight, Palette } from "lucide-react";
 import "./Curves.css";
@@ -18,7 +18,6 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
     '#50fa7b', // green
     '#8be9fd', // cyan
     '#bd93f9', // purple
-    
   ];
 
   const getConnectionPoint = (item, position) => {
@@ -79,27 +78,7 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
     return { cp1, cp2 };
   };
 
-  const calculateArrowPoints = (path, isStart) => {
-    const arrowSize = 10;
-    const point = isStart ? path[0] : path[path.length - 1];
-    const prevPoint = isStart ? path[1] : path[path.length - 2];
-    
-    const angle = Math.atan2(point.y - prevPoint.y, point.x - prevPoint.x);
-    
-    return [
-      {
-        x: point.x - arrowSize * Math.cos(angle - Math.PI / 6),
-        y: point.y - arrowSize * Math.sin(angle - Math.PI / 6)
-      },
-      { x: point.x, y: point.y },
-      {
-        x: point.x - arrowSize * Math.cos(angle + Math.PI / 6),
-        y: point.y - arrowSize * Math.sin(angle + Math.PI / 6)
-      }
-    ];
-  };
-
-  const handleConnectionClick = (e, index, path) => {
+  const handleConnectionClick = (e, index) => {
     e.stopPropagation();
     
     // Get the SVG container's position
@@ -141,6 +120,58 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
     setSelectedConnection(null);
   };
 
+  // Function to calculate the arrow points for drawing custom arrows
+  const calculateArrowPoints = (start, end, controlPoint1, controlPoint2) => {
+    // For a bezier curve, we need to approximate the tangent at the endpoints
+    // We'll use the direction from the control point to the endpoint for better approximation
+    
+    // For end arrow (pointing to end point)
+    const endDx = end.x - controlPoint2.x;
+    const endDy = end.y - controlPoint2.y;
+    const endAngle = Math.atan2(endDy, endDx);
+    
+    // For start arrow (pointing away from start point)
+    const startDx = controlPoint1.x - start.x;
+    const startDy = controlPoint1.y - start.y;
+    const startAngle = Math.atan2(startDy, startDx);
+    
+    const arrowSize = 12; // Slightly larger arrows for better visibility
+    
+    // Calculate end arrow points
+    const endArrow = {
+      p1: {
+        x: end.x - arrowSize * Math.cos(endAngle - Math.PI/8),
+        y: end.y - arrowSize * Math.sin(endAngle - Math.PI/8)
+      },
+      p2: {
+        x: end.x,
+        y: end.y
+      },
+      p3: {
+        x: end.x - arrowSize * Math.cos(endAngle + Math.PI/8),
+        y: end.y - arrowSize * Math.sin(endAngle + Math.PI/8)
+      }
+    };
+    
+    // Calculate start arrow points
+    const startArrow = {
+      p1: {
+        x: start.x + arrowSize * Math.cos(startAngle - Math.PI/8),
+        y: start.y + arrowSize * Math.sin(startAngle - Math.PI/8)
+      },
+      p2: {
+        x: start.x,
+        y: start.y
+      },
+      p3: {
+        x: start.x + arrowSize * Math.cos(startAngle + Math.PI/8),
+        y: start.y + arrowSize * Math.sin(startAngle + Math.PI/8)
+      }
+    };
+    
+    return { startArrow, endArrow };
+  };
+
   return (
     <>
       <svg
@@ -167,45 +198,39 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
           
           const path = `M ${start.x},${start.y} C ${cp1.x},${cp1.y} ${cp2.x},${cp2.y} ${end.x},${end.y}`;
           
+          // Calculate arrow points for custom arrows
+          const { startArrow, endArrow } = calculateArrowPoints(start, end, cp1, cp2);
+          
           return (
             <g key={index} style={{ pointerEvents: 'all', cursor: 'pointer' }}>
+              {/* Main curve path */}
               <path
                 d={path}
                 fill="none"
                 stroke={connection.color || "#6a6a6a"}
                 strokeWidth="3"
-                onClick={(e) => handleConnectionClick(e, index, path)}
+                onClick={(e) => handleConnectionClick(e, index)}
                 style={{ pointerEvents: 'all' }}
               />
+              
+              {/* End arrow (for unidirectional and bidirectional) */}
               {(connection.direction === 'unidirectional' || connection.direction === 'bidirectional') && (
-                <marker
-                  id={`arrowhead-end-${index}`}
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="9"
-                  refY="3.5"
-                  orient="auto"
-                >
-                  <polygon
-                    points="0 0, 10 3.5, 0 7"
-                    fill={connection.color || "#6a6a6a"}
-                  />
-                </marker>
+                <polygon
+                  points={`${endArrow.p1.x},${endArrow.p1.y} ${endArrow.p2.x},${endArrow.p2.y} ${endArrow.p3.x},${endArrow.p3.y}`}
+                  fill={connection.color || "#6a6a6a"}
+                  onClick={(e) => handleConnectionClick(e, index)}
+                  style={{ pointerEvents: 'all' }}
+                />
               )}
+              
+              {/* Start arrow (for bidirectional only) */}
               {connection.direction === 'bidirectional' && (
-                <marker
-                  id={`arrowhead-start-${index}`}
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="1"
-                  refY="3.5"
-                  orient="auto-start-reverse"
-                >
-                  <polygon
-                    points="10 0, 0 3.5, 10 7"
-                    fill={connection.color || "#6a6a6a"}
-                  />
-                </marker>
+                <polygon
+                  points={`${startArrow.p1.x},${startArrow.p1.y} ${startArrow.p2.x},${startArrow.p2.y} ${startArrow.p3.x},${startArrow.p3.y}`}
+                  fill={connection.color || "#6a6a6a"}
+                  onClick={(e) => handleConnectionClick(e, index)}
+                  style={{ pointerEvents: 'all' }}
+                />
               )}
             </g>
           );
@@ -241,21 +266,21 @@ const Curves = ({ connections, items, onDeleteConnection, onUpdateConnection }) 
                 onClick={() => handleDirectionChange('nondirectional')}
               >
                 <span className="menu-icon">━</span>
-                <span>Nondirectional</span>
+                <span>No Direction</span>
               </button>
               <button
                 className={`menu-item ${connections[selectedConnection]?.direction === 'unidirectional' ? 'active' : ''}`}
                 onClick={() => handleDirectionChange('unidirectional')}
               >
                 <span className="menu-icon">⟶</span>
-                <span>Unidirectional</span>
+                <span>One Direction</span>
               </button>
               <button
                 className={`menu-item ${connections[selectedConnection]?.direction === 'bidirectional' ? 'active' : ''}`}
                 onClick={() => handleDirectionChange('bidirectional')}
               >
                 <span className="menu-icon">⟷</span>
-                <span>Bidirectional</span>
+                <span>Both Directions</span>
               </button>
             </div>
           )}

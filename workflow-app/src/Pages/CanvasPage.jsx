@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import "./CanvasPage.css";
 import CanvasItem from "../Components/CanvasItem";
 import Curves from "../Components/Curves";
@@ -72,7 +72,7 @@ const CanvasPage = () => {
                 endId: itemId,
                 startPoint: connectingFrom.point,
                 endPoint: connectionPoint,
-                direction: 'unidirectional', 
+                direction: 'nondirectional', 
                 color: '#6a6a6a' 
               }]
             };
@@ -134,7 +134,7 @@ const CanvasPage = () => {
     }));
   };
 
-  const handlePan = (e) => {
+  const handlePan = useCallback((e) => {
     if (isDragging && isSpacePressed) {
       const deltaX = e.clientX - startPos.x;
       const deltaY = e.clientY - startPos.y;
@@ -144,7 +144,7 @@ const CanvasPage = () => {
       }));
       setStartPos({ x: e.clientX, y: e.clientY });
     }
-  };
+  }, [isDragging, isSpacePressed, startPos]);
 
   const handleMouseDown = (e) => {
     if (isSpacePressed) {
@@ -230,7 +230,7 @@ const CanvasPage = () => {
       window.removeEventListener("mousemove", handlePan);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, isSpacePressed]);
+  }, [isDragging, isSpacePressed, handlePan]);
 
   return (
     <div className="canvas-page">
