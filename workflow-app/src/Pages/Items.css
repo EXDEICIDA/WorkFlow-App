@@ -407,12 +407,13 @@ body[data-sidebar="collapsed"] .items-container {
 }
 
 .action-button.delete-action {
-  background-color: rgba(220, 53, 53, 0.85);
-  color: white;
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .action-button.delete-action:hover {
-  background-color: rgb(220, 38, 38);
+  background-color: rgba(220, 38, 38, 0.2);
 }
 
 .action-button svg {
