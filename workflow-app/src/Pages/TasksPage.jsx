@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useLocation } from "react-router-dom";
 import { apiRequest } from "../services/apiService";
 import "./TasksPage.css";
 import TaskForm from "../Components/TaskForm";
@@ -36,6 +37,7 @@ const TasksPage = () => {
     },
   });
   const { currentUser } = useAuth();
+  const location = useLocation();
 
   const fetchTasks = async () => {
     try {
@@ -62,6 +64,13 @@ const TasksPage = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  useEffect(() => {
+    // Check if we're coming from the dashboard "New Task" button
+    if (location.state && location.state.openTaskForm) {
+      setShowTaskForm(true);
+    }
+  }, [location]);
 
   const handleTaskSubmit = async (taskData) => {
     try {

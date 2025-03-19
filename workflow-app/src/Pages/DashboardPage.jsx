@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/apiService";
 import Calendar from "../Components/Calendar/Calendar";
 import "./DashboardPage.css";
@@ -17,6 +18,8 @@ const DashboardPage = () => {
     { type: "comment", text: "Comment added to Project X", time: "Yesterday" },
     { type: "update", text: "Updated deadline for Task Y", time: "2 days ago" },
   ]);
+
+  const navigate = useNavigate();
 
   // Fetch tasks and calculate statistics
   const fetchTaskStats = async () => {
@@ -247,7 +250,7 @@ const DashboardPage = () => {
               <h2>Quick Actions</h2>
             </div>
             <div className="quick-actions">
-              <button className="action-button primary">
+              <button className="action-button primary" onClick={() => navigate("/tasks", { state: { openTaskForm: true } })}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"

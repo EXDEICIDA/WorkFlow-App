@@ -1,7 +1,9 @@
 import { useState } from "react";
 import "./SettingsPage.css";
+import { useAuth } from "../context/AuthContext";
 
 const SettingsPage = () => {
+  const { currentUser } = useAuth();
   const [settings, setSettings] = useState({
     version: "v1.0.0",
     automaticUpdates: true,
@@ -96,7 +98,7 @@ const SettingsPage = () => {
         <div className="settings-section-content">
           <h2>Account</h2>
           <h3>Your account</h3>
-          <p>You are currently signed in as user@example.com</p>
+          <p>You are currently signed in as {currentUser ? currentUser.email : "Loading..."}</p>
         </div>
         <div className="settings-section-controls">
           <button className="settings-button secondary-button">Manage</button>
