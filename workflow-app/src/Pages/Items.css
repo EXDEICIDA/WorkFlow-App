@@ -260,37 +260,6 @@ body[data-sidebar="collapsed"] .items-container {
   margin: 0;
 }
 
-.delete-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(255, 0, 0, 0.1);
-  border: none;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.item-card:hover .delete-button,
-.folder-card:hover .delete-button {
-  opacity: 1;
-}
-
-.delete-button:hover {
-  background-color: rgba(255, 0, 0, 0.2);
-}
-
-.delete-button svg {
-  color: #ff4d4d;
-}
-
 .item-card {
   background-color: #2a2a2a;
   border-radius: 6px;
@@ -417,38 +386,44 @@ body[data-sidebar="collapsed"] .items-container {
 .item-actions {
   display: flex;
   gap: 1rem;
+  margin-top: 1.5rem;
 }
 
-.edit-button,
-.delete-button {
+.action-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
   transition: background-color 0.2s;
 }
 
-.edit-button {
-  background-color: #2a5a8c;
+.action-button:hover {
+  background-color: #444;
+}
+
+.action-button.delete-action {
+  background-color: rgba(220, 53, 53, 0.85);
   color: white;
-  border: none;
 }
 
-.edit-button:hover {
-  background-color: #336699;
+.action-button.delete-action:hover {
+  background-color: rgb(220, 38, 38);
 }
 
-.delete-button {
-  background-color: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-  border: 1px solid #dc2626;
+.action-button svg {
+  width: 20px;
+  height: 20px;
 }
 
-.delete-button:hover {
-  background-color: rgba(220, 38, 38, 0.2);
+.delete-menu-item svg {
+  color: #ff4d4d;
+  width: 16px;
+  height: 16px;
 }
 
 .modal-overlay {
@@ -575,6 +550,119 @@ body[data-sidebar="collapsed"] .items-container {
   }
 }
 
+.item-card::after,
+.folder-card::after {
+  content: "";
+  display: none;
+}
+
+.context-menu {
+  background-color: #2a2a2a;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 150px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeIn 0.1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.context-menu-item {
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #fff;
+}
+
+.context-menu-item:hover {
+  background-color: #333;
+}
+
+.delete-menu-item {
+  color: #ff4d4d;
+}
+
+.delete-menu-item:hover {
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+.item-details {
+  display: flex;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+}
+
+.item-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Delete confirmation modal styling */
+.delete-confirm-modal {
+  max-width: 400px;
+  text-align: center;
+}
+
+.delete-warning {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.delete-confirm-button {
+  background-color: #dc2626 !important;
+  color: white !important;
+}
+
+.delete-confirm-button:hover {
+  background-color: #b91c1c !important;
+}
+
+/* Improved delete button styling */
+.item-delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(220, 53, 53, 0.85);
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  z-index: 10;
+  padding: 0;
+}
+
+.item-delete-button:hover {
+  background-color: rgb(220, 38, 38);
+  transform: scale(1.05);
+}
+
+.item-delete-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.5);
+}
+
+.item-delete-button svg {
+  color: #fff;
+  width: 16px;
+  height: 16px;
+}
+
 @media (max-width: 768px) {
   .items-container {
     margin-left: 0;
@@ -606,35 +694,4 @@ body[data-sidebar="collapsed"] .items-container {
   .items-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
-}
-
-.item-details {
-  display: flex;
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  padding: 2rem;
-  margin: 1.5rem 0;
-}
-
-.item-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.action-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.action-button:hover {
-  background-color: #444;
 }

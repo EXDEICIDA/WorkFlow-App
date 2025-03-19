@@ -41,6 +41,9 @@ const Items = () => {
   const [showFolderForm, setShowFolderForm] = useState(false);
   const [currentFolder, setCurrentFolder] = useState(null);
   const [error, setError] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, item: null });
 
   // Wrap axiosConfig in useMemo to prevent dependency cycle
   const axiosConfig = useMemo(() => ({
@@ -198,7 +201,9 @@ const Items = () => {
   };
 
   const handleDeleteItem = async (itemId, event) => {
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
     try {
       setIsLoading(true);
       setError(null);
@@ -212,6 +217,10 @@ const Items = () => {
       if (selectedItem && selectedItem.id === itemId) {
         setSelectedItem(null);
       }
+      
+      // Clear delete confirmation state
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
     } catch (error) {
       console.error("Error deleting item:", error);
       setError(`Failed to delete item: ${error.response?.data?.error || error.message}`);
@@ -221,7 +230,9 @@ const Items = () => {
   };
 
   const handleDeleteFolder = async (folderId, event) => {
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
     try {
       setIsLoading(true);
       setError(null);
@@ -235,6 +246,10 @@ const Items = () => {
       if (currentFolder && currentFolder.id === folderId) {
         setCurrentFolder(null);
       }
+      
+      // Clear delete confirmation state
+      setShowDeleteConfirm(false);
+      setItemToDelete(null);
     } catch (error) {
       console.error("Error deleting folder:", error);
       setError(`Failed to delete folder: ${error.response?.data?.error || error.message}`);
@@ -242,47 +257,46 @@ const Items = () => {
       setIsLoading(false);
     }
   };
-
-  const handleRenameItem = async (itemId, newName) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      await axios.put(`${API_BASE_URL}/${itemId}/rename`, { new_name: newName }, axiosConfig);
-      
-      // Refresh the items list
-      fetchItems();
-      
-      // Update selected item if it was renamed
-      if (selectedItem && selectedItem.id === itemId) {
-        setSelectedItem({...selectedItem, name: newName});
-      }
-    } catch (error) {
-      console.error("Error renaming item:", error);
-      setError(`Failed to rename item: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setIsLoading(false);
+  
+  const promptDeleteConfirmation = (item, event) => {
+    if (event) {
+      event.stopPropagation();
     }
+    setItemToDelete(item);
+    setShowDeleteConfirm(true);
+    // Hide context menu if it was open
+    setContextMenu({ ...contextMenu, visible: false });
   };
-
-  // We'll keep this function even though it's not used yet
-  // It will be useful for future feature implementation
-  const handleMoveItem = async (itemId, newParentId) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      await axios.put(`${API_BASE_URL}/${itemId}/move`, { new_parent_id: newParentId }, axiosConfig);
-      
-      // Refresh the items list
-      fetchItems();
-    } catch (error) {
-      console.error("Error moving item:", error);
-      setError(`Failed to move item: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setIsLoading(false);
+  
+  const handleContextMenu = (e, item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Position the context menu at the mouse position
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      item: item
+    });
+  };
+  
+  // Close context menu when clicking elsewhere
+  const handleGlobalClick = useCallback(() => {
+    if (contextMenu.visible) {
+      setContextMenu({ ...contextMenu, visible: false });
     }
-  };
+  }, [contextMenu]);
+  
+  useEffect(() => {
+    // Add event listener for clicks to close the context menu
+    document.addEventListener('click', handleGlobalClick);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, [handleGlobalClick]);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -411,10 +425,11 @@ const Items = () => {
               <Edit size={20} />
               Edit
             </button>
-            <button className="action-button" onClick={(e) => handleDeleteItem(selectedItem.id, e)}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" width="18" height="18">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+            <button className="action-button delete-action" onClick={(e) => promptDeleteConfirmation(selectedItem, e)}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
               </svg>
+              Delete
             </button>
             <button className="action-button">
               <Upload size={20} />
@@ -535,6 +550,7 @@ const Items = () => {
                         key={folder.id}
                         className="folder-card"
                         onClick={() => handleFolderClick(folder)}
+                        onContextMenu={(e) => handleContextMenu(e, folder)}
                       >
                         <div className="folder-header">
                           <div className="folder-icon">
@@ -548,13 +564,13 @@ const Items = () => {
                           <p className="folder-date">{formatDate(folder.created_at)}</p>
                         </div>
                         <button
-                          className="delete-button"
-                          onClick={(e) => handleDeleteFolder(folder.id, e)}
+                          className="item-delete-button"
+                          onClick={(e) => promptDeleteConfirmation(folder, e)}
+                          aria-label="Delete folder"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-</svg>
-
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                          </svg>
                         </button>
                       </div>
                     ))}
@@ -571,6 +587,7 @@ const Items = () => {
                         key={item.id}
                         className="item-card"
                         onClick={() => handleItemClick(item)}
+                        onContextMenu={(e) => handleContextMenu(e, item)}
                       >
                         <div className="item-icon">
                           {getItemTypeIcon(item.file_type)}
@@ -581,14 +598,12 @@ const Items = () => {
                           <p className="item-date">{formatDate(item.created_at)}</p>
                         </div>
                         <button
-                          className="delete-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteItem(item.id);
-                          }}
+                          className="item-delete-button"
+                          onClick={(e) => promptDeleteConfirmation(item, e)}
+                          aria-label="Delete file"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" width="18" height="18">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                           </svg>
                         </button>
                       </div>
@@ -665,6 +680,52 @@ const Items = () => {
                 <button type="submit">Create</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-confirm-modal">
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete &quot;{itemToDelete?.name}&quot;?</p>
+            <p className="delete-warning">This action cannot be undone.</p>
+            <div className="form-actions">
+              <button type="button" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+              <button 
+                type="button" 
+                className="delete-confirm-button"
+                onClick={() => itemToDelete?.type === 'folder' 
+                  ? handleDeleteFolder(itemToDelete.id) 
+                  : handleDeleteItem(itemToDelete.id)
+                }
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <div 
+          className="context-menu"
+          style={{ 
+            position: 'fixed', 
+            top: `${contextMenu.y}px`, 
+            left: `${contextMenu.x}px` 
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div 
+            className="context-menu-item delete-menu-item"
+            onClick={() => promptDeleteConfirmation(contextMenu.item)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+            </svg>
+            <span>Delete</span>
           </div>
         </div>
       )}
