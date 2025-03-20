@@ -35,6 +35,7 @@ body[data-sidebar="collapsed"] .dashboard-container {
   margin: 0;
   background: linear-gradient(90deg, #e6c980, #c19b4a);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 30px rgba(230, 201, 128, 0.1);
 }
@@ -175,6 +176,14 @@ body[data-sidebar="collapsed"] .dashboard-container {
   height: 100%;
   background: linear-gradient(to right, #e6c980, #c19b4a);
   border-radius: 3px;
+}
+
+.progress-fill.blue {
+  background: linear-gradient(to right, #7eb6e6, #4a8ac1);
+}
+
+.progress-fill.red {
+  background: linear-gradient(to right, #e67e7e, #c14a4a);
 }
 
 .progress-text {

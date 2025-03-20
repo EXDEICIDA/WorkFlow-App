@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/apiService";
+import useProjectStats from "../hooks/useProjectStats";
 import Calendar from "../Components/Calendar/Calendar";
 import "./DashboardPage.css";
 
@@ -8,9 +9,11 @@ const DashboardPage = () => {
   const [stats, setStats] = useState({
     totalTasks: 0,
     completedTasks: 0,
-    activeProjects: 3,
     upcomingDeadlines: 2,
   });
+
+  // Get project statistics from the custom hook
+  const projectStats = useProjectStats();
 
   const [recentActivities] = useState([
     { type: "add", text: "New task created", time: "2 hours ago" },
@@ -49,6 +52,22 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchTaskStats();
   }, []);
+
+  // Calculate percentages for progress bars
+  const getTaskCompletionPercentage = () => {
+    if (stats.totalTasks === 0) return 0;
+    return Math.round((stats.completedTasks / stats.totalTasks) * 100);
+  };
+
+  const getActiveProjectsPercentage = () => {
+    if (projectStats.totalProjects === 0) return 0;
+    return Math.round((projectStats.activeProjects / projectStats.totalProjects) * 100);
+  };
+
+  const getOnHoldProjectsPercentage = () => {
+    if (projectStats.totalProjects === 0) return 0;
+    return Math.round((projectStats.onHoldProjects / projectStats.totalProjects) * 100);
+  };
 
   return (
     <div className="dashboard-container">
@@ -91,15 +110,12 @@ const DashboardPage = () => {
                   <div
                     className="progress-fill"
                     style={{
-                      width: `${
-                        (stats.completedTasks / stats.totalTasks) * 100
-                      }%`,
+                      width: `${getTaskCompletionPercentage()}%`,
                     }}
                   ></div>
                 </div>
                 <span className="progress-text">
-                  {Math.round((stats.completedTasks / stats.totalTasks) * 100)}%
-                  complete
+                  {getTaskCompletionPercentage()}% complete
                 </span>
               </div>
             </div>
@@ -127,8 +143,20 @@ const DashboardPage = () => {
           <div className="stat-info">
             <h3>Active Projects</h3>
             <div className="stat-data">
-              <div className="stat-number">{stats.activeProjects}</div>
-              <div className="stat-detail">In progress</div>
+              <div className="stat-number">{projectStats.activeProjects}</div>
+              <div className="stat-progress">
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill blue"
+                    style={{
+                      width: `${getActiveProjectsPercentage()}%`,
+                    }}
+                  ></div>
+                </div>
+                <span className="progress-text">
+                  {getActiveProjectsPercentage()}% of total
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -149,10 +177,22 @@ const DashboardPage = () => {
             </svg>
           </div>
           <div className="stat-info">
-            <h3>Upcoming Deadlines</h3>
+            <h3>On Hold Projects</h3>
             <div className="stat-data">
-              <div className="stat-number">{stats.upcomingDeadlines}</div>
-              <div className="stat-detail">This week</div>
+              <div className="stat-number">{projectStats.onHoldProjects}</div>
+              <div className="stat-progress">
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill red"
+                    style={{
+                      width: `${getOnHoldProjectsPercentage()}%`,
+                    }}
+                  ></div>
+                </div>
+                <span className="progress-text">
+                  {getOnHoldProjectsPercentage()}% of total
+                </span>
+              </div>
             </div>
           </div>
         </div>

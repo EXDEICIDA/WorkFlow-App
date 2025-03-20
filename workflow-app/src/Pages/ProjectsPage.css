@@ -47,7 +47,7 @@ body[data-sidebar="collapsed"] .projects-container {
   background-color: #333;
   border-radius: 4px;
   width: 300px;
-  padding-left: 0;
+  padding: 0 12px;
   border: 1px solid #444;
   transition: all 0.2s ease;
 }
@@ -58,13 +58,13 @@ body[data-sidebar="collapsed"] .projects-container {
 }
 
 .search-icon {
-  position: absolute;
-  left: 12px;
-  color: #888;
   width: 18px;
   height: 18px;
+  color: #888;
+  margin-right: 8px;
   flex-shrink: 0;
-  z-index: 1;
+  position: absolute;
+  left: 12px;
 }
 
 .search-bar input {
@@ -74,13 +74,9 @@ body[data-sidebar="collapsed"] .projects-container {
   font-size: 0.9rem;
   height: 100%;
   flex-grow: 1;
-  padding-left: 40px;
-  padding-right: 12px;
+  padding-left: 30px; /* Add left padding to make room for the icon */
   transition: all 0.2s;
   width: 100%;
-}
-
-.search-bar input:focus {
   outline: none;
 }
 
