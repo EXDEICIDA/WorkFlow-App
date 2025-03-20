@@ -11,6 +11,7 @@ const ProjectsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchProjects = async () => {
     try {
@@ -123,32 +124,80 @@ const ProjectsPage = () => {
   };
 
   const filteredProjects = projects.filter((project) => {
-    if (filter === "all") return true;
-    return project.status === filter;
+    // Ensure project is valid
+    if (!project) return false;
+    
+    // First apply status filter
+    if (filter !== "all" && project.status !== filter) return false;
+    
+    // Then apply search filter if there's a search term
+    if (searchTerm && searchTerm.trim() !== "") {
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Check if project has a title
+      if (!project.title) return false;
+      
+      return (
+        project.title.toLowerCase().includes(searchLower) ||
+        (project.description && project.description.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    return true;
   });
 
   return (
     <div className="projects-container">
       <div className="projects-header">
         <h1>Projects</h1>
-        <button
-          className="create-project-btn"
-          onClick={() => setShowProjectForm(true)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        <div className="projects-header-actions">
+          <div className="search-bar">
+            <svg 
+              className="search-icon" 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              strokeWidth="1.5" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" 
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  // Prevent form submission if inside a form
+                  e.preventDefault();
+                }
+              }}
+            />
+          </div>
+          <button
+            className="create-project-btn"
+            onClick={() => setShowProjectForm(true)}
           >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          New Project
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Project
+          </button>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -195,9 +244,11 @@ const ProjectsPage = () => {
       ) : filteredProjects.length === 0 ? (
         <div className="no-projects">
           <p>
-            {filter === "all"
-              ? "You don't have any projects yet. Create your first project to get started!"
-              : `No ${filter.toLowerCase()} projects found.`}
+            {searchTerm.trim() !== "" 
+              ? `No projects matching "${searchTerm}" found.` 
+              : filter === "all"
+                ? "You don't have any projects yet. Create your first project to get started!"
+                : `No ${filter.toLowerCase()} projects found.`}
           </p>
         </div>
       ) : (

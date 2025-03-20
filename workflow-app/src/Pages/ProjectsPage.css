@@ -33,6 +33,61 @@ body[data-sidebar="collapsed"] .projects-container {
   color: #ffffff;
 }
 
+.projects-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-bar {
+  position: relative;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  background-color: #333;
+  border-radius: 4px;
+  width: 300px;
+  padding-left: 0;
+  border: 1px solid #444;
+  transition: all 0.2s ease;
+}
+
+.search-bar:focus-within {
+  border-color: #666;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #888;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.search-bar input {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  height: 100%;
+  flex-grow: 1;
+  padding-left: 40px;
+  padding-right: 12px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.search-bar input:focus {
+  outline: none;
+}
+
+.search-bar input::placeholder {
+  color: #888;
+}
+
 .create-project-btn {
   display: flex;
   align-items: center;
@@ -46,6 +101,8 @@ body[data-sidebar="collapsed"] .projects-container {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  height: 42px;
+  white-space: nowrap;
 }
 
 .create-project-btn:hover {
