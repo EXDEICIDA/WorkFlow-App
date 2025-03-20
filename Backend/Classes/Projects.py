@@ -1,4 +1,5 @@
 from Classes.DataConfig import DataConfig
+from flask import request
 
 class ProjectManager:
     def __init__(self):
@@ -19,6 +20,12 @@ class ProjectManager:
             dict: Created project data
         """
         try:
+            # Get auth token from request headers
+            auth_header = request.headers.get('Authorization')
+            auth_token = None
+            if auth_header and auth_header.startswith('Bearer '):
+                auth_token = auth_header.split(' ')[1]
+            
             # Create project in database
             data = {
                 "title": title,
@@ -29,8 +36,11 @@ class ProjectManager:
                 "created_at": DataConfig.get_timestamp()
             }
             
+            # Get authenticated client
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
             # Insert project into the database
-            response = self._client.table("projects").insert(data).execute()
+            response = auth_client.table("projects").insert(data).execute()
             
             if response.data and len(response.data) > 0:
                 return response.data[0]
@@ -52,7 +62,16 @@ class ProjectManager:
             list: List of projects
         """
         try:
-            query = self._client.table("projects").select("*")
+            # Get auth token from request headers
+            auth_header = request.headers.get('Authorization')
+            auth_token = None
+            if auth_header and auth_header.startswith('Bearer '):
+                auth_token = auth_header.split(' ')[1]
+            
+            # Get authenticated client
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
+            query = auth_client.table("projects").select("*")
             
             # Filter by user_id if provided
             if user_id:
@@ -81,7 +100,16 @@ class ProjectManager:
             dict: Project data
         """
         try:
-            query = self._client.table("projects").select("*").eq("id", project_id)
+            # Get auth token from request headers
+            auth_header = request.headers.get('Authorization')
+            auth_token = None
+            if auth_header and auth_header.startswith('Bearer '):
+                auth_token = auth_header.split(' ')[1]
+            
+            # Get authenticated client
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
+            query = auth_client.table("projects").select("*").eq("id", project_id)
             
             # Filter by user_id if provided (for authorization)
             if user_id:
@@ -111,22 +139,30 @@ class ProjectManager:
             dict: Updated project data
         """
         try:
-            # Verify project exists and belongs to user
-            if user_id:
-                existing = self.get_project(project_id, user_id)
-            else:
-                existing = self.get_project(project_id)
-                
-            # Update project in database
-            update_data = {k: v for k, v in data.items() if k in ["title", "description", "status", "deadline"]}
-            update_data["updated_at"] = DataConfig.get_timestamp()
+            # Get auth token from request headers
+            auth_header = request.headers.get('Authorization')
+            auth_token = None
+            if auth_header and auth_header.startswith('Bearer '):
+                auth_token = auth_header.split(' ')[1]
             
-            response = self._client.table("projects").update(update_data).eq("id", project_id).execute()
+            # Get authenticated client
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
+            # Add updated_at timestamp
+            data["updated_at"] = DataConfig.get_timestamp()
+            
+            query = auth_client.table("projects").update(data).eq("id", project_id)
+            
+            # Filter by user_id if provided (for authorization)
+            if user_id:
+                query = query.eq("user_id", user_id)
+                
+            response = query.execute()
             
             if response.data and len(response.data) > 0:
                 return response.data[0]
             else:
-                raise Exception("Failed to update project")
+                raise Exception("Project not found or not authorized")
                 
         except Exception as e:
             print(f"Error updating project: {e}")
@@ -144,17 +180,28 @@ class ProjectManager:
             dict: Deleted project data
         """
         try:
-            # Verify project exists and belongs to user
+            # Get auth token from request headers
+            auth_header = request.headers.get('Authorization')
+            auth_token = None
+            if auth_header and auth_header.startswith('Bearer '):
+                auth_token = auth_header.split(' ')[1]
+            
+            # Get authenticated client
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
+            query = auth_client.table("projects").delete().eq("id", project_id)
+            
+            # Filter by user_id if provided (for authorization)
             if user_id:
-                existing = self.get_project(project_id, user_id)
-            else:
-                existing = self.get_project(project_id)
+                query = query.eq("user_id", user_id)
                 
-            # Delete project from database
-            response = self._client.table("projects").delete().eq("id", project_id).execute()
+            response = query.execute()
             
-            return existing
-            
+            if response.data and len(response.data) > 0:
+                return response.data[0]
+            else:
+                raise Exception("Project not found or not authorized")
+                
         except Exception as e:
             print(f"Error deleting project: {e}")
             raise
