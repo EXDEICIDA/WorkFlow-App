@@ -47,7 +47,6 @@ body[data-sidebar="collapsed"] .projects-container {
   background-color: #333;
   border-radius: 4px;
   width: 300px;
-  padding: 0 12px;
   border: 1px solid #444;
   transition: all 0.2s ease;
 }
@@ -57,14 +56,13 @@ body[data-sidebar="collapsed"] .projects-container {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
-.search-icon {
-  width: 18px;
-  height: 18px;
-  color: #888;
-  margin-right: 8px;
-  flex-shrink: 0;
+.search-icon-left {
   position: absolute;
   left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  z-index: 1;
 }
 
 .search-bar input {
@@ -73,10 +71,9 @@ body[data-sidebar="collapsed"] .projects-container {
   color: white;
   font-size: 0.9rem;
   height: 100%;
-  flex-grow: 1;
-  padding-left: 30px; /* Add left padding to make room for the icon */
-  transition: all 0.2s;
   width: 100%;
+  padding: 0 12px 0 40px;
+  transition: all 0.2s;
   outline: none;
 }
 
