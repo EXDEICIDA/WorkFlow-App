@@ -1,6 +1,7 @@
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -34,3 +35,8 @@ class DataConfig:
             client.postgrest.auth(auth_token)
             
         return client
+        
+    @classmethod
+    def get_timestamp(cls):
+        """Get current timestamp in ISO format."""
+        return datetime.utcnow().isoformat()
