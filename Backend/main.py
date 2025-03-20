@@ -3,6 +3,7 @@ from flask_cors import CORS
 from Classes.Tasks import TaskManager
 from Classes.Scripts import ScriptsManager
 from Classes.Items import ItemsManager
+from Classes.Projects import ProjectManager
 from auth.AuthConfig import Auth
 
 app = Flask(__name__)
@@ -12,6 +13,7 @@ CORS(app)
 task_manager = TaskManager()
 script_manager = ScriptsManager()
 items_manager = ItemsManager()
+project_manager = ProjectManager()
 auth_manager = Auth()
 
 # Token refresh endpoint
@@ -317,6 +319,69 @@ def rename_item(item_id):
             user_id=request.user.id
         )
         return jsonify(item), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Project operations routes
+@app.route('/api/projects', methods=['POST'])
+@Auth.auth_required
+def create_project():
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('title'):
+            return jsonify({"error": "Title is required"}), 400
+            
+        project = project_manager.create_project(
+            title=data.get('title'),
+            description=data.get('description', ''),
+            status=data.get('status', 'Active'),
+            deadline=data.get('deadline'),
+            user_id=request.user.id
+        )
+        return jsonify(project), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/projects', methods=['GET'])
+@Auth.auth_required
+def get_projects():
+    try:
+        projects = project_manager.fetch_projects(user_id=request.user.id)
+        return jsonify(projects), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/projects/<int:project_id>', methods=['GET'])
+@Auth.auth_required
+def get_project(project_id):
+    try:
+        project = project_manager.get_project(project_id, user_id=request.user.id)
+        return jsonify(project), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/projects/<int:project_id>', methods=['PUT'])
+@Auth.auth_required
+def update_project(project_id):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+            
+        project = project_manager.update_project(project_id, data, user_id=request.user.id)
+        return jsonify(project), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+@Auth.auth_required
+def delete_project(project_id):
+    try:
+        project = project_manager.delete_project(project_id, user_id=request.user.id)
+        return jsonify(project), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
