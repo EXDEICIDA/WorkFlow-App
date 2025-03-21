@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { apiRequest } from "../services/apiService";
+import { useLocation } from "react-router-dom";
 import ProjectForm from "../Components/ProjectForm";
 import ProjectCard from "../Components/ProjectCard";
 import "./ProjectsPage.css";
 
 const ProjectsPage = () => {
+  const location = useLocation();
   const [projects, setProjects] = useState([]);
-  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(location.state?.openProjectForm || false);
   const [editingProject, setEditingProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,6 +38,12 @@ const ProjectsPage = () => {
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openProjectForm) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleCreateProject = async (projectData) => {
     try {
