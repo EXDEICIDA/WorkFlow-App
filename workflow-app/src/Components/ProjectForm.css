@@ -101,3 +101,257 @@
 .submit-button:hover {
   background-color: #3a7bc8;
 }
+
+/* Date Picker Styles */
+.date-picker-container {
+  position: relative;
+  width: 100%;
+}
+
+.date-picker-wrapper {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+.date-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.date-picker-trigger:hover {
+  background-color: #3a3a3a;
+  border-color: #555;
+}
+
+.date-picker-trigger svg {
+  color: #888;
+  margin-left: 8px;
+}
+
+.date-picker-calendar {
+  width: 300px;
+  background-color: #1e1e1e;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+.current-month-year {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.current-month-year:hover {
+  background-color: #333;
+}
+
+.year-display {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-top: 2px;
+}
+
+.month-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.month-nav-btn:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.month-nav-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+}
+
+.calendar-grid {
+  padding: 12px;
+}
+
+.weekday-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+
+.weekday-header div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #888;
+  height: 32px;
+}
+
+.week-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 0.9rem;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.day:hover:not(.empty) {
+  background-color: #333;
+  color: #fff;
+}
+
+.day.selected {
+  background-color: #4a90e2;
+  color: #fff;
+}
+
+.day.today:not(.selected) {
+  border: 1px solid #555;
+  font-weight: 500;
+}
+
+.day.empty {
+  cursor: default;
+}
+
+/* Year selector styles */
+.year-selector {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #1e1e1e;
+}
+
+.year-selector::-webkit-scrollbar {
+  width: 6px;
+}
+
+.year-selector::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.year-selector::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 6px;
+}
+
+.year-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.year-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  font-size: 0.9rem;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.year-item:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.year-item.selected {
+  background-color: #4a90e2;
+  color: #fff;
+}
+
+/* Footer styles */
+.date-picker-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-top: 1px solid #333;
+}
+
+.today-btn,
+.close-btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.today-btn {
+  background-color: transparent;
+  color: #4a90e2;
+}
+
+.today-btn:hover {
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+.close-btn {
+  background-color: transparent;
+  color: #bbb;
+}
+
+.close-btn:hover {
+  background-color: #333;
+  color: #fff;
+}
