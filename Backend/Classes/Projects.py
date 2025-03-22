@@ -1,9 +1,11 @@
 from Classes.DataConfig import DataConfig
+from Classes.ActivityModule import ActivityTracker
 from flask import request
 
 class ProjectManager:
     def __init__(self):
         self._client = DataConfig.get_client()
+        self._activity_tracker = ActivityTracker()
         
     def create_project(self, title, description="", status="Active", deadline=None, user_id=None):
         """
@@ -43,7 +45,16 @@ class ProjectManager:
             response = auth_client.table("projects").insert(data).execute()
             
             if response.data and len(response.data) > 0:
-                return response.data[0]
+                # Log activity
+                project = response.data[0]
+                self._activity_tracker.log_activity(
+                    user_id=user_id,
+                    activity_type="create",
+                    description=f"Created project '{title}'",
+                    related_item_id=project['id'],
+                    related_item_type="project"
+                )
+                return project
             else:
                 raise Exception("Failed to create project")
                 
@@ -148,6 +159,13 @@ class ProjectManager:
             # Get authenticated client
             auth_client = DataConfig.get_auth_client(auth_token)
             
+            # Get project details before update for activity logging
+            project_details = auth_client.table("projects").select("*").eq("id", project_id).execute()
+            if not project_details.data or len(project_details.data) == 0:
+                raise Exception("Project not found")
+            
+            project = project_details.data[0]
+            
             # Add updated_at timestamp
             data["updated_at"] = DataConfig.get_timestamp()
             
@@ -160,7 +178,31 @@ class ProjectManager:
             response = query.execute()
             
             if response.data and len(response.data) > 0:
-                return response.data[0]
+                # Log activity
+                updated_project = response.data[0]
+                description = f"Updated project '{project['title']}'"
+                
+                # Add specific details about what was updated
+                update_details = []
+                if data.get('title') and data['title'] != project['title']:
+                    update_details.append(f"title to '{data['title']}'")
+                if data.get('status') and data['status'] != project['status']:
+                    update_details.append(f"status to '{data['status']}'")
+                if data.get('deadline') and data['deadline'] != project['deadline']:
+                    update_details.append("deadline")
+                
+                if update_details:
+                    description += f" ({', '.join(update_details)})"
+                
+                self._activity_tracker.log_activity(
+                    user_id=user_id,
+                    activity_type="update",
+                    description=description,
+                    related_item_id=project_id,
+                    related_item_type="project"
+                )
+                
+                return updated_project
             else:
                 raise Exception("Project not found or not authorized")
                 
@@ -189,6 +231,13 @@ class ProjectManager:
             # Get authenticated client
             auth_client = DataConfig.get_auth_client(auth_token)
             
+            # Get project details before deletion for activity logging
+            project_details = auth_client.table("projects").select("*").eq("id", project_id).execute()
+            if not project_details.data or len(project_details.data) == 0:
+                raise Exception("Project not found")
+            
+            project = project_details.data[0]
+            
             query = auth_client.table("projects").delete().eq("id", project_id)
             
             # Filter by user_id if provided (for authorization)
@@ -198,6 +247,15 @@ class ProjectManager:
             response = query.execute()
             
             if response.data and len(response.data) > 0:
+                # Log activity
+                self._activity_tracker.log_activity(
+                    user_id=user_id,
+                    activity_type="delete",
+                    description=f"Deleted project '{project['title']}'",
+                    related_item_id=project_id,
+                    related_item_type="project"
+                )
+                
                 return response.data[0]
             else:
                 raise Exception("Project not found or not authorized")

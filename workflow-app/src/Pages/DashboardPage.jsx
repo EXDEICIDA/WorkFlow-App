@@ -15,12 +15,8 @@ const DashboardPage = () => {
   // Get project statistics from the custom hook
   const projectStats = useProjectStats();
 
-  const [recentActivities] = useState([
-    { type: "add", text: "New task created", time: "2 hours ago" },
-    { type: "complete", text: "Completed task", time: "5 hours ago" },
-    { type: "comment", text: "Comment added to Project X", time: "Yesterday" },
-    { type: "update", text: "Updated deadline for Task Y", time: "2 days ago" },
-  ]);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -49,8 +45,82 @@ const DashboardPage = () => {
     }
   };
 
+  // Fetch user activities
+  const fetchActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      const response = await apiRequest("http://localhost:8080/api/activities?limit=10");
+      if (!response.ok) {
+        throw new Error("Failed to fetch activities");
+      }
+
+      const activities = await response.json();
+      
+      // Transform activities for display
+      const formattedActivities = activities.map(activity => {
+        // Format the timestamp
+        const timestamp = new Date(activity.timestamp);
+        const now = new Date();
+        
+        // Calculate time difference
+        const diffMs = now - timestamp;
+        const diffMins = Math.round(diffMs / 60000);
+        const diffHours = Math.round(diffMs / 3600000);
+        const diffDays = Math.round(diffMs / 86400000);
+        
+        let timeString;
+        if (diffMins < 60) {
+          timeString = `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+        } else if (diffHours < 24) {
+          timeString = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        } else if (diffDays < 30) {
+          timeString = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+        } else {
+          timeString = timestamp.toLocaleDateString();
+        }
+        
+        // Determine activity type icon
+        let type;
+        switch (activity.activity_type) {
+          case 'create':
+            type = 'add';
+            break;
+          case 'complete':
+            type = 'complete';
+            break;
+          case 'update':
+          case 'rename':
+          case 'move':
+            type = 'update';
+            break;
+          case 'delete':
+            type = 'delete';
+            break;
+          default:
+            type = 'update';
+        }
+        
+        return {
+          id: activity.id,
+          type,
+          text: activity.description,
+          time: timeString,
+          related_item_id: activity.related_item_id,
+          related_item_type: activity.related_item_type
+        };
+      });
+      
+      setRecentActivities(formattedActivities);
+      setActivitiesLoading(false);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      setActivitiesLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTaskStats();
+    fetchActivities();
   }, []);
 
   // Calculate percentages for progress bars
@@ -216,72 +286,80 @@ const DashboardPage = () => {
               <button className="view-all-button">View All</button>
             </div>
             <div className="activity-list">
-              {recentActivities.map((activity, index) => (
-                <div className="activity-item" key={index}>
-                  <div className={`activity-icon ${activity.type}`}>
-                    {activity.type === "add" && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M12 5v14" />
-                        <path d="M5 12h14" />
-                      </svg>
-                    )}
-                    {activity.type === "complete" && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M9 11l3 3L22 4" />
-                      </svg>
-                    )}
-                    {activity.type === "comment" && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                    )}
-                    {activity.type === "update" && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M21 2v6h-6" />
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                        <path d="M3 22v-6h6" />
-                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                      </svg>
-                    )}
+              {activitiesLoading ? (
+                <div className="loading-activities">Loading activities...</div>
+              ) : recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => (
+                  <div className="activity-item" key={activity.id || index}>
+                    <div className={`activity-icon ${activity.type}`}>
+                      {activity.type === "add" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M12 5v14" />
+                          <path d="M5 12h14" />
+                        </svg>
+                      )}
+                      {activity.type === "complete" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M9 11l3 3L22 4" />
+                        </svg>
+                      )}
+                      {activity.type === "update" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M21 2v6h-6" />
+                          <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                          <path d="M3 22v-6h6" />
+                          <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                        </svg>
+                      )}
+                      {activity.type === "delete" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="activity-content">
+                      <p>{activity.text}</p>
+                      <span className="activity-time">{activity.time}</span>
+                    </div>
                   </div>
-                  <div className="activity-content">
-                    <p>{activity.text}</p>
-                    <span className="activity-time">{activity.time}</span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="no-activities">No recent activities</div>
+              )}
             </div>
           </div>
 

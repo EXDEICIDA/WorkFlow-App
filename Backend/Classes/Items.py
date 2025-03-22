@@ -1,9 +1,11 @@
 from Classes.DataConfig import DataConfig
+from Classes.ActivityModule import ActivityTracker
 
 class ItemsManager:
     def __init__(self):
         self._client = DataConfig.get_client()
         self._auth_token = None
+        self._activity_tracker = ActivityTracker()
         
     def set_auth_token(self, auth_token):
         """Set the auth token for authenticated requests."""
@@ -29,8 +31,18 @@ class ItemsManager:
             
             if not response.data:
                 raise Exception("Folder creation failed")
+            
+            # Log activity
+            folder = response.data[0]
+            self._activity_tracker.log_activity(
+                user_id=user_id,
+                activity_type="create",
+                description=f"Created folder '{name}'",
+                related_item_id=folder['id'],
+                related_item_type="folder"
+            )
                 
-            return response.data[0]
+            return folder
             
         except Exception as e:
             raise Exception(f"Failed to create folder: {str(e)}")
@@ -54,8 +66,18 @@ class ItemsManager:
             
             if not response.data:
                 raise Exception("File creation failed")
+            
+            # Log activity
+            file = response.data[0]
+            self._activity_tracker.log_activity(
+                user_id=user_id,
+                activity_type="create",
+                description=f"Uploaded file '{name}'",
+                related_item_id=file['id'],
+                related_item_type="file"
+            )
                 
-            return response.data[0]
+            return file
             
         except Exception as e:
             raise Exception(f"Failed to create file: {str(e)}")
@@ -84,6 +106,13 @@ class ItemsManager:
             # Use auth client for RLS-protected operations
             client = DataConfig.get_auth_client(self._auth_token)
             
+            # Get item details before deletion for activity logging
+            item_details = client.table('items').select('*').eq('id', item_id).eq('user_id', user_id).execute()
+            if not item_details.data:
+                raise Exception("Item not found")
+            
+            item = item_details.data[0]
+            
             # First check if it's a folder and has children
             children = client.table('items').select('id').eq('parent_id', item_id).execute()
             
@@ -98,6 +127,16 @@ class ItemsManager:
             if not response.data:
                 raise Exception("Item not found or already deleted")
             
+            # Log activity
+            item_type = "folder" if item['type'] == "folder" else "file"
+            self._activity_tracker.log_activity(
+                user_id=user_id,
+                activity_type="delete",
+                description=f"Deleted {item_type} '{item['name']}'",
+                related_item_id=item_id,
+                related_item_type=item_type
+            )
+            
             return {"id": item_id, "message": "Item deleted successfully"}
             
         except Exception as e:
@@ -110,6 +149,14 @@ class ItemsManager:
             
             # Use auth client for RLS-protected operations
             client = DataConfig.get_auth_client(self._auth_token)
+            
+            # Get item details before update for activity logging
+            item_details = client.table('items').select('*').eq('id', item_id).eq('user_id', user_id).execute()
+            if not item_details.data:
+                raise Exception("Item not found")
+            
+            item = item_details.data[0]
+            
             response = client.table('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
@@ -117,6 +164,16 @@ class ItemsManager:
             
             if not response.data:
                 raise Exception("Item not found or unauthorized")
+            
+            # Log activity
+            item_type = "folder" if item['type'] == "folder" else "file"
+            self._activity_tracker.log_activity(
+                user_id=user_id,
+                activity_type="move",
+                description=f"Moved {item_type} '{item['name']}' to a different folder",
+                related_item_id=item_id,
+                related_item_type=item_type
+            )
                 
             return response.data[0]
             
@@ -126,10 +183,18 @@ class ItemsManager:
     def rename_item(self, item_id, new_name, user_id):
         """Rename an item."""
         try:
-            update_data = {"name": new_name}
-            
             # Use auth client for RLS-protected operations
             client = DataConfig.get_auth_client(self._auth_token)
+            
+            # Get item details before update for activity logging
+            item_details = client.table('items').select('*').eq('id', item_id).eq('user_id', user_id).execute()
+            if not item_details.data:
+                raise Exception("Item not found")
+            
+            item = item_details.data[0]
+            old_name = item['name']
+            
+            update_data = {"name": new_name}
             response = client.table('items').update(update_data)\
                 .eq('id', item_id)\
                 .eq('user_id', user_id)\
@@ -137,6 +202,16 @@ class ItemsManager:
             
             if not response.data:
                 raise Exception("Item not found or unauthorized")
+            
+            # Log activity
+            item_type = "folder" if item['type'] == "folder" else "file"
+            self._activity_tracker.log_activity(
+                user_id=user_id,
+                activity_type="rename",
+                description=f"Renamed {item_type} from '{old_name}' to '{new_name}'",
+                related_item_id=item_id,
+                related_item_type=item_type
+            )
                 
             return response.data[0]
             

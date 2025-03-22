@@ -4,6 +4,7 @@ from Classes.Tasks import TaskManager
 from Classes.Scripts import ScriptsManager
 from Classes.Items import ItemsManager
 from Classes.Projects import ProjectManager
+from Classes.ActivityModule import ActivityTracker
 from auth.AuthConfig import Auth
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ script_manager = ScriptsManager()
 items_manager = ItemsManager()
 project_manager = ProjectManager()
 auth_manager = Auth()
+activity_tracker = ActivityTracker()
 
 # Token refresh endpoint
 @app.route('/api/auth/refresh', methods=['POST'])
@@ -459,6 +461,27 @@ def get_user():
         }
         
         return jsonify({"user": user_data}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Activities operations routes
+@app.route('/api/activities', methods=['GET'])
+@Auth.auth_required
+def get_activities():
+    try:
+        # Get query parameters
+        limit = request.args.get('limit', default=10, type=int)
+        
+        # Get auth token from request headers
+        auth_header = request.headers.get('Authorization')
+        auth_token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            auth_token = auth_header.split(' ')[1]
+        
+        # Fetch activities for the authenticated user
+        activities = activity_tracker.get_auth_activities(auth_token, limit=limit)
+        
+        return jsonify(activities), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
