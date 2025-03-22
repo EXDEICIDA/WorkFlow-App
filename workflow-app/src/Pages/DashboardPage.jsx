@@ -16,7 +16,9 @@ const DashboardPage = () => {
   const projectStats = useProjectStats();
 
   const [recentActivities, setRecentActivities] = useState([]);
+  const [allActivities, setAllActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [showAllActivities, setShowAllActivities] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,10 +48,10 @@ const DashboardPage = () => {
   };
 
   // Fetch user activities
-  const fetchActivities = async () => {
+  const fetchActivities = async (limit = 10) => {
     try {
       setActivitiesLoading(true);
-      const response = await apiRequest("http://localhost:8080/api/activities?limit=10");
+      const response = await apiRequest(`http://localhost:8080/api/activities?limit=${limit}`);
       if (!response.ok) {
         throw new Error("Failed to fetch activities");
       }
@@ -105,17 +107,33 @@ const DashboardPage = () => {
           type,
           text: activity.description,
           time: timeString,
+          timestamp: timestamp,
           related_item_id: activity.related_item_id,
           related_item_type: activity.related_item_type
         };
       });
       
-      setRecentActivities(formattedActivities);
+      if (limit === 10) {
+        setRecentActivities(formattedActivities);
+      } else {
+        setAllActivities(formattedActivities);
+      }
       setActivitiesLoading(false);
     } catch (error) {
       console.error("Error fetching activities:", error);
       setActivitiesLoading(false);
     }
+  };
+
+  // Fetch all activities for the modal
+  const fetchAllActivities = async () => {
+    await fetchActivities(100); // Fetch up to 100 activities for the "View All" modal
+  };
+
+  // Handle opening the "View All" activities modal
+  const handleViewAllActivities = () => {
+    fetchAllActivities();
+    setShowAllActivities(true);
   };
 
   useEffect(() => {
@@ -283,7 +301,7 @@ const DashboardPage = () => {
           <div className="dashboard-section activity-section">
             <div className="section-header">
               <h2>Recent Activity</h2>
-              <button className="view-all-button">View All</button>
+              <button className="view-all-button" onClick={handleViewAllActivities}>View All</button>
             </div>
             <div className="activity-list">
               {activitiesLoading ? (
@@ -411,6 +429,112 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for displaying all activities */}
+      {showAllActivities && (
+        <div className="activity-modal-overlay" onClick={() => setShowAllActivities(false)}>
+          <div className="activity-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="activity-modal-header">
+              <h2>All Activities</h2>
+              <button className="close-modal-button" onClick={() => setShowAllActivities(false)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="activity-modal-content">
+              {activitiesLoading ? (
+                <div className="loading-activities">Loading activities...</div>
+              ) : allActivities.length > 0 ? (
+                <div className="all-activities-list">
+                  {allActivities.map((activity, index) => (
+                    <div className="activity-item" key={activity.id || index}>
+                      <div className={`activity-icon ${activity.type}`}>
+                        {activity.type === "add" && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M12 5v14" />
+                            <path d="M5 12h14" />
+                          </svg>
+                        )}
+                        {activity.type === "complete" && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M9 11l3 3L22 4" />
+                          </svg>
+                        )}
+                        {activity.type === "update" && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M21 2v6h-6" />
+                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                            <path d="M3 22v-6h6" />
+                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                          </svg>
+                        )}
+                        {activity.type === "delete" && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="activity-content">
+                        <p>{activity.text}</p>
+                        <div className="activity-details">
+                          <span className="activity-time">{activity.time}</span>
+                          <span className="activity-date">{activity.timestamp.toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-activities">No activities found</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
