@@ -17,6 +17,7 @@ body {
   min-height: 100vh;
   background-color: #f8f8f8;
   width: 100%;
+  position: relative;
 }
 
 .main-content {
@@ -25,11 +26,12 @@ body {
   min-height: 100vh;
   margin-left: 250px;
   width: calc(100% - 250px);
-  transition: margin-left 0.3s ease;
+  transition: all 0.3s ease;
   overflow-x: hidden;
+  position: relative;
 }
 
-.sidebar.collapsed + .main-content {
+body[data-sidebar="collapsed"] .main-content {
   margin-left: 70px;
   width: calc(100% - 70px);
 }
@@ -46,6 +48,7 @@ body {
 .page-container h1 {
   margin-bottom: 20px;
 }
+
 .main-content.no-sidebar {
   margin-left: 0;
   width: 100%;
