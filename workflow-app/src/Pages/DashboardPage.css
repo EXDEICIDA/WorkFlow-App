@@ -367,6 +367,11 @@ body[data-sidebar="collapsed"] .dashboard-container {
   color: #7ee69e;
 }
 
+.activity-icon.delete {
+  background-color: rgba(230, 126, 126, 0.1);
+  color: #e67e7e;
+}
+
 .activity-icon.comment {
   background-color: rgba(126, 182, 230, 0.1);
   color: #7eb6e6;
