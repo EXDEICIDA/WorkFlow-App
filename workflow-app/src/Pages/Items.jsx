@@ -1,5 +1,5 @@
 // React is needed for JSX
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash2 } from "lucide-react";
 import "./Items.css";
@@ -390,15 +390,54 @@ const Items = () => {
     }
   };
 
-  const filteredItems = items.filter(item => {
-    const nameMatch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const typeMatch = !selectedType || (item.file_type && item.file_type.toLowerCase() === selectedType.toLowerCase());
-    return nameMatch && typeMatch;
-  });
+  const filteredItems = items
+    .filter(item => {
+      const nameMatch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Handle "All Types" filter correctly
+      if (!selectedType || selectedType === "") {
+        return nameMatch;
+      }
+      
+      // Get the item type category based on file extension
+      let itemTypeName = "Other";
+      if (item.file_type) {
+        const lowerFileType = item.file_type.toLowerCase();
+        if (['doc', 'docx', 'txt', 'pdf'].includes(lowerFileType)) {
+          itemTypeName = "Document";
+        } else if (['xls', 'xlsx', 'csv'].includes(lowerFileType)) {
+          itemTypeName = "Spreadsheet";
+        } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(lowerFileType)) {
+          itemTypeName = "Image";
+        } else if (['mp4', 'avi', 'mov', 'wmv'].includes(lowerFileType)) {
+          itemTypeName = "Video";
+        } else if (['mp3', 'wav', 'ogg'].includes(lowerFileType)) {
+          itemTypeName = "Audio";
+        } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(lowerFileType)) {
+          itemTypeName = "Archive";
+        }
+      }
+      
+      // Match the selected type with the item's type category
+      const typeMatch = itemTypeName === selectedType;
+      
+      return nameMatch && typeMatch;
+    })
+    .sort((a, b) => {
+      // Apply date sorting based on dateSort state
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
-  const filteredFolders = folders.filter(folder => 
-    folder.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFolders = folders
+    .filter(folder => folder.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      // Apply the same date sorting to folders
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateSort === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
   return (
     <div className="items-container">
@@ -488,7 +527,7 @@ const Items = () => {
                           key={type.name}
                           className="dropdown-item"
                           onClick={() => {
-                            setSelectedType(type.name.toLowerCase());
+                            setSelectedType(type.name);
                             setShowTypeDropdown(false);
                           }}
                         >
