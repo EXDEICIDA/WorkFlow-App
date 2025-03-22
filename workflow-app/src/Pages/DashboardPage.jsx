@@ -19,6 +19,7 @@ const DashboardPage = () => {
   const [allActivities, setAllActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [showAllActivities, setShowAllActivities] = useState(false);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
 
   const navigate = useNavigate();
 
@@ -134,6 +135,11 @@ const DashboardPage = () => {
   const handleViewAllActivities = () => {
     fetchAllActivities();
     setShowAllActivities(true);
+  };
+
+  // Handle opening the full calendar modal
+  const handleViewFullCalendar = () => {
+    setShowFullCalendar(true);
   };
 
   useEffect(() => {
@@ -291,7 +297,7 @@ const DashboardPage = () => {
           <div className="dashboard-section calendar-section">
             <div className="section-header">
               <h2>Calendar</h2>
-              <button className="view-all-button">View All</button>
+              <button className="view-all-button" onClick={handleViewFullCalendar}>View All</button>
             </div>
             <Calendar />
           </div>
@@ -531,6 +537,34 @@ const DashboardPage = () => {
               ) : (
                 <div className="no-activities">No activities found</div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for displaying full calendar */}
+      {showFullCalendar && (
+        <div className="calendar-modal-overlay" onClick={() => setShowFullCalendar(false)}>
+          <div className="calendar-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="calendar-modal-header">
+              <h2>Calendar</h2>
+              <button className="close-modal-button" onClick={() => setShowFullCalendar(false)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="calendar-modal-content">
+              <Calendar />
             </div>
           </div>
         </div>
