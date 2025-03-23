@@ -23,7 +23,6 @@ const DashboardPage = () => {
   
   // Event related states
   const [showEventModal, setShowEventModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventFormData, setEventFormData] = useState({
@@ -237,17 +236,13 @@ const DashboardPage = () => {
 
   // Handle day click on calendar
   const handleDayClick = (date) => {
-    setSelectedDate(date);
-    
-    // Set the form data with the selected date
+    // Set the start and end date in the event form data
     const formattedDate = date.toISOString().split('T')[0];
     setEventFormData({
       ...eventFormData,
       start_date: formattedDate,
       end_date: formattedDate
     });
-    
-    // Show the event creation modal
     setShowEventModal(true);
   };
   
@@ -780,10 +775,10 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* Modal for creating events */}
+      {/* Modal for creating events - Redesigned */}
       {showEventModal && (
         <div className="event-modal-overlay" onClick={closeEventModal}>
-          <div className="event-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="event-modal-redesigned" onClick={(e) => e.stopPropagation()}>
             <div className="event-modal-header">
               <h2>Create Event</h2>
               <button className="close-modal-button" onClick={closeEventModal}>
@@ -802,41 +797,100 @@ const DashboardPage = () => {
               </button>
             </div>
             <div className="event-modal-content">
-              <form onSubmit={handleEventSubmit}>
+              <form onSubmit={handleEventSubmit} className="event-form-redesigned">
                 <div className="form-group">
-                  <label>Title:</label>
-                  <input type="text" name="title" value={eventFormData.title} onChange={handleEventInputChange} />
+                  <label>Title</label>
+                  <input 
+                    type="text" 
+                    name="title" 
+                    value={eventFormData.title} 
+                    onChange={handleEventInputChange} 
+                    placeholder="Event title"
+                    required
+                  />
                 </div>
+                
                 <div className="form-group">
-                  <label>Description:</label>
-                  <textarea name="description" value={eventFormData.description} onChange={handleEventInputChange} />
+                  <label>Description</label>
+                  <textarea 
+                    name="description" 
+                    value={eventFormData.description} 
+                    onChange={handleEventInputChange}
+                    placeholder="Event description"
+                    rows="3"
+                  />
                 </div>
-                <div className="form-group">
-                  <label>Start Date:</label>
-                  <input type="date" name="start_date" value={eventFormData.start_date} onChange={handleEventInputChange} />
+                
+                <div className="date-time-container">
+                  <div className="checkbox-group">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        name="all_day" 
+                        checked={eventFormData.all_day} 
+                        onChange={handleEventInputChange}
+                      />
+                      All Day Event
+                    </label>
+                  </div>
+                  
+                  <div className="date-time-grid">
+                    <div className="date-time-row">
+                      <div className="date-time-label">Start</div>
+                      <div className="date-input">
+                        <input 
+                          type="date" 
+                          name="start_date" 
+                          value={eventFormData.start_date} 
+                          onChange={handleEventInputChange}
+                          required
+                        />
+                      </div>
+                      {!eventFormData.all_day && (
+                        <div className="time-input">
+                          <input 
+                            type="time" 
+                            id="start_time" 
+                            defaultValue="09:00" 
+                          />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="date-time-row">
+                      <div className="date-time-label">End</div>
+                      <div className="date-input">
+                        <input 
+                          type="date" 
+                          name="end_date" 
+                          value={eventFormData.end_date} 
+                          onChange={handleEventInputChange}
+                          required
+                        />
+                      </div>
+                      {!eventFormData.all_day && (
+                        <div className="time-input">
+                          <input 
+                            type="time" 
+                            id="end_time" 
+                            defaultValue="17:00" 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>End Date:</label>
-                  <input type="date" name="end_date" value={eventFormData.end_date} onChange={handleEventInputChange} />
+                
+                <div className="form-actions">
+                  <button type="button" onClick={closeEventModal} className="modal-button cancel-button">Cancel</button>
+                  <button type="submit" className="modal-button create-button">Create Event</button>
                 </div>
-                <div className="form-group">
-                  <label>All Day:</label>
-                  <input type="checkbox" name="all_day" checked={eventFormData.all_day} onChange={handleEventInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Start Time:</label>
-                  <input type="time" id="start_time" />
-                </div>
-                <div className="form-group">
-                  <label>End Time:</label>
-                  <input type="time" id="end_time" />
-                </div>
-                <button type="submit">Create Event</button>
               </form>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
