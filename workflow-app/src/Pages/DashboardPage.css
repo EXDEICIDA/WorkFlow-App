@@ -704,18 +704,18 @@ body[data-sidebar="collapsed"] .dashboard-container {
 
 /* Upcoming Events Section */
 .upcoming-events-section {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   background-color: #2a2a2a;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.25rem;
 }
 
 .upcoming-events {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-  max-height: 300px;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  max-height: 255px;
   overflow-y: auto;
   padding-right: 0.5rem;
 }
@@ -742,8 +742,9 @@ body[data-sidebar="collapsed"] .dashboard-container {
   display: flex;
   background-color: #333;
   border-radius: 6px;
-  padding: 1rem;
+  padding: 0.75rem;
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
 }
 
 .event-card:hover {
@@ -751,23 +752,58 @@ body[data-sidebar="collapsed"] .dashboard-container {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.delete-event-button {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.event-card:hover .delete-event-button {
+  opacity: 1;
+}
+
+.delete-event-button:hover {
+  background-color: rgba(255, 100, 100, 0.15);
+  color: #ff6464;
+}
+
+.delete-event-button:active {
+  background-color: rgba(255, 100, 100, 0.3);
+  transform: translateY(-50%) scale(0.95);
+}
+
 .event-date {
-  min-width: 60px;
+  min-width: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-weight: 500;
   color: #e6c980;
+  font-size: 0.9rem;
 }
 
 .event-details {
-  margin-left: 1rem;
+  margin-left: 0.75rem;
+  flex: 1;
+  padding-right: 2rem;
 }
 
 .event-details h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
+  margin: 0 0 0.3rem 0;
+  font-size: 0.95rem;
 }
 
 .event-details p {

@@ -216,6 +216,25 @@ const DashboardPage = () => {
     }
   };
   
+  // Function to delete an event
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const response = await apiRequest(`http://localhost:8080/api/events/${eventId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+      
+      // Refresh the events list after deletion
+      fetchUpcomingEvents();
+      
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
   // Handle day click on calendar
   const handleDayClick = (date) => {
     setSelectedDate(date);
@@ -594,6 +613,29 @@ const DashboardPage = () => {
                       <h3>{event.title}</h3>
                       <p>{event.description}</p>
                     </div>
+                    <button 
+                      className="delete-event-button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEvent(event.id);
+                      }}
+                      aria-label="Delete event"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                      </svg>
+                    </button>
                   </div>
                 ))
               ) : (
