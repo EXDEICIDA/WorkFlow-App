@@ -1,9 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { apiRequest } from "../../services/apiService";
 import "./Calendar.css";
 
-const Calendar = () => {
+const Calendar = ({ onDayClick }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch events when the current month changes
+  useEffect(() => {
+    fetchEvents();
+  }, [currentDate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      // Calculate the first and last day of the current month for filtering
+      const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      
+      // Format dates for API query
+      const startDate = firstDay.toISOString();
+      const endDate = lastDay.toISOString();
+      
+      const response = await apiRequest(`http://localhost:8080/api/events?start_date=${startDate}&end_date=${endDate}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      
+      const eventData = await response.json();
+      setEvents(eventData);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const daysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -59,6 +94,36 @@ const Calendar = () => {
     );
   };
 
+  // Check if a date has events
+  const getEventsForDate = (date) => {
+    return events.filter(event => {
+      const eventStart = new Date(event.start_date);
+      const eventEnd = event.end_date ? new Date(event.end_date) : new Date(event.start_date);
+      
+      // Check if the date falls within the event's date range
+      return (
+        date.getDate() === eventStart.getDate() && 
+        date.getMonth() === eventStart.getMonth() && 
+        date.getFullYear() === eventStart.getFullYear()
+      ) || (
+        date.getDate() === eventEnd.getDate() && 
+        date.getMonth() === eventEnd.getMonth() && 
+        date.getFullYear() === eventEnd.getFullYear()
+      ) || (
+        date >= eventStart && date <= eventEnd
+      );
+    });
+  };
+
+  const handleDayClick = (date) => {
+    setSelectedDate(date);
+    
+    // If onDayClick prop is provided, call it with the selected date
+    if (onDayClick) {
+      onDayClick(date);
+    }
+  };
+
   const renderCalendarDays = () => {
     const days = [];
     const totalDays = daysInMonth(currentDate);
@@ -76,17 +141,25 @@ const Calendar = () => {
         currentDate.getMonth(),
         day
       );
+      
+      // Get events for this date
+      const dateEvents = getEventsForDate(date);
+      const hasEvents = dateEvents.length > 0;
+      
       const dayClass = `calendar-day ${isToday(date) ? "today" : ""} ${
         isSelected(date) ? "selected" : ""
-      }`;
+      } ${hasEvents ? "has-events" : ""}`;
 
       days.push(
         <div
           key={day}
           className={dayClass}
-          onClick={() => setSelectedDate(date)}
+          onClick={() => handleDayClick(date)}
         >
-          {day}
+          <span className="day-number">{day}</span>
+          {hasEvents && (
+            <div className="event-indicator" style={{ backgroundColor: dateEvents[0].color || "#e6c980" }}></div>
+          )}
         </div>
       );
     }
@@ -135,8 +208,14 @@ const Calendar = () => {
         ))}
       </div>
       <div className="calendar-days">{renderCalendarDays()}</div>
+      {loading && <div className="calendar-loading">Loading events...</div>}
     </div>
   );
+};
+
+// Add prop types validation
+Calendar.propTypes = {
+  onDayClick: PropTypes.func
 };
 
 export default Calendar;

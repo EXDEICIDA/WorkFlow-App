@@ -20,6 +20,20 @@ const DashboardPage = () => {
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [showFullCalendar, setShowFullCalendar] = useState(false);
+  
+  // Event related states
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventFormData, setEventFormData] = useState({
+    title: "",
+    description: "",
+    start_date: "",
+    end_date: "",
+    all_day: false,
+    color: "#e6c980"
+  });
 
   const navigate = useNavigate();
 
@@ -145,6 +159,7 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchTaskStats();
     fetchActivities();
+    fetchUpcomingEvents(); // Fetch upcoming events on component mount
   }, []);
 
   // Calculate percentages for progress bars
@@ -161,6 +176,131 @@ const DashboardPage = () => {
   const getOnHoldProjectsPercentage = () => {
     if (projectStats.totalProjects === 0) return 0;
     return Math.round((projectStats.onHoldProjects / projectStats.totalProjects) * 100);
+  };
+
+  // Function to fetch upcoming events
+  const fetchUpcomingEvents = async () => {
+    try {
+      setEventsLoading(true);
+      
+      // Get today's date
+      const today = new Date();
+      
+      // Get date 30 days from now
+      const futureDate = new Date();
+      futureDate.setDate(today.getDate() + 30);
+      
+      // Format dates for API
+      const startDate = today.toISOString();
+      const endDate = futureDate.toISOString();
+      
+      const response = await apiRequest(`http://localhost:8080/api/events?start_date=${startDate}&end_date=${endDate}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      
+      const eventData = await response.json();
+      
+      // Sort events by start date
+      const sortedEvents = eventData.sort((a, b) => 
+        new Date(a.start_date) - new Date(b.start_date)
+      );
+      
+      // Limit to 5 upcoming events
+      setUpcomingEvents(sortedEvents.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching upcoming events:", error);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+  
+  // Handle day click on calendar
+  const handleDayClick = (date) => {
+    setSelectedDate(date);
+    
+    // Set the form data with the selected date
+    const formattedDate = date.toISOString().split('T')[0];
+    setEventFormData({
+      ...eventFormData,
+      start_date: formattedDate,
+      end_date: formattedDate
+    });
+    
+    // Show the event creation modal
+    setShowEventModal(true);
+  };
+  
+  // Handle event form input changes
+  const handleEventInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEventFormData({
+      ...eventFormData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+  
+  // Handle event form submission
+  const handleEventSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Prepare the event data
+      const eventData = {
+        ...eventFormData,
+        // If all_day is true, set the time to 00:00:00 for start and 23:59:59 for end
+        start_date: eventFormData.all_day 
+          ? `${eventFormData.start_date}T00:00:00.000Z` 
+          : `${eventFormData.start_date}T${document.getElementById('start_time').value || '00:00'}:00.000Z`,
+        end_date: eventFormData.all_day 
+          ? `${eventFormData.end_date}T23:59:59.999Z` 
+          : `${eventFormData.end_date}T${document.getElementById('end_time').value || '23:59'}:59.999Z`
+      };
+      
+      // Send the request to create the event
+      const response = await apiRequest('http://localhost:8080/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventData)
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create event");
+      }
+      
+      // Reset form and close modal
+      setEventFormData({
+        title: "",
+        description: "",
+        start_date: "",
+        end_date: "",
+        all_day: false,
+        color: "#e6c980"
+      });
+      setShowEventModal(false);
+      
+      // Refresh the events list
+      fetchUpcomingEvents();
+      
+    } catch (error) {
+      console.error("Error creating event:", error);
+    }
+  };
+  
+  // Close the event modal
+  const closeEventModal = () => {
+    setShowEventModal(false);
+    setEventFormData({
+      title: "",
+      description: "",
+      start_date: "",
+      end_date: "",
+      all_day: false,
+      color: "#e6c980"
+    });
   };
 
   return (
@@ -299,7 +439,7 @@ const DashboardPage = () => {
               <h2>Calendar</h2>
               <button className="view-all-button" onClick={handleViewFullCalendar}>View All</button>
             </div>
-            <Calendar />
+            <Calendar onDayClick={handleDayClick} />
           </div>
         </div>
 
@@ -431,6 +571,34 @@ const DashboardPage = () => {
                 </svg>
                 Generate Report
               </button>
+            </div>
+          </div>
+
+          <div className="dashboard-section upcoming-events-section">
+            <div className="section-header">
+              <h2>Upcoming Events</h2>
+            </div>
+            <div className="upcoming-events">
+              {eventsLoading ? (
+                <div className="loading-events">Loading events...</div>
+              ) : upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="event-card" style={{ borderLeft: `4px solid ${event.color || '#e6c980'}` }}>
+                    <div className="event-date">
+                      {new Date(event.start_date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                    <div className="event-details">
+                      <h3>{event.title}</h3>
+                      <p>{event.description}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-events">No upcoming events</div>
+              )}
             </div>
           </div>
         </div>
@@ -565,6 +733,64 @@ const DashboardPage = () => {
             </div>
             <div className="calendar-modal-content">
               <Calendar />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for creating events */}
+      {showEventModal && (
+        <div className="event-modal-overlay" onClick={closeEventModal}>
+          <div className="event-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="event-modal-header">
+              <h2>Create Event</h2>
+              <button className="close-modal-button" onClick={closeEventModal}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="event-modal-content">
+              <form onSubmit={handleEventSubmit}>
+                <div className="form-group">
+                  <label>Title:</label>
+                  <input type="text" name="title" value={eventFormData.title} onChange={handleEventInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Description:</label>
+                  <textarea name="description" value={eventFormData.description} onChange={handleEventInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Start Date:</label>
+                  <input type="date" name="start_date" value={eventFormData.start_date} onChange={handleEventInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>End Date:</label>
+                  <input type="date" name="end_date" value={eventFormData.end_date} onChange={handleEventInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>All Day:</label>
+                  <input type="checkbox" name="all_day" checked={eventFormData.all_day} onChange={handleEventInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Start Time:</label>
+                  <input type="time" id="start_time" />
+                </div>
+                <div className="form-group">
+                  <label>End Time:</label>
+                  <input type="time" id="end_time" />
+                </div>
+                <button type="submit">Create Event</button>
+              </form>
             </div>
           </div>
         </div>

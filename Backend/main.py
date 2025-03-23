@@ -5,6 +5,7 @@ from Classes.Scripts import ScriptsManager
 from Classes.Items import ItemsManager
 from Classes.Projects import ProjectManager
 from Classes.ActivityModule import ActivityTracker
+from Classes.Events import EventManager
 from auth.AuthConfig import Auth
 
 app = Flask(__name__)
@@ -17,6 +18,7 @@ items_manager = ItemsManager()
 project_manager = ProjectManager()
 auth_manager = Auth()
 activity_tracker = ActivityTracker()
+event_manager = EventManager()
 
 # Token refresh endpoint
 @app.route('/api/auth/refresh', methods=['POST'])
@@ -482,6 +484,105 @@ def get_activities():
         activities = activity_tracker.get_auth_activities(auth_token, limit=limit)
         
         return jsonify(activities), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Events operations routes
+@app.route('/api/events', methods=['POST'])
+@Auth.auth_required
+def create_event():
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data or not data.get('title') or not data.get('start_date'):
+            return jsonify({"error": "Title and start date are required"}), 400
+            
+        # Create the event
+        event = event_manager.create_event(
+            title=data.get('title'),
+            description=data.get('description', ''),
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+            all_day=data.get('all_day', False),
+            color=data.get('color', '#e6c980'),
+            user_id=request.user.id
+        )
+        
+        if "error" in event:
+            return jsonify(event), 400
+            
+        return jsonify(event), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/events', methods=['GET'])
+@Auth.auth_required
+def get_events():
+    try:
+        # Get optional date range filters from query parameters
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        events = event_manager.fetch_events(
+            user_id=request.user.id,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        if isinstance(events, dict) and "error" in events:
+            return jsonify(events), 400
+            
+        return jsonify(events), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/events/<int:event_id>', methods=['GET'])
+@Auth.auth_required
+def get_event(event_id):
+    try:
+        event = event_manager.get_event(event_id, user_id=request.user.id)
+        
+        if "error" in event:
+            return jsonify(event), 404 if event["error"] == "Event not found" else 400
+            
+        return jsonify(event), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/events/<int:event_id>', methods=['PUT'])
+@Auth.auth_required
+def update_event(event_id):
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+            
+        event = event_manager.update_event(event_id, data, user_id=request.user.id)
+        
+        if "error" in event:
+            return jsonify(event), 404 if event["error"] == "Event not found" else 400
+            
+        return jsonify(event), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/events/<int:event_id>', methods=['DELETE'])
+@Auth.auth_required
+def delete_event(event_id):
+    try:
+        result = event_manager.delete_event(event_id, user_id=request.user.id)
+        
+        if "error" in result:
+            return jsonify(result), 404 if result["error"] == "Event not found" else 400
+            
+        return jsonify(result), 200
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
