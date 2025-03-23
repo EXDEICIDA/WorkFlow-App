@@ -157,9 +157,7 @@ const Calendar = ({ onDayClick }) => {
           onClick={() => handleDayClick(date)}
         >
           <span className="day-number">{day}</span>
-          {hasEvents && (
-            <div className="event-indicator" style={{ backgroundColor: dateEvents[0].color || "#e6c980" }}></div>
-          )}
+          {/* Removing the event indicator dots */}
         </div>
       );
     }
