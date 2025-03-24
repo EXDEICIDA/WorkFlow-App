@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/apiService";
 import useProjectStats from "../hooks/useProjectStats";
@@ -31,8 +31,22 @@ const DashboardPage = () => {
     start_date: "",
     end_date: "",
     all_day: false,
+    start_time: "09:00",
+    end_time: "17:00",
     color: "#e6c980"
   });
+
+  // Date picker related states
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [currentStartMonth, setCurrentStartMonth] = useState(new Date());
+  const [currentEndMonth, setCurrentEndMonth] = useState(new Date());
+  const [showStartYearSelector, setShowStartYearSelector] = useState(false);
+  const [showEndYearSelector, setShowEndYearSelector] = useState(false);
+  const startDatePickerRef = useRef(null);
+  const endDatePickerRef = useRef(null);
+  const startTriggerRef = useRef(null);
+  const endTriggerRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -243,6 +257,8 @@ const DashboardPage = () => {
       start_date: formattedDate,
       end_date: formattedDate
     });
+    setCurrentStartMonth(date);
+    setCurrentEndMonth(date);
     setShowEventModal(true);
   };
   
@@ -254,7 +270,425 @@ const DashboardPage = () => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
-  
+
+  // Date picker handlers
+  useEffect(() => {
+    // Close date pickers when clicking outside
+    function handleClickOutside(event) {
+      if (startDatePickerRef.current && !startDatePickerRef.current.contains(event.target) && 
+          !startTriggerRef.current.contains(event.target)) {
+        setShowStartDatePicker(false);
+        setShowStartYearSelector(false);
+      }
+      
+      if (endDatePickerRef.current && !endDatePickerRef.current.contains(event.target) && 
+          !endTriggerRef.current.contains(event.target)) {
+        setShowEndDatePicker(false);
+        setShowEndYearSelector(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleStartDatePicker = () => {
+    setShowStartDatePicker(!showStartDatePicker);
+    setShowStartYearSelector(false);
+    setShowEndDatePicker(false);
+    setShowEndYearSelector(false);
+  };
+
+  const toggleEndDatePicker = () => {
+    setShowEndDatePicker(!showEndDatePicker);
+    setShowEndYearSelector(false);
+    setShowStartDatePicker(false);
+    setShowStartYearSelector(false);
+  };
+
+  const handleStartDateSelect = (date) => {
+    const formattedDate = date.toISOString().split("T")[0];
+    setEventFormData((prev) => ({
+      ...prev,
+      start_date: formattedDate,
+    }));
+    setShowStartDatePicker(false);
+    setShowStartYearSelector(false);
+  };
+
+  const handleEndDateSelect = (date) => {
+    const formattedDate = date.toISOString().split("T")[0];
+    setEventFormData((prev) => ({
+      ...prev,
+      end_date: formattedDate,
+    }));
+    setShowEndDatePicker(false);
+    setShowEndYearSelector(false);
+  };
+
+  const handlePrevStartMonth = () => {
+    setCurrentStartMonth(new Date(currentStartMonth.getFullYear(), currentStartMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextStartMonth = () => {
+    setCurrentStartMonth(new Date(currentStartMonth.getFullYear(), currentStartMonth.getMonth() + 1, 1));
+  };
+
+  const handlePrevEndMonth = () => {
+    setCurrentEndMonth(new Date(currentEndMonth.getFullYear(), currentEndMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextEndMonth = () => {
+    setCurrentEndMonth(new Date(currentEndMonth.getFullYear(), currentEndMonth.getMonth() + 1, 1));
+  };
+
+  const handleStartYearClick = () => {
+    setShowStartYearSelector(!showStartYearSelector);
+  };
+
+  const handleEndYearClick = () => {
+    setShowEndYearSelector(!showEndYearSelector);
+  };
+
+  const handleStartYearSelect = (year) => {
+    setCurrentStartMonth(new Date(year, currentStartMonth.getMonth(), 1));
+    setShowStartYearSelector(false);
+  };
+
+  const handleEndYearSelect = (year) => {
+    setCurrentEndMonth(new Date(year, currentEndMonth.getMonth(), 1));
+    setShowEndYearSelector(false);
+  };
+
+  const handleStartTodayClick = () => {
+    const today = new Date();
+    setCurrentStartMonth(today);
+    handleStartDateSelect(today);
+  };
+
+  const handleEndTodayClick = () => {
+    const today = new Date();
+    setCurrentEndMonth(today);
+    handleEndDateSelect(today);
+  };
+
+  const handleStartCloseClick = () => {
+    setShowStartDatePicker(false);
+    setShowStartYearSelector(false);
+  };
+
+  const handleEndCloseClick = () => {
+    setShowEndDatePicker(false);
+    setShowEndYearSelector(false);
+  };
+
+  const renderStartYearSelector = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    
+    // Generate a range of years (current year ± 10 years)
+    for (let year = currentYear - 10; year <= currentYear + 10; year++) {
+      years.push(year);
+    }
+    
+    return (
+      <div className="year-selector">
+        <div className="year-selector-grid">
+          {years.map((year) => (
+            <div 
+              key={year} 
+              className={`year-item ${year === currentStartMonth.getFullYear() ? 'selected' : ''}`}
+              onClick={() => handleStartYearSelect(year)}
+            >
+              {year}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEndYearSelector = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    
+    // Generate a range of years (current year ± 10 years)
+    for (let year = currentYear - 10; year <= currentYear + 10; year++) {
+      years.push(year);
+    }
+    
+    return (
+      <div className="year-selector">
+        <div className="year-selector-grid">
+          {years.map((year) => (
+            <div 
+              key={year} 
+              className={`year-item ${year === currentEndMonth.getFullYear() ? 'selected' : ''}`}
+              onClick={() => handleEndYearSelect(year)}
+            >
+              {year}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderStartCalendar = () => {
+    const year = currentStartMonth.getFullYear();
+    const month = currentStartMonth.getMonth();
+    
+    // Get first day of month and last day of month
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    
+    // Get day of week for first day (0 = Sunday, 1 = Monday, etc.)
+    const firstDayOfWeek = firstDayOfMonth.getDay();
+    
+    // Create array of day numbers for the month
+    const daysInMonth = lastDayOfMonth.getDate();
+    
+    // Create array of weeks
+    const weeks = [];
+    let days = [];
+    
+    // Add empty cells for days before first day of month
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      days.push(null);
+    }
+    
+    // Add days of month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+      
+      // Start new week if we reach Sunday or end of month
+      if (days.length === 7 || day === daysInMonth) {
+        // Fill in remaining days of last week if needed
+        while (days.length < 7) {
+          days.push(null);
+        }
+        weeks.push(days);
+        days = [];
+      }
+    }
+    
+    const selectedDate = eventFormData.start_date ? new Date(eventFormData.start_date) : null;
+    const today = new Date();
+    
+    return (
+      <div className="date-picker-calendar">
+        <div className="date-picker-header">
+          <button type="button" className="month-nav-btn" onClick={handlePrevStartMonth}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 3L5 7.5L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div className="current-month-year" onClick={handleStartYearClick}>
+            <span>{currentStartMonth.toLocaleString('default', { month: 'long' })}</span>
+            <span className="year-display">{currentStartMonth.getFullYear()}</span>
+          </div>
+          <button type="button" className="month-nav-btn" onClick={handleNextStartMonth}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 3L10 7.5L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        
+        {showStartYearSelector ? (
+          renderStartYearSelector()
+        ) : (
+          <>
+            <div className="calendar-grid">
+              <div className="weekday-header">
+                <div>Su</div>
+                <div>Mo</div>
+                <div>Tu</div>
+                <div>We</div>
+                <div>Th</div>
+                <div>Fr</div>
+                <div>Sa</div>
+              </div>
+              
+              {weeks.map((week, weekIndex) => (
+                <div key={weekIndex} className="week-row">
+                  {week.map((day, dayIndex) => {
+                    if (day === null) {
+                      return <div key={dayIndex} className="day empty"></div>;
+                    }
+                    
+                    const date = new Date(year, month, day);
+                    const isSelected = selectedDate && 
+                      date.getDate() === selectedDate.getDate() && 
+                      date.getMonth() === selectedDate.getMonth() && 
+                      date.getFullYear() === selectedDate.getFullYear();
+                    
+                    const isToday = 
+                      date.getDate() === today.getDate() && 
+                      date.getMonth() === today.getMonth() && 
+                      date.getFullYear() === today.getFullYear();
+                    
+                    return (
+                      <div 
+                        key={dayIndex} 
+                        className={`day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+                        onClick={() => handleStartDateSelect(date)}
+                      >
+                        {day}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            
+            <div className="date-picker-footer">
+              <button type="button" className="today-btn" onClick={handleStartTodayClick}>
+                Today
+              </button>
+              <button type="button" className="close-btn" onClick={handleStartCloseClick}>
+                Close
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderEndCalendar = () => {
+    const year = currentEndMonth.getFullYear();
+    const month = currentEndMonth.getMonth();
+    
+    // Get first day of month and last day of month
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    
+    // Get day of week for first day (0 = Sunday, 1 = Monday, etc.)
+    const firstDayOfWeek = firstDayOfMonth.getDay();
+    
+    // Create array of day numbers for the month
+    const daysInMonth = lastDayOfMonth.getDate();
+    
+    // Create array of weeks
+    const weeks = [];
+    let days = [];
+    
+    // Add empty cells for days before first day of month
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      days.push(null);
+    }
+    
+    // Add days of month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+      
+      // Start new week if we reach Sunday or end of month
+      if (days.length === 7 || day === daysInMonth) {
+        // Fill in remaining days of last week if needed
+        while (days.length < 7) {
+          days.push(null);
+        }
+        weeks.push(days);
+        days = [];
+      }
+    }
+    
+    const selectedDate = eventFormData.end_date ? new Date(eventFormData.end_date) : null;
+    const today = new Date();
+    
+    return (
+      <div className="date-picker-calendar">
+        <div className="date-picker-header">
+          <button type="button" className="month-nav-btn" onClick={handlePrevEndMonth}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 3L5 7.5L9 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div className="current-month-year" onClick={handleEndYearClick}>
+            <span>{currentEndMonth.toLocaleString('default', { month: 'long' })}</span>
+            <span className="year-display">{currentEndMonth.getFullYear()}</span>
+          </div>
+          <button type="button" className="month-nav-btn" onClick={handleNextEndMonth}>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 3L10 7.5L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        
+        {showEndYearSelector ? (
+          renderEndYearSelector()
+        ) : (
+          <>
+            <div className="calendar-grid">
+              <div className="weekday-header">
+                <div>Su</div>
+                <div>Mo</div>
+                <div>Tu</div>
+                <div>We</div>
+                <div>Th</div>
+                <div>Fr</div>
+                <div>Sa</div>
+              </div>
+              
+              {weeks.map((week, weekIndex) => (
+                <div key={weekIndex} className="week-row">
+                  {week.map((day, dayIndex) => {
+                    if (day === null) {
+                      return <div key={dayIndex} className="day empty"></div>;
+                    }
+                    
+                    const date = new Date(year, month, day);
+                    const isSelected = selectedDate && 
+                      date.getDate() === selectedDate.getDate() && 
+                      date.getMonth() === selectedDate.getMonth() && 
+                      date.getFullYear() === selectedDate.getFullYear();
+                    
+                    const isToday = 
+                      date.getDate() === today.getDate() && 
+                      date.getMonth() === today.getMonth() && 
+                      date.getFullYear() === today.getFullYear();
+                    
+                    return (
+                      <div 
+                        key={dayIndex} 
+                        className={`day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+                        onClick={() => handleEndDateSelect(date)}
+                      >
+                        {day}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            
+            <div className="date-picker-footer">
+              <button type="button" className="today-btn" onClick={handleEndTodayClick}>
+                Today
+              </button>
+              <button type="button" className="close-btn" onClick={handleEndCloseClick}>
+                Close
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  // Format date for display
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
   // Handle event form submission
   const handleEventSubmit = async (e) => {
     e.preventDefault();
@@ -266,10 +700,10 @@ const DashboardPage = () => {
         // If all_day is true, set the time to 00:00:00 for start and 23:59:59 for end
         start_date: eventFormData.all_day 
           ? `${eventFormData.start_date}T00:00:00.000Z` 
-          : `${eventFormData.start_date}T${document.getElementById('start_time').value || '00:00'}:00.000Z`,
+          : `${eventFormData.start_date}T${eventFormData.start_time}:00.000Z`,
         end_date: eventFormData.all_day 
           ? `${eventFormData.end_date}T23:59:59.999Z` 
-          : `${eventFormData.end_date}T${document.getElementById('end_time').value || '23:59'}:59.999Z`
+          : `${eventFormData.end_date}T${eventFormData.end_time}:59.999Z`
       };
       
       // Send the request to create the event
@@ -292,6 +726,8 @@ const DashboardPage = () => {
         start_date: "",
         end_date: "",
         all_day: false,
+        start_time: "09:00",
+        end_time: "17:00",
         color: "#e6c980"
       });
       setShowEventModal(false);
@@ -313,6 +749,8 @@ const DashboardPage = () => {
       start_date: "",
       end_date: "",
       all_day: false,
+      start_time: "09:00",
+      end_time: "17:00",
       color: "#e6c980"
     });
   };
@@ -575,7 +1013,7 @@ const DashboardPage = () => {
                 onClick={() => navigate('/canvas')}
               >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+  <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
 </svg>
 
                 Canvas Template
@@ -770,7 +1208,7 @@ const DashboardPage = () => {
         </div>
       )}
 
-      {/* Modal for creating events - Redesigned */}
+      {/* Modal for creating events */}
       {showEventModal && (
         <div className="event-modal-overlay" onClick={closeEventModal}>
           <div className="event-modal-redesigned" onClick={(e) => e.stopPropagation()}>
@@ -832,21 +1270,33 @@ const DashboardPage = () => {
                   <div className="date-time-grid">
                     <div className="date-time-row">
                       <div className="date-time-label">Start</div>
-                      <div className="date-input">
-                        <input 
-                          type="date" 
-                          name="start_date" 
-                          value={eventFormData.start_date} 
-                          onChange={handleEventInputChange}
-                          required
-                        />
+                      <div className="date-picker-container">
+                        <button 
+                          type="button" 
+                          className="date-picker-trigger" 
+                          onClick={toggleStartDatePicker}
+                          ref={startTriggerRef}
+                        >
+                          {eventFormData.start_date ? formatDisplayDate(eventFormData.start_date) : "Select date"}
+                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.5 1V3.5M10.5 1V3.5M1 7.5H14M2.5 3H12.5C13.0523 3 13.5 3.44772 13.5 4V12.5C13.5 13.0523 13.0523 13.5 12.5 13.5H2.5C1.94772 13.5 1.5 13.0523 1.5 12.5V4C1.5 3.44772 1.94772 3 2.5 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        
+                        {showStartDatePicker && (
+                          <div className="date-picker-wrapper" ref={startDatePickerRef}>
+                            {renderStartCalendar()}
+                          </div>
+                        )}
                       </div>
                       {!eventFormData.all_day && (
                         <div className="time-input">
                           <input 
                             type="time" 
                             id="start_time" 
-                            defaultValue="09:00" 
+                            name="start_time"
+                            value={eventFormData.start_time || "09:00"}
+                            onChange={handleEventInputChange}
                           />
                         </div>
                       )}
@@ -854,21 +1304,33 @@ const DashboardPage = () => {
                     
                     <div className="date-time-row">
                       <div className="date-time-label">End</div>
-                      <div className="date-input">
-                        <input 
-                          type="date" 
-                          name="end_date" 
-                          value={eventFormData.end_date} 
-                          onChange={handleEventInputChange}
-                          required
-                        />
+                      <div className="date-picker-container">
+                        <button 
+                          type="button" 
+                          className="date-picker-trigger" 
+                          onClick={toggleEndDatePicker}
+                          ref={endTriggerRef}
+                        >
+                          {eventFormData.end_date ? formatDisplayDate(eventFormData.end_date) : "Select date"}
+                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.5 1V3.5M10.5 1V3.5M1 7.5H14M2.5 3H12.5C13.0523 3 13.5 3.44772 13.5 4V12.5C13.5 13.0523 13.0523 13.5 12.5 13.5H2.5C1.94772 13.5 1.5 13.0523 1.5 12.5V4C1.5 3.44772 1.94772 3 2.5 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        
+                        {showEndDatePicker && (
+                          <div className="date-picker-wrapper" ref={endDatePickerRef}>
+                            {renderEndCalendar()}
+                          </div>
+                        )}
                       </div>
                       {!eventFormData.all_day && (
                         <div className="time-input">
                           <input 
                             type="time" 
                             id="end_time" 
-                            defaultValue="17:00" 
+                            name="end_time"
+                            value={eventFormData.end_time || "17:00"}
+                            onChange={handleEventInputChange}
                           />
                         </div>
                       )}
@@ -885,7 +1347,6 @@ const DashboardPage = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
