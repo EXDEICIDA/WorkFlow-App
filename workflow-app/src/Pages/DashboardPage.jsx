@@ -111,23 +111,28 @@ const DashboardPage = () => {
         
         // Determine activity type icon
         let type;
-        switch (activity.activity_type) {
-          case 'create':
-            type = 'add';
-            break;
-          case 'complete':
-            type = 'complete';
-            break;
-          case 'update':
-          case 'rename':
-          case 'move':
-            type = 'update';
-            break;
-          case 'delete':
-            type = 'delete';
-            break;
-          default:
-            type = 'update';
+        // Special case for script creation
+        if (activity.activity_type === 'create' && activity.related_item_type === 'script') {
+          type = 'script';
+        } else {
+          switch (activity.activity_type) {
+            case 'create':
+              type = 'add';
+              break;
+            case 'complete':
+              type = 'complete';
+              break;
+            case 'update':
+            case 'rename':
+            case 'move':
+              type = 'update';
+              break;
+            case 'delete':
+              type = 'delete';
+              break;
+            default:
+              type = 'update';
+          }
         }
         
         return {
@@ -966,6 +971,19 @@ const DashboardPage = () => {
                           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                         </svg>
                       )}
+                      {activity.type === "script" && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                      )}
                     </div>
                     <div className="activity-content">
                       <p>{activity.text}</p>
@@ -1159,6 +1177,19 @@ const DashboardPage = () => {
                             <path d="M3 6h18" />
                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                          </svg>
+                        )}
+                        {activity.type === "script" && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                           </svg>
                         )}
                       </div>

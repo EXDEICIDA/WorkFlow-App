@@ -382,6 +382,11 @@ body[data-sidebar="collapsed"] .dashboard-container {
   color: #c37ee6;
 }
 
+.activity-icon.script {
+  background-color: rgba(11, 102, 35, 0.1);
+  color: #0b6623;
+}
+
 .activity-content {
   flex: 1;
 }
