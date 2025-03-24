@@ -1085,6 +1085,7 @@ body[data-sidebar="collapsed"] .dashboard-container {
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
   margin-top: 1rem;
 }
@@ -1097,12 +1098,17 @@ body[data-sidebar="collapsed"] .dashboard-container {
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cancel-button {
   background-color: transparent;
   border: 1px solid #666;
   color: #ccc;
+  position: relative;
+  top: 6px;
 }
 
 .cancel-button:hover {
