@@ -100,17 +100,21 @@ class ScriptsManager:
             script_details = self._client.table('scripts').select('*').eq('id', script_id).execute()
             if not script_details.data or len(script_details.data) == 0:
                 raise Exception("Script not found")
-            
+                
             script = script_details.data[0]
             
-            script_data = {
-                "title": title,
-                "description": description,
-                "code": code,
-                "language": language
-            }
-        
-            query = self._client.table('scripts').update(script_data).eq('id', script_id)
+            # Only update fields that are provided (not None)
+            update_data = {}
+            if title is not None:
+                update_data['title'] = title
+            if description is not None:
+                update_data['description'] = description
+            if code is not None:
+                update_data['code'] = code
+            if language is not None:
+                update_data['language'] = language
+            
+            query = self._client.table('scripts').update(update_data).eq('id', script_id)
             
             # Ensure the script belongs to the user if user_id is provided
             if user_id:
@@ -119,38 +123,20 @@ class ScriptsManager:
             response = query.execute()
             
             if not response.data:
-                raise Exception("Script not found or already deleted")
+                raise Exception("Script not found or unauthorized")
             
             # Log activity
-            updated_script = response.data[0]
-            
-            # Determine what was changed
-            changes = []
-            if title != script['title']:
-                changes.append("title")
-            if description != script['description']:
-                changes.append("description")
-            if code != script['code']:
-                changes.append("code")
-            if language != script['language']:
-                changes.append("language")
-            
-            change_description = f"Updated script '{script['title']}'"
-            if changes:
-                change_description += f" ({', '.join(changes)})"
-            
             self._activity_tracker.log_activity(
                 user_id=user_id,
-                activity_type="update",
-                description=change_description,
+                activity_type="edit",
+                description=f"Updated script '{script['title']}'",
                 related_item_id=script_id,
                 related_item_type="script"
             )
-                
-            return updated_script
             
+            return response.data[0]
         except Exception as e:
-            raise Exception(f"Failed to edit script: {str(e)}")    
+            raise Exception(f"Failed to edit script: {str(e)}")
     
 
 

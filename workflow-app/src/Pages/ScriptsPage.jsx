@@ -130,7 +130,7 @@ const ScriptsPage = () => {
     }
   };
 
-  const handleLanguageChange = (newLanguage) => {
+  const handleLanguageChange = (script, newLanguage) => {
     if (selectedScript) {
       // First update the UI
       const updatedScript = { ...selectedScript, language: newLanguage };
@@ -165,6 +165,25 @@ const ScriptsPage = () => {
           setSelectedScript(originalScript);
         }
       }
+    }
+  };
+
+  const handleCodeChange = async (script, newCode) => {
+    try {
+      const response = await apiRequest(`${API_BASE_URL}/${script.id}/code`, {
+        method: "PUT",
+        body: JSON.stringify({ code: newCode })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update script code");
+      }
+
+      const updatedScript = await response.json();
+      setScripts(scripts.map(s => s.id === script.id ? updatedScript : s));
+      setSelectedScript(updatedScript);
+    } catch (error) {
+      console.error("Error updating script code:", error);
     }
   };
 
@@ -367,7 +386,9 @@ const ScriptsPage = () => {
           <CodeCard
             code={selectedScript.code}
             language={selectedScript.language}
-            onLanguageChange={handleLanguageChange}
+            onLanguageChange={(language) => handleLanguageChange(selectedScript, language)}
+            onCodeChange={(newCode) => handleCodeChange(selectedScript, newCode)}
+            editable={true}
           />
         </div>
       )}

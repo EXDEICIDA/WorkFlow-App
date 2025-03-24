@@ -109,9 +109,31 @@
   font-size: 0.875rem;
   color: #d4d4d8;
   overflow-x: auto;
+  height: auto;
+  overflow: visible;
 }
 
 .code-content pre {
   white-space: pre-wrap;
   margin: 0;
+}
+
+.code-editor {
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+  padding: 1rem;
+  background-color: transparent;
+  color: inherit;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  border: none;
+  resize: none;
+  outline: none;
+  overflow-y: hidden;
+}
+
+.code-editor:focus {
+  outline: 1px solid rgba(255, 255, 255, 0.1);
 }
