@@ -100,24 +100,37 @@ class ItemsManager:
             # If we're at the root level, also fetch canvas items
             if parent_id is None:
                 try:
+                    # Check if there are any canvas items already in the items list
+                    existing_canvas_ids = set()
+                    for item in items:
+                        if item.get('file_type') == 'canvas' and item.get('file_url'):
+                            # Extract canvas ID from file_url if it follows the pattern /canvas/{id}
+                            try:
+                                canvas_id = item.get('file_url').split('/')[-1]
+                                if canvas_id.isdigit():
+                                    existing_canvas_ids.add(int(canvas_id))
+                            except:
+                                pass
+                    
                     # Fetch all canvases for the user
                     canvas_response = client.table('canvas').select('*').eq('user_id', user_id).execute()
                     canvases = canvas_response.data if canvas_response.data else []
                     
-                    # Convert canvas items to the same format as regular items
+                    # Convert canvas items to the same format as regular items, but only if they don't already exist
                     for canvas in canvases:
-                        canvas_item = {
-                            "id": f"canvas_{canvas['id']}",  # Prefix to distinguish from regular items
-                            "name": canvas['name'],
-                            "type": "file",
-                            "file_type": "canvas",
-                            "file_url": f"/canvas/{canvas['id']}",  # URL format for canvas items
-                            "user_id": canvas['user_id'],
-                            "created_at": canvas['created_at'],
-                            "updated_at": canvas['updated_at'],
-                            "parent_id": None  # Canvas items are at root level
-                        }
-                        items.append(canvas_item)
+                        if canvas['id'] not in existing_canvas_ids:
+                            canvas_item = {
+                                "id": f"canvas_{canvas['id']}",  # Prefix to distinguish from regular items
+                                "name": canvas['name'],
+                                "type": "file",
+                                "file_type": "canvas",
+                                "file_url": f"/canvas/{canvas['id']}",  # URL format for canvas items
+                                "user_id": canvas['user_id'],
+                                "created_at": canvas['created_at'],
+                                "updated_at": canvas['updated_at'],
+                                "parent_id": None  # Canvas items are at root level
+                            }
+                            items.append(canvas_item)
                 except Exception as e:
                     # Log the error but continue with regular items
                     print(f"Error fetching canvas items: {str(e)}")

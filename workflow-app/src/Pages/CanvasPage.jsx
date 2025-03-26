@@ -233,19 +233,45 @@ const CanvasPage = () => {
         description: `Canvas created on ${new Date().toLocaleDateString()}`
       };
       
-      // Make API request to save canvas
-      const response = await axios.post(
-        `${API_BASE_URL}/canvas`, 
-        canvasData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authTokens?.access_token || ''}`
-          }
-        }
-      );
+      // Check if this tab has a canvas ID from a previous load
+      const searchParams = new URLSearchParams(location.search);
+      const canvasId = searchParams.get('id');
       
-      toast.success(`Canvas "${activeTab.name}" saved successfully`);
+      let response;
+      
+      if (canvasId) {
+        // Update existing canvas
+        response = await axios.put(
+          `${API_BASE_URL}/canvas/${canvasId}`, 
+          canvasData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authTokens?.access_token || ''}`
+            }
+          }
+        );
+        toast.success(`Canvas "${activeTab.name}" updated successfully`);
+      } else {
+        // Create new canvas
+        response = await axios.post(
+          `${API_BASE_URL}/canvas`, 
+          canvasData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authTokens?.access_token || ''}`
+            }
+          }
+        );
+        
+        // Update URL with the new canvas ID
+        const newCanvasId = response.data.id;
+        window.history.replaceState(null, '', `?id=${newCanvasId}`);
+        
+        toast.success(`Canvas "${activeTab.name}" saved successfully`);
+      }
+      
       console.log("Canvas saved:", response.data);
     } catch (error) {
       console.error("Error saving canvas:", error);
