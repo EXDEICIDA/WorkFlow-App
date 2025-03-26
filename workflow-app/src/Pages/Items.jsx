@@ -1,9 +1,10 @@
 // React is needed for JSX
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
-import { File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash2 } from "lucide-react";
+import { File, Plus, ChevronDown, ChevronLeft, Upload, Filter, FileText, Image, Video, Music, Archive, AlertCircle, Edit, Table, Trash2, Palette } from "lucide-react";
 import "./Items.css";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = "http://localhost:8080/api/items";
 
@@ -15,11 +16,13 @@ const ItemTypes = [
   { name: "Video", icon: <Video size={24} />, color: "#F4B400" },
   { name: "Audio", icon: <Music size={24} />, color: "#AB47BC" },
   { name: "Archive", icon: <Archive size={24} />, color: "#795548" },
+  { name: "Canvas", icon: <Palette size={24} />, color: "#009688" },
   { name: "Other", icon: <File size={24} />, color: "#607D8B" },
 ];
 
 const Items = () => {
   const { authTokens } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [folders, setFolders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -298,8 +301,54 @@ const Items = () => {
     };
   }, [handleGlobalClick]);
 
+  const getItemIcon = (item) => {
+    if (item.type === 'folder') {
+      return (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 6H20C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V19Z" stroke="#FFB74D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    }
+    
+    // Check if it's a canvas file
+    if (item.file_type === 'canvas') {
+      return ItemTypes.find(t => t.name === "Canvas").icon;
+    }
+    
+    // For other file types
+    const extension = item.file_type ? item.file_type.toLowerCase() : '';
+    
+    if (['doc', 'docx', 'txt', 'pdf'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Document").icon;
+    } else if (['xls', 'xlsx', 'csv'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Spreadsheet").icon;
+    } else if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Image").icon;
+    } else if (['mp4', 'avi', 'mov', 'wmv', 'webm'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Video").icon;
+    } else if (['mp3', 'wav', 'ogg', 'flac'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Audio").icon;
+    } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return ItemTypes.find(t => t.name === "Archive").icon;
+    } else {
+      return ItemTypes.find(t => t.name === "Other").icon;
+    }
+  };
+
   const handleItemClick = (item) => {
-    setSelectedItem(item);
+    if (item.type === 'folder') {
+      setCurrentFolder(item);
+    } else {
+      // Handle file click based on file type
+      if (item.file_type === 'canvas') {
+        // Extract canvas ID from file_url
+        const canvasId = item.file_url.split('/').pop();
+        // Navigate to canvas page with the canvas ID
+        navigate(`/canvas?id=${canvasId}`);
+      } else {
+        setSelectedItem(item);
+      }
+    }
   };
 
   const handleFolderClick = (folder) => {
@@ -346,31 +395,6 @@ const Items = () => {
     });
   };
 
-  const getItemTypeIcon = (fileType) => {
-    let itemTypeName = "Other";
-    
-    if (fileType) {
-      const lowerFileType = fileType.toLowerCase();
-      if (['doc', 'docx', 'txt', 'pdf'].includes(lowerFileType)) {
-        itemTypeName = "Document";
-      } else if (['xls', 'xlsx', 'csv'].includes(lowerFileType)) {
-        itemTypeName = "Spreadsheet";
-      } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(lowerFileType)) {
-        itemTypeName = "Image";
-      } else if (['mp4', 'avi', 'mov', 'wmv'].includes(lowerFileType)) {
-        itemTypeName = "Video";
-      } else if (['mp3', 'wav', 'ogg'].includes(lowerFileType)) {
-        itemTypeName = "Audio";
-      } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(lowerFileType)) {
-        itemTypeName = "Archive";
-      }
-    }
-    
-    const itemType = ItemTypes.find(type => type.name === itemTypeName);
-    return itemType ? itemType.icon : <File size={32} />;
-  };
-
-  // Format date to show relative time for recent dates and full date for older ones
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -415,6 +439,8 @@ const Items = () => {
           itemTypeName = "Audio";
         } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(lowerFileType)) {
           itemTypeName = "Archive";
+        } else if (lowerFileType === 'canvas') {
+          itemTypeName = "Canvas";
         }
       }
       
@@ -449,7 +475,7 @@ const Items = () => {
           </button>
           <div className="item-details">
             <div className="item-icon">
-              {getItemTypeIcon(selectedItem.file_type)}
+              {getItemIcon(selectedItem)}
             </div>
             <div className="item-info">
               <h2>{selectedItem.name}</h2>
@@ -627,7 +653,7 @@ const Items = () => {
                         onContextMenu={(e) => handleContextMenu(e, item)}
                       >
                         <div className="item-icon">
-                          {getItemTypeIcon(item.file_type)}
+                          {getItemIcon(item)}
                         </div>
                         <div className="item-info">
                           <h3 className="item-name">{item.name}</h3>

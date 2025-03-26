@@ -378,28 +378,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #121212;
-  background-image: radial-gradient(circle, #1f1f1f 1px, transparent 1px);
-  background-size: 20px 20px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
 }
 
 .empty-state-content {
-  text-align: center;
-  color: #666;
+  max-width: 400px;
   padding: 2rem;
-  border-radius: 8px;
-  background-color: rgba(26, 26, 26, 0.8);
-  backdrop-filter: blur(5px);
 }
 
-.empty-state-content h2 {
-  margin: 0 0 1rem;
-  font-size: 1.5rem;
-  font-weight: normal;
-  color: #888;
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
-.empty-state-content p {
-  margin: 0;
-  font-size: 0.9rem;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #009688;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

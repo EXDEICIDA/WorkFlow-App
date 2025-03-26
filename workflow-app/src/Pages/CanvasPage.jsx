@@ -2,8 +2,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import "./CanvasPage.css";
 import CanvasItem from "../Components/CanvasItem";
 import Curves from "../Components/Curves";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
+
+const API_BASE_URL = "http://localhost:8080/api";
 
 const CanvasPage = () => {
+  const { authTokens } = useAuth();
+  const location = useLocation();
   const [tabs, setTabs] = useState([]);
   const [activeTabIndex, setActiveTabIndex] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -14,6 +23,8 @@ const CanvasPage = () => {
   const [connectingFrom, setConnectingFrom] = useState(null);
   const [nextItemId, setNextItemId] = useState(1);
   const [editingTabId, setEditingTabId] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef(null);
 
   // Get active tab's canvas items and connections
@@ -202,6 +213,101 @@ const CanvasPage = () => {
     }
   };
 
+  const handleSaveCanvas = async () => {
+    if (activeTabIndex === null || !tabs[activeTabIndex]) {
+      toast.error("No canvas selected to save");
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      const activeTab = tabs[activeTabIndex];
+      
+      // Prepare canvas data
+      const canvasData = {
+        name: activeTab.name,
+        content: JSON.stringify({
+          canvasItems: activeTab.canvasItems || [],
+          connections: activeTab.connections || []
+        }),
+        description: `Canvas created on ${new Date().toLocaleDateString()}`
+      };
+      
+      // Make API request to save canvas
+      const response = await axios.post(
+        `${API_BASE_URL}/canvas`, 
+        canvasData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authTokens?.access_token || ''}`
+          }
+        }
+      );
+      
+      toast.success(`Canvas "${activeTab.name}" saved successfully`);
+      console.log("Canvas saved:", response.data);
+    } catch (error) {
+      console.error("Error saving canvas:", error);
+      toast.error(`Failed to save canvas: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Load canvas from URL parameter if present
+  useEffect(() => {
+    const loadCanvasFromUrl = async () => {
+      const searchParams = new URLSearchParams(location.search);
+      const canvasId = searchParams.get('id');
+      
+      if (canvasId && authTokens) {
+        try {
+          setIsLoading(true);
+          // Make API request to load canvas
+          const response = await axios.get(
+            `${API_BASE_URL}/canvas/${canvasId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${authTokens?.access_token || ''}`
+              }
+            }
+          );
+          
+          const canvasData = response.data;
+          const content = JSON.parse(canvasData.content);
+          
+          // Create new tab with loaded canvas data
+          const newTab = {
+            id: Date.now(),
+            name: canvasData.name,
+            canvasItems: content.canvasItems || [],
+            connections: content.connections || []
+          };
+          
+          setTabs([newTab]);
+          setActiveTabIndex(0);
+          
+          // Update nextItemId to be greater than any existing item id
+          const maxId = Math.max(
+            0,
+            ...(content.canvasItems || []).map(item => item.id)
+          );
+          setNextItemId(maxId + 1);
+          
+          toast.success(`Canvas "${canvasData.name}" loaded successfully`);
+        } catch (error) {
+          console.error("Error loading canvas:", error);
+          toast.error(`Failed to load canvas: ${error.response?.data?.error || error.message}`);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    loadCanvasFromUrl();
+  }, [location.search, authTokens]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === "Space") {
@@ -315,8 +421,17 @@ const CanvasPage = () => {
       ) : (
         <div className="empty-state">
           <div className="empty-state-content">
-            <h2>No Canvas Selected</h2>
-            <p>Click the + button to create a new canvas</p>
+            {isLoading ? (
+              <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>Loading canvas...</p>
+              </div>
+            ) : (
+              <>
+                <h2>No Canvas Selected</h2>
+                <p>Click the + button to create a new canvas</p>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -421,7 +536,12 @@ const CanvasPage = () => {
           </svg>
         </button>
         
-        <button className="tool-btn">
+        <button 
+          className="tool-btn"
+          onClick={handleSaveCanvas}
+          disabled={isSaving || activeTabIndex === null}
+          title="Save Canvas"
+        >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
   <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
 </svg>
@@ -441,7 +561,7 @@ const CanvasPage = () => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+              d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25V11.25a9 9 0 0 0-9-9Z"
             />
           </svg>
         </button>
@@ -471,7 +591,7 @@ const CanvasPage = () => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
+              d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25V11.25a9 9 0 0 0-9-9Z"
             />
           </svg>
         </button>

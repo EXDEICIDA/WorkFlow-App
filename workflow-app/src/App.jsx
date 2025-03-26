@@ -11,6 +11,8 @@ import Layout from "./Components/Layout";
 import Items from "./Pages/Items";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import "./App.css";
 
@@ -63,6 +65,7 @@ function App() {
               </ProtectedRoute>
             } />
           </Routes>
+          <ToastContainer position="bottom-right" autoClose={3000} />
         </Layout>
       </Router>
     </AuthProvider>

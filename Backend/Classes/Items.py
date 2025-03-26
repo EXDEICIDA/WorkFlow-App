@@ -95,7 +95,34 @@ class ItemsManager:
                 query = query.is_('parent_id', 'null')  # Root items
                 
             response = query.execute()
-            return response.data if response.data else []
+            items = response.data if response.data else []
+            
+            # If we're at the root level, also fetch canvas items
+            if parent_id is None:
+                try:
+                    # Fetch all canvases for the user
+                    canvas_response = client.table('canvas').select('*').eq('user_id', user_id).execute()
+                    canvases = canvas_response.data if canvas_response.data else []
+                    
+                    # Convert canvas items to the same format as regular items
+                    for canvas in canvases:
+                        canvas_item = {
+                            "id": f"canvas_{canvas['id']}",  # Prefix to distinguish from regular items
+                            "name": canvas['name'],
+                            "type": "file",
+                            "file_type": "canvas",
+                            "file_url": f"/canvas/{canvas['id']}",  # URL format for canvas items
+                            "user_id": canvas['user_id'],
+                            "created_at": canvas['created_at'],
+                            "updated_at": canvas['updated_at'],
+                            "parent_id": None  # Canvas items are at root level
+                        }
+                        items.append(canvas_item)
+                except Exception as e:
+                    # Log the error but continue with regular items
+                    print(f"Error fetching canvas items: {str(e)}")
+            
+            return items
             
         except Exception as e:
             raise Exception(f"Failed to fetch items: {str(e)}")

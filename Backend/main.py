@@ -6,6 +6,7 @@ from Classes.Items import ItemsManager
 from Classes.Projects import ProjectManager
 from Classes.ActivityModule import ActivityTracker
 from Classes.Events import EventManager
+from Classes.Canvas import CanvasManager
 from auth.AuthConfig import Auth
 
 app = Flask(__name__)
@@ -19,6 +20,7 @@ project_manager = ProjectManager()
 auth_manager = Auth()
 activity_tracker = ActivityTracker()
 event_manager = EventManager()
+canvas_manager = CanvasManager()
 
 # Token refresh endpoint
 @app.route('/api/auth/refresh', methods=['POST'])
@@ -602,6 +604,88 @@ def delete_event(event_id):
             
         return jsonify(result), 200
         
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Canvas operations routes
+@app.route('/api/canvas', methods=['POST'])
+@Auth.auth_required
+def save_canvas():
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('name') or not data.get('content'):
+            return jsonify({"error": "Name and content are required"}), 400
+            
+        # Set auth token for RLS
+        canvas_manager.set_auth_token(request.headers.get('Authorization').split(' ')[1])
+        
+        canvas = canvas_manager.save_canvas(
+            name=data.get('name'),
+            content=data.get('content'),
+            description=data.get('description', ''),
+            user_id=request.user.id
+        )
+        
+        return jsonify(canvas), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/canvas', methods=['GET'])
+@Auth.auth_required
+def get_all_canvas():
+    try:
+        # Set auth token for RLS
+        canvas_manager.set_auth_token(request.headers.get('Authorization').split(' ')[1])
+        
+        canvases = canvas_manager.fetch_all_canvas(user_id=request.user.id)
+        return jsonify(canvases), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/canvas/<int:canvas_id>', methods=['GET'])
+@Auth.auth_required
+def get_canvas(canvas_id):
+    try:
+        # Set auth token for RLS
+        canvas_manager.set_auth_token(request.headers.get('Authorization').split(' ')[1])
+        
+        canvas = canvas_manager.fetch_canvas(canvas_id=canvas_id, user_id=request.user.id)
+        return jsonify(canvas), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/canvas/<int:canvas_id>', methods=['PUT'])
+@Auth.auth_required
+def update_canvas(canvas_id):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+            
+        # Set auth token for RLS
+        canvas_manager.set_auth_token(request.headers.get('Authorization').split(' ')[1])
+        
+        canvas = canvas_manager.update_canvas(
+            canvas_id=canvas_id,
+            updates=data,
+            user_id=request.user.id
+        )
+        
+        return jsonify(canvas), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/canvas/<int:canvas_id>', methods=['DELETE'])
+@Auth.auth_required
+def delete_canvas(canvas_id):
+    try:
+        # Set auth token for RLS
+        canvas_manager.set_auth_token(request.headers.get('Authorization').split(' ')[1])
+        
+        result = canvas_manager.delete_canvas(canvas_id=canvas_id, user_id=request.user.id)
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
