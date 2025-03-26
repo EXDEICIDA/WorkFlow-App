@@ -343,8 +343,10 @@ const Items = () => {
       if (item.file_type === 'canvas') {
         // Extract canvas ID from file_url
         const canvasId = item.file_url.split('/').pop();
-        // Navigate to canvas page with the canvas ID
-        navigate(`/canvas?id=${canvasId}`);
+        // Add timestamp to prevent duplicate loading
+        const timestamp = Date.now();
+        // Navigate to canvas page with the canvas ID and timestamp
+        navigate(`/canvas?id=${canvasId}&t=${timestamp}`);
       } else {
         setSelectedItem(item);
       }

@@ -26,6 +26,8 @@ const CanvasPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef(null);
+  const loadingCanvasRef = useRef(false); // Track if we're currently loading a canvas
+  const prevTabCountRef = useRef(0);
 
   // Get active tab's canvas items and connections
   const canvasItems = tabs[activeTabIndex]?.canvasItems || [];
@@ -202,15 +204,26 @@ const CanvasPage = () => {
 
   const handleCloseTab = (tabId, event) => {
     event.stopPropagation();
+    
+    // Set loading flag to prevent canvas reload
+    loadingCanvasRef.current = true;
+    
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     const newTabs = tabs.filter(tab => tab.id !== tabId);
     setTabs(newTabs);
     
     if (newTabs.length === 0) {
       setActiveTabIndex(null);
+      // Clear URL parameters when closing the last tab
+      window.history.replaceState(null, '', '/canvas');
     } else if (tabIndex <= activeTabIndex) {
       setActiveTabIndex(Math.max(0, activeTabIndex - 1));
     }
+    
+    // Reset loading flag after a delay
+    setTimeout(() => {
+      loadingCanvasRef.current = false;
+    }, 500);
   };
 
   const handleSaveCanvas = async () => {
@@ -281,58 +294,89 @@ const CanvasPage = () => {
     }
   };
 
+  // Handle closing tabs without triggering canvas reload
+  useEffect(() => {
+    // If tab count decreased, we're closing tabs - set a flag
+    if (tabs.length < prevTabCountRef.current) {
+      loadingCanvasRef.current = true; // Prevent loading during tab close
+      
+      // Reset the loading flag after a short delay
+      setTimeout(() => {
+        loadingCanvasRef.current = false;
+      }, 300);
+    }
+    
+    // Update the previous tab count
+    prevTabCountRef.current = tabs.length;
+  }, [tabs.length]);
+
   // Load canvas from URL parameter if present
   useEffect(() => {
     const loadCanvasFromUrl = async () => {
+      // Prevent multiple simultaneous loading attempts
+      if (loadingCanvasRef.current) return;
+      
       const searchParams = new URLSearchParams(location.search);
       const canvasId = searchParams.get('id');
       
-      if (canvasId && authTokens) {
-        try {
-          setIsLoading(true);
-          // Make API request to load canvas
-          const response = await axios.get(
-            `${API_BASE_URL}/canvas/${canvasId}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${authTokens?.access_token || ''}`
-              }
+      if (!canvasId || !authTokens) return;
+      
+      // Check if we already have this canvas loaded in the tabs
+      if (tabs.some(tab => tab.canvasId === parseInt(canvasId))) {
+        return; // Skip loading if already loaded
+      }
+      
+      try {
+        loadingCanvasRef.current = true; // Set loading flag
+        setIsLoading(true);
+        
+        // Make API request to load canvas
+        const response = await axios.get(
+          `${API_BASE_URL}/canvas/${canvasId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${authTokens?.access_token || ''}`
             }
-          );
-          
-          const canvasData = response.data;
-          const content = JSON.parse(canvasData.content);
-          
-          // Create new tab with loaded canvas data
-          const newTab = {
-            id: Date.now(),
-            name: canvasData.name,
-            canvasItems: content.canvasItems || [],
-            connections: content.connections || []
-          };
-          
-          setTabs([newTab]);
-          setActiveTabIndex(0);
-          
-          // Update nextItemId to be greater than any existing item id
-          const maxId = Math.max(
-            0,
-            ...(content.canvasItems || []).map(item => item.id)
-          );
-          setNextItemId(maxId + 1);
-          
-          toast.success(`Canvas "${canvasData.name}" loaded successfully`);
-        } catch (error) {
-          console.error("Error loading canvas:", error);
-          toast.error(`Failed to load canvas: ${error.response?.data?.error || error.message}`);
-        } finally {
-          setIsLoading(false);
-        }
+          }
+        );
+        
+        const canvasData = response.data;
+        const content = JSON.parse(canvasData.content);
+        
+        // Create new tab with loaded canvas data
+        const newTab = {
+          id: Date.now(),
+          canvasId: parseInt(canvasId),
+          name: canvasData.name,
+          canvasItems: content.canvasItems || [],
+          connections: content.connections || []
+        };
+        
+        setTabs(currentTabs => [...currentTabs, newTab]);
+        setActiveTabIndex(tabs.length);
+        
+        // Update nextItemId to be greater than any existing item id
+        const maxId = Math.max(
+          0,
+          ...(content.canvasItems || []).map(item => item.id)
+        );
+        setNextItemId(maxId + 1);
+        
+        toast.success(`Canvas "${canvasData.name}" loaded successfully`);
+      } catch (error) {
+        console.error("Error loading canvas:", error);
+        toast.error(`Failed to load canvas: ${error.response?.data?.error || error.message}`);
+      } finally {
+        setIsLoading(false);
+        // Reset loading flag after a short delay to prevent immediate reloading
+        setTimeout(() => {
+          loadingCanvasRef.current = false;
+        }, 500);
       }
     };
     
     loadCanvasFromUrl();
-  }, [location.search, authTokens]);
+  }, [location.search, authTokens, tabs]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -552,7 +596,7 @@ const CanvasPage = () => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.204-.107-.397.165-.71.505-.78.929l-.15.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.78-.93-.398-.164-.855-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"
+              d="M10.343 3.94c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z"
             />
             <path
               strokeLinecap="round"
@@ -569,7 +613,7 @@ const CanvasPage = () => {
           title="Save Canvas"
         >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 11.186 0Z" />
 </svg>
 
         </button>
