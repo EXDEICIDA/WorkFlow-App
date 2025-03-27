@@ -143,6 +143,17 @@ class ItemsManager:
     def delete_item(self, item_id, user_id):
         """Delete an item (file or folder) from the database."""
         try:
+            # Check if this is a canvas item (ID starts with "canvas_")
+            if isinstance(item_id, str) and item_id.startswith("canvas_"):
+                # Extract the canvas ID from the string
+                canvas_id = int(item_id.split("_")[1])
+                
+                # Use the canvas manager to delete the canvas
+                from Classes.Canvas import CanvasManager
+                canvas_manager = CanvasManager()
+                canvas_manager.set_auth_token(self._auth_token)
+                return canvas_manager.delete_canvas(canvas_id, user_id)
+            
             # Use auth client for RLS-protected operations
             client = DataConfig.get_auth_client(self._auth_token)
             
