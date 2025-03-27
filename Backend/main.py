@@ -508,6 +508,26 @@ def get_activities():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/activities/all', methods=['DELETE'])
+@Auth.auth_required
+def delete_user_activities():
+    try:
+        # Get auth token from request headers
+        auth_header = request.headers.get('Authorization')
+        auth_token = None
+        if auth_header and auth_header.startswith('Bearer '):
+            auth_token = auth_header.split(' ')[1]
+        
+        # Delete all activities for the authenticated user
+        success = activity_tracker.delete_user_activities(auth_token)
+        
+        if success:
+            return jsonify({"message": "All activities deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Failed to delete activities"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Events operations routes
 @app.route('/api/events', methods=['POST'])
 @Auth.auth_required

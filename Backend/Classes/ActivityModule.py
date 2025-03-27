@@ -90,3 +90,32 @@ class ActivityTracker:
         except Exception as e:
             print(f"Error fetching authenticated user activities: {str(e)}")
             return []
+            
+    def delete_user_activities(self, auth_token):
+        """
+        Delete all activities for the authenticated user.
+        
+        Args:
+            auth_token (str): The authentication token
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            auth_client = DataConfig.get_auth_client(auth_token)
+            
+            # First get the user ID from the auth token
+            user = auth_client.auth.get_user()
+            if not user or not user.id:
+                return False
+                
+            # Delete all activities for this user
+            result = auth_client.table("activities") \
+                .delete() \
+                .eq("user_id", user.id) \
+                .execute()
+            
+            return True
+        except Exception as e:
+            print(f"Error deleting user activities: {str(e)}")
+            return False

@@ -51,6 +51,7 @@ const DashboardPage = () => {
   const endTriggerRef = useRef(null);
 
   const [showConfirmClearEvents, setShowConfirmClearEvents] = useState(false);
+  const [showConfirmClearActivities, setShowConfirmClearActivities] = useState(false);
 
   const navigate = useNavigate();
 
@@ -320,6 +321,27 @@ const DashboardPage = () => {
       
     } catch (error) {
       console.error("Error clearing all events:", error);
+    }
+  };
+
+  const handleClearAllActivities = async () => {
+    try {
+      const response = await apiRequest('http://localhost:8080/api/activities/all', {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to clear all activities");
+      }
+      
+      // Refresh the activities list after clearing
+      fetchActivities();
+      fetchAllActivities();
+      setShowAllActivities(false);
+      setShowConfirmClearActivities(false);
+      
+    } catch (error) {
+      console.error("Error clearing all activities:", error);
     }
   };
 
@@ -859,7 +881,7 @@ const DashboardPage = () => {
               strokeWidth="2"
             >
               <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 01 2-2h11" />
             </svg>
           </div>
           <div className="stat-info">
@@ -974,7 +996,9 @@ const DashboardPage = () => {
           <div className="dashboard-section activity-section">
             <div className="section-header">
               <h2>Recent Activity</h2>
-              <button className="view-all-button" onClick={handleViewAllActivities}>View All</button>
+              <div className="section-header-actions">
+                <button className="view-all-button" onClick={handleViewAllActivities}>View All</button>
+              </div>
             </div>
             <div className="activity-list">
               {activitiesLoading ? (
@@ -1169,20 +1193,43 @@ const DashboardPage = () => {
           <div className="activity-modal" onClick={(e) => e.stopPropagation()}>
             <div className="activity-modal-header">
               <h2>All Activities</h2>
-              <button className="close-modal-button" onClick={() => setShowAllActivities(false)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+              <div className="modal-header-actions">
+                <button 
+                  className="clear-all-activities-button" 
+                  onClick={() => setShowConfirmClearActivities(true)}
+                  aria-label="Clear all activities"
                 >
-                  <path d="M18 6L6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </button>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    strokeWidth="1.5" 
+                    stroke="currentColor" 
+                    className="trash-icon"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" 
+                    />
+                  </svg>
+                  Clear All Activities
+                </button>
+                <button className="close-modal-button" onClick={() => setShowAllActivities(false)}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M18 6L6 18" />
+                    <path d="M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div className="activity-modal-content">
               {activitiesLoading ? (
@@ -1460,7 +1507,6 @@ const DashboardPage = () => {
                 <button 
                   className="clear-all-events-button" 
                   onClick={() => setShowConfirmClearEvents(true)}
-                  aria-label="Clear all events"
                 >
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
@@ -1562,6 +1608,34 @@ const DashboardPage = () => {
                 <button 
                   className="confirm-modal-button cancel-button" 
                   onClick={() => setShowConfirmClearEvents(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal for confirmation */}
+      {showConfirmClearActivities && (
+        <div className="confirm-modal-overlay" onClick={() => setShowConfirmClearActivities(false)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-header">
+              <h2>Confirm Clear All Activities</h2>
+            </div>
+            <div className="confirm-modal-content">
+              <p>Are you sure you want to clear all activities?</p>
+              <div className="confirm-modal-actions">
+                <button 
+                  className="confirm-modal-button confirm-button" 
+                  onClick={handleClearAllActivities}
+                >
+                  Yes, Clear All
+                </button>
+                <button 
+                  className="confirm-modal-button cancel-button" 
+                  onClick={() => setShowConfirmClearActivities(false)}
                 >
                   Cancel
                 </button>

@@ -227,6 +227,32 @@ body[data-sidebar="collapsed"] .dashboard-container {
   margin-bottom: 1.25rem;
 }
 
+.section-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.clear-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.clear-button:hover {
+  background-color: rgba(255, 100, 100, 0.15);
+}
+
+.clear-button svg {
+  color: #ff6464;
+}
+
 .section-header h2 {
   font-size: 1.2rem;
   font-weight: 500;
@@ -536,6 +562,12 @@ body[data-sidebar="collapsed"] .dashboard-container {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .close-modal-button {
@@ -1648,6 +1680,29 @@ body[data-sidebar="collapsed"] .dashboard-container {
 .clear-all-events-button .trash-icon {
   width: 18px;
   height: 18px;
+}
+
+.clear-all-activities-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: none;
+  color: #ff6464;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clear-all-activities-button:hover {
+  background-color: rgba(255, 100, 100, 0.15);
+}
+
+.clear-all-activities-button .trash-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .close-modal-button {
