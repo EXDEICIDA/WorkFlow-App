@@ -1724,6 +1724,8 @@ body[data-sidebar="collapsed"] .dashboard-container {
   gap: 1rem;
   justify-content: center;
   width: 100%;
+  align-items: center;
+  margin-top: 1.5rem;
 }
 
 .confirm-modal-button {
@@ -1731,9 +1733,17 @@ body[data-sidebar="collapsed"] .dashboard-container {
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   border: none;
   min-width: 120px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  position: relative;
+  top: 0;
+  box-shadow: none;
 }
 
 .confirm-button {
@@ -1743,7 +1753,6 @@ body[data-sidebar="collapsed"] .dashboard-container {
 
 .confirm-button:hover {
   background-color: #ff4848;
-  transform: translateY(-2px);
 }
 
 .cancel-button {
@@ -1753,5 +1762,4 @@ body[data-sidebar="collapsed"] .dashboard-container {
 
 .cancel-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
 }
