@@ -39,31 +39,66 @@ const CanvasPage = () => {
       const x = (e.clientX - rect.left - pan.x) / zoom;
       const y = (e.clientY - rect.top - pan.y) / zoom;
 
-      const newItem = {
-        id: nextItemId,
-        position: { x, y },
-      };
+      // Calculate the bounds of the visible canvas area
+      const containerWidth = rect.width / zoom;
+      const containerHeight = rect.height / zoom;
+      
+      // Define margins to ensure the item is fully visible
+      const itemWidth = 200; // Approximate width of a canvas item
+      const itemHeight = 100; // Reduced height constraint
+      
+      // Check if the item would be within the bounds
+      if (x >= 0 && x <= containerWidth - itemWidth && 
+          y >= 0 && y <= containerHeight - (itemHeight * 0.5)) { // Allow items to go lower
+        const newItem = {
+          id: nextItemId,
+          position: { x, y },
+        };
 
-      setTabs(prevTabs => prevTabs.map((tab, index) => {
-        if (index === activeTabIndex) {
-          return {
-            ...tab,
-            canvasItems: [...(tab.canvasItems || []), newItem]
-          };
-        }
-        return tab;
-      }));
-      setNextItemId(nextItemId + 1);
+        setTabs(prevTabs => prevTabs.map((tab, index) => {
+          if (index === activeTabIndex) {
+            return {
+              ...tab,
+              canvasItems: [...(tab.canvasItems || []), newItem]
+            };
+          }
+          return tab;
+        }));
+        setNextItemId(nextItemId + 1);
+      } else {
+        // Optionally show a toast notification that the item can't be created outside bounds
+        toast.warning("Cannot create item outside of the viewable area");
+      }
     }
   };
 
   const handleItemPositionChange = (itemId, newPosition) => {
+    // Get container dimensions
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const containerWidth = containerRect.width / zoom;
+    const containerHeight = containerRect.height / zoom;
+    
+    // Define item dimensions with reduced height constraint
+    const itemWidth = 200;
+    const itemHeight = 100; // Reduced height constraint
+    
+    // Constrain the position within bounds
+    // Allow more space at the bottom by reducing the height constraint
+    const constrainedX = Math.max(0, Math.min(newPosition.x, containerWidth - itemWidth));
+    const constrainedY = Math.max(0, Math.min(newPosition.y, containerHeight - (itemHeight * 0.5)));
+    
+    // Apply the constrained position
+    const constrainedPosition = {
+      x: constrainedX,
+      y: constrainedY
+    };
+    
     setTabs(prevTabs => prevTabs.map((tab, index) => {
       if (index === activeTabIndex) {
         return {
           ...tab,
           canvasItems: (tab.canvasItems || []).map(item =>
-            item.id === itemId ? { ...item, position: newPosition } : item
+            item.id === itemId ? { ...item, position: constrainedPosition } : item
           )
         };
       }
