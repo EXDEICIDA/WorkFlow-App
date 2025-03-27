@@ -598,12 +598,22 @@ def update_event(event_id):
 def delete_event(event_id):
     try:
         result = event_manager.delete_event(event_id, user_id=request.user.id)
-        
         if "error" in result:
-            return jsonify(result), 404 if result["error"] == "Event not found" else 400
-            
+            return jsonify(result), 400
         return jsonify(result), 200
-        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# New endpoint for deleting all events
+@app.route('/api/events/all', methods=['DELETE'])
+@Auth.auth_required
+def delete_all_events():
+    try:
+        result = event_manager.delete_all_events(user_id=request.user.id)
+        if "error" in result:
+            return jsonify(result), 400
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

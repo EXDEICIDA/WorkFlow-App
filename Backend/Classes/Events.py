@@ -108,3 +108,17 @@ class EventManager:
             
         except Exception as e:
             return {"error": str(e)}
+            
+    def delete_all_events(self, user_id):
+        """Deletes all events for a user."""
+        try:
+            # Delete all events for the user
+            response = self._client.table("events").delete().eq("user_id", user_id).execute()
+            
+            if hasattr(response, 'error') and response.error:
+                return {"error": str(response.error)}
+                
+            return {"success": "All events deleted successfully"}
+            
+        except Exception as e:
+            return {"error": str(e)}
