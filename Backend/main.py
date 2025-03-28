@@ -518,6 +518,9 @@ def delete_user_activities():
         if auth_header and auth_header.startswith('Bearer '):
             auth_token = auth_header.split(' ')[1]
         
+        if not auth_token:
+            return jsonify({"error": "Missing authentication token"}), 401
+        
         # Delete all activities for the authenticated user
         success = activity_tracker.delete_user_activities(auth_token)
         
@@ -526,6 +529,7 @@ def delete_user_activities():
         else:
             return jsonify({"error": "Failed to delete activities"}), 500
     except Exception as e:
+        app.logger.error(f"Error deleting activities: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Events operations routes
